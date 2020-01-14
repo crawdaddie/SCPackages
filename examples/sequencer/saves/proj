@@ -1,0 +1,109 @@
+var o, p;
+o = [
+	Dictionary.prNew,  Array.prNew(32),  Event.prNew,  Array.prNew(16),  
+	Mod.prNew,  Array.prNew(32),  #{ arg event ... protoEvents;
+	protoEvents.do { arg protoEvent;
+		event.insertParent(protoEvent);
+	};
+	event;
+},  Event.prNew,  
+	Array.prNew(8),  #{ arg ev; Document.open(ev[\path]) },  "/Users/adamjuraszek/PROJECTS/supercollider/_modules/events/factory",  Event.prNew,  
+	Array.prNew(4),  Event.prNew,  Array.prNew(12),  { arg ev, bpm = 60;
+		var absolute;
+		absolute = if (ev.unit == 'beats', { ev.timestamp * bpm });
+		absolute;
+	},  
+	Event.prNew,  Array.prNew(8),  Event.prNew,  Array.prNew(16),  
+	Event.prNew,  Array.prNew(16),  Event.prNew,  Array.prNew(16)
+];
+p = [
+	// Dictionary
+	0, [ array: o[1],  size: 4 ],  
+	// Array
+	1, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		1001,  o[2],  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		1003,  o[18],  1002,  o[20],  
+		1004,  o[22],  nil,  nil,  
+		nil,  nil,  nil,  nil ],  
+	// Event
+	2, [ array: o[3],  size: 3,  
+		proto: nil,  parent: o[4],  
+		know: true ],  
+	// Array
+	3, [ 'channel',  9.45,  'timestamp',  0.91666666666667,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'id',  1001,  
+		nil,  nil,  nil,  nil ],  
+	// Mod
+	4, [ array: o[5],  size: 1,  
+		proto: o[7],  parent: o[11],  
+		know: true ],  
+	// Array
+	5, [ nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'inheritEvents',  o[6] ],  
+	// Event
+	7, [ array: o[8],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	8, [ 'open',  o[9],  'path',  o[10],  
+		nil,  nil,  nil,  nil ],  
+	// Event
+	11, [ array: o[12],  size: 1,  
+		proto: nil,  parent: o[13],  
+		know: true ],  
+	// Array
+	12, [ 'channel',  0,  nil,  nil ],  
+	// Event
+	13, [ array: o[14],  size: 3,  
+		proto: nil,  parent: o[16],  
+		know: true ],  
+	// Array
+	14, [ 'unit',  'beats',  'resolveTiming',  o[15],  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'timestamp',  0 ],  
+	// Event
+	16, [ array: o[17],  size: 2,  
+		proto: nil,  parent: nil,  
+		know: true ],  
+	// Array
+	17, [ 'sequencer',  1,  'length',  110,  
+		nil,  nil,  nil,  nil ],  
+	// Event
+	18, [ array: o[19],  size: 3,  
+		proto: nil,  parent: o[4],  
+		know: true ],  
+	// Array
+	19, [ 'channel',  4.05,  'timestamp',  2.1833333333333,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'id',  1003,  
+		nil,  nil,  nil,  nil ],  
+	// Event
+	20, [ array: o[21],  size: 3,  
+		proto: nil,  parent: o[4],  
+		know: true ],  
+	// Array
+	21, [ 'channel',  8.85,  'timestamp',  1,  
+		nil,  nil,  nil,  nil,  
+		nil,  nil,  'id',  1002,  
+		nil,  nil,  nil,  nil ],  
+	// Event
+	22, [ array: o[23],  size: 4,  
+		proto: nil,  parent: o[4],  
+		know: true ],  
+	// Array
+	23, [ 'channel',  0,  'timestamp',  3,  
+		nil,  nil,  nil,  nil,  
+		'chan',  'drums',  'id',  1004,  
+		nil,  nil,  nil,  nil ]
+];
+prUnarchive(o,p);
