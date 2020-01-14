@@ -1,10 +1,20 @@
 SequenceableBlock {
-	classvar <xFactor = 50, <yFactor = 40;
+	/**
+	 * xFactor = 50
+	 * default value for a 1-second long block, or equivalently:
+	 * 1 beat at 60 bpm
+	 * so ordinarily, let's say a soundfile block lasts 2 seconds, and zoom = 1@1 
+	 * this block will render with a width of 100 pixels
+	 **/
+	classvar <xFactor = 50; 
+	
+	classvar <yFactor = 40;
+	classvar <moveWidgetPixelsWidth = 5;
 	// reference to state
 	var id;
 
 	// view variables
-	var color, bounds, initialBounds;
+	var color, <bounds, initialBounds;
 	var initialCursor;
 
 	// state-action variables
@@ -12,8 +22,9 @@ SequenceableBlock {
 	var <selected = false, toRefresh = true;
 	var zoom;
 
+
 	getAction { arg x, y;
-		var innerArea = bounds.insetBy(5, 0);
+		var innerArea = bounds.insetBy(moveWidgetPixelsWidth, 0);
 		^case
 			{innerArea.contains(x@y)} {'move'}
 			{x < innerArea.left} {'resizeLeft'}
@@ -78,6 +89,7 @@ SequenceableBlock {
 
 	renderView { arg origin;
 		var renderBounds = bounds.moveBy(origin.x, origin.y);
+		Pen.smoothing = true;
 		Pen.addRect(renderBounds); // wie addRect
 		Pen.color = color;
 	  Pen.draw;
@@ -88,43 +100,50 @@ SequenceableBlock {
 		};
 	}
 
-	mouseDownAction { arg x, y;
-		action = this.getAction(x, y);
-		selected = true;
-		initialBounds = bounds.copy;
-		initialCursor = x@y;
-	}
-
 	moveAction { arg x, y;
 		if (selected) {
 			bounds = bounds.moveBy(x, y);
 		};
 		this.updateState;
 	}
+	
+	mouseDownAction { arg x, y;
+		color.alpha = 0.8;
+		action = this.getAction(x, y);
+		selected = true;
+		initialBounds = bounds.copy;
+		initialCursor = x@y;
+	}
 
-	mouseMoveAction { arg x, y;
-		var newOrigin = x@y - (initialCursor - initialBounds.origin);
-		var difference = bounds.origin - newOrigin;
-
-		toRefresh = bounds.origin != newOrigin;
-
+	mouseMoveAction { arg x, y, modifiers, quantX;
+		// , quantX, quantY;
+		var difference, newOrigin, quantY;
 		if (selected) {
+			newOrigin = x@y - (initialCursor - initialBounds.origin);
+
+			difference = bounds.origin - newOrigin;
+			toRefresh = bounds.origin != newOrigin;
+			
+			quantY = yFactor * zoom.y;
+
 			switch (action,
 				'move', {
+					quantX !? { newOrigin.x = newOrigin.x.round(quantX) };
+					quantY !? { newOrigin.y = max(0, newOrigin.y.round(quantY)) };
 					bounds.origin = newOrigin;
 				},
 				'resizeLeft', {
 					bounds.set(
 						bounds.left - difference.x,
 						bounds.top,
-						bounds.width + difference.x,
+						max(moveWidgetPixelsWidth, bounds.width + difference.x),
 						bounds.height);
 				},
 				'resizeRight', {
 					bounds.set(
 						bounds.left,
 						bounds.top,
-						initialBounds.width - difference.x,
+						max(moveWidgetPixelsWidth, initialBounds.width - difference.x),
 						bounds.height);
 				}
 			);
@@ -132,6 +151,7 @@ SequenceableBlock {
 	}
 
 	mouseUpAction {
+		color.alpha = 1;
 		if (selected && bounds != initialBounds) {
 			this.updateState;
 		}
@@ -158,8 +178,9 @@ SequenceableBlock {
 		^bounds.contains(x_y)
 	}
 
-	setZoom { arg zoomX = 1, zoomY = 1;
-		zoom = (zoom.x * zoomX)@(zoom.y * zoomY);
+	zoomBy { arg zoomX = 1, zoomY = 1;
+		zoom.x = zoom.x * zoomX;
+		zoom.y = zoom.y * zoomY;
 		bounds.set(
 			bounds.left * zoomX,
 			bounds.top * zoomY,
@@ -177,7 +198,7 @@ SequenceableSoundfileBlock : SequenceableBlock {
 	}
 
 	initSoundfile { arg event;
-		soundfileMod = Mod.all.at(event.soundfile);
+		soundfileMod = Mod(event.soundfile);
 		startPos = event.startPos;
 		this.getWaveform;
 		^this;
@@ -195,8 +216,8 @@ SequenceableSoundfileBlock : SequenceableBlock {
 		};
 	}
 
-	setZoom { arg zoomX = 1, zoomY = 1;
-		super.setZoom(zoomX, zoomY);
+	zoomBy { arg zoomX = 1, zoomY = 1;
+		super.zoomBy(zoomX, zoomY);
 		this.getWaveform;
 	}
 
@@ -211,6 +232,7 @@ SequenceableSoundfileBlock : SequenceableBlock {
 		var height = renderBounds.height;
 		var waveformColor = color.multiply(Color(0.5, 0.5, 0.5));
 
+		Pen.smoothing = true;
 		Pen.strokeColor = waveformColor;
 		
 		if (waveform.size > 0) {

@@ -9,6 +9,9 @@ Store {
 		var id = UniqueID.next;
 		object.id = id;
 		objects.put(id, object);
+		object.init !? {
+			object.init;
+		}
 	}
 
 	*updateObject { arg id, newState, history = true;

@@ -1,3 +1,4 @@
+var selectedWaveform;
 ~soundfile = SoundFile.openRead(~path);
 
 ~rawArray = nil;
@@ -35,6 +36,8 @@ Routine({
 	ev.withRawArray { |rawArray|
 		ev.computeWaveform(rawArray, waveformObject);
 	};
+	waveformObject.complete = false;
+	waveformObject.task = Task {};
 
 	waveformObject;
 };
@@ -45,7 +48,6 @@ Routine({
 	var chunks = waveformObject.waveform.size;
 	var chunkSize = (rawArray.size / chunks).asInt;
 
-	waveformObject.complete = false;
 	waveformObject.task = Task({
 		chunks.do { |index|
 			var maxVal, minVal;
@@ -66,7 +68,16 @@ Routine({
 };
 
 ~getWaveform = { arg ev, zoom = 1;
-	ev.waveformCache.at(zoom) !? { arg object; object } ?? { ev.createWaveform(zoom) };
+	var prevWaveform = selectedWaveform;
+
+	selectedWaveform = ev.waveformCache.at(zoom) !? { arg object;
+		object.task.resume;
+		object;
+		} ?? { ev.createWaveform(zoom) };
+
+	prevWaveform !? { |wf| wf.task.pause };
+
+	selectedWaveform;
 };
 
 
