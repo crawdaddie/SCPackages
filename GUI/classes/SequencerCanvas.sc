@@ -19,7 +19,8 @@ Keys {
 
 			\s -> 83,
 			\z -> 90,
-			\o -> 79
+			\o -> 79,
+			\q -> 81,
 		]);
   }
 
@@ -34,10 +35,15 @@ SequencerCanvas : UserView {
 	var zoom;
 	var origin;
 
-	var <>quantX, <>quantY;
-	var <subdivisions;
-	var <>grid;
 	var <bpm;
+	
+	var <>quantX, <>quantY;
+	var <quantize;
+	var <subdivisions;
+	
+	var <timingContextView;
+	var <>grid;
+	var <cursorView;
 
 	*new { arg argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
 		var parent = argParent ?? Window.new('sequencer', Rect(1040, 455, 400, 400))
@@ -47,9 +53,9 @@ SequencerCanvas : UserView {
 		^super.new(parent, bounds).init(subviews ? [], quantX, quantY);
 	}
 
-	*fromEvents { arg events;
+	*fromObjects { arg objects;
 		var canvas = this.new();
-		canvas.addEvents(events);
+		canvas.addObjects(objects);
 		^canvas
 	}
 
@@ -59,16 +65,17 @@ SequencerCanvas : UserView {
 	}
 
 	renderView {
-		grid.draw(quantX, origin, this.parent.bounds, zoom, subdivisions);
-		this.renderGridInfo(this.parent.bounds);
-		views.do(_.renderView(origin))
+		var bounds = this.parent.bounds;
+		grid.draw(quantX, origin, bounds, zoom, subdivisions);
+		
+		timingContextView !? { |view|
+			view.draw(bounds, subdivisions);
+		};
+
+		views.do(_.renderView(origin));
+		cursorView.renderView(origin);
 	}
 
-	renderGridInfo { arg bounds;
-		var color = Color.grey(0.7, 1);
-		var point = bounds.leftBottom;
-		Pen.stringAtPoint("%bpm - % subdivisions".format(bpm, subdivisions), point + Point(10, -20), color: color);
-	}
 
 	getTopView { arg x, y;
 		^views.reverse.detect(_.contains(x@y))
@@ -80,6 +87,12 @@ SequencerCanvas : UserView {
 
 	moveViews { arg x, y;
 		views.do(_.moveAction(x, y));
+		cursorView.moveAction(x, y);
+	}
+
+	snapMoveViews { arg x, y;
+		views.do(_.snapMoveAction(x, y));
+		cursorView.snapMoveAction(x, y);
 	}
 
 	moveOrigin { arg x, y;
@@ -99,6 +112,7 @@ SequencerCanvas : UserView {
 
 	zoomBy { arg zoomX, zoomY;
 		views.do(_.zoomBy(zoomX, zoomY));
+		cursorView.zoomBy(zoomX, zoomY);
 		this.setZoom(zoom.x * zoomX, zoom.y * zoomY);	
 	}
 
@@ -111,27 +125,38 @@ SequencerCanvas : UserView {
 		^views;
 	}
 
-	addViews { arg ...newViews;
-		views = views ++ newViews;
-		this.deselectAll();
-		this.refresh;
-	}
-
-	addEvents { arg newEvents;
-		var newViews = newEvents.collect { |event|
-			if (event.type == 'soundfile', { SequenceableSoundfileBlock(event)}, { SequenceableBlock(event) });
+	addObjects { arg newObjects;
+		newObjects.do { |newObject|
+			this.addObject(newObject);
 		};
 
-		views = views ++ newViews;
 		this.deselectAll();
 		this.refresh;
 	}
 
-	addEvent { arg event;
-		var newView = if (event.type == 'soundfile', { SequenceableSoundfileBlock(event)}, { SequenceableBlock(event) });
-		views = views ++ [ newView ];
-		this.deselectAll();
-		this.refresh;
+	addObject { arg object;
+		case
+			{ object.type == 'sampleEvent' } {
+				views = views.add(SequenceableSoundfileBlock(object))
+			}
+			{ object.type == 'sequencerEvent' } {
+				views = views.add(SequenceableBlock(object))
+			}
+			{ object.type == 'timingContext' } {
+				timingContextView = (
+					bpm: object.bpm,
+					draw: { arg ev, bounds, subdivisions;
+						var color = Color.grey(0.7, 1);
+						var point = bounds.leftBottom;
+						var string = if (quantize, { "%bpm - Q".format(ev.bpm) }, { "%bpm".format(ev.bpm) });
+						Pen.stringAtPoint(string, point + Point(10, -20), color: color);
+					},
+					setBPM: { arg ev, newBPM;
+						Dispatcher((type: 'setBPM', payload: (id: object.id, bpm: newBPM)));
+						ev.bpm = newBPM;
+					}
+				) 
+			};
 	}
 
 	save { arg newFile = false;
@@ -161,6 +186,7 @@ SequencerCanvas : UserView {
 	init { arg argviews, argQuantX, argQuantY;
 		var xGrid, yGrid;
 
+		quantize = true;
 		views = argviews;
 		zoom = 1@1;
 		origin = 0@0;
@@ -172,6 +198,7 @@ SequencerCanvas : UserView {
 		subdivisions = 1;
 
 		grid = SequencerGrid();
+		cursorView = Cursor((timestamp: 0, channel: 0));
 		
 		this.resize = 5;
 		this.parent.acceptsMouseOver_(true);
@@ -181,7 +208,7 @@ SequencerCanvas : UserView {
 			this.renderView;
 		};
 
-		this.mouseDownAction = { |canvas, mouseX, mouseY|
+		this.mouseDownAction = { |canvas, mouseX, mouseY, modifiers, buttonNumber, clickCount|
 			var translatedMouse = Point(mouseX, mouseY) - origin;
 			var x = translatedMouse.x;
 			var y = translatedMouse.y;
@@ -189,7 +216,15 @@ SequencerCanvas : UserView {
 
 			this.deselectAll;
 
-			topView !? _.mouseDownAction(x, y);
+			topView !? { |topView|
+				topView.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+			} ?? {
+				// cursorView.position = Point(x, y.trunc(quantY * zoom.y));
+				// cursorView.move
+				if (buttonNumber == 1) { this.showMenu }
+			};
+			
+			cursorView.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 
 			this.refresh;
 		};
@@ -210,7 +245,7 @@ SequencerCanvas : UserView {
 			this.refresh;
 		};
 
-		this.mouseUpAction = {
+		this.mouseUpAction = { |canvas, mouseX, mouseY, modifiers, buttonNumber, clickCount|
 
 			views.do(_.mouseUpAction);
 
@@ -218,7 +253,8 @@ SequencerCanvas : UserView {
 		};
 
 		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
-			// [modifiers, key].postln;
+			var moveY = quantY * zoom.y;
+			[modifiers, key].postln;
 			switch ([modifiers, key])
 				{ Keys(\cmdMod, \plus) }	{ this.zoomBy(1.05, 1) }
 				{ Keys(\cmdMod, \minus) }	{ this.zoomBy(1.05.reciprocal, 1) }
@@ -229,22 +265,30 @@ SequencerCanvas : UserView {
 				{ [ 1310720, 61 ] }	{ this.zoomBy(1, 1.05) }
 				{ [ 1310720, 45 ] }	{ this.zoomBy(1, 1.05.reciprocal) }
 
-				{ [ 2097152, 16777234 ] } { this.moveViews(-1 * quantX * zoom.x / subdivisions, 0) }
-				{ [ 2097152, 16777236 ] } { this.moveViews(quantX * zoom.x / subdivisions, 0) }
-				{ [ 2097152, 16777235 ] } { this.moveViews(0, -1 * quantY * zoom.y) }
-				{ [ 2097152, 16777237 ] } { this.moveViews(0, quantY * zoom.y) }
+				{ [ 2097152, 16777234 ] } { this.snapMoveViews(-1 * quantX * zoom.x / subdivisions, 0) }
+				{ [ 2097152, 16777236 ] } { this.snapMoveViews(quantX * zoom.x / subdivisions, 0) }
+				{ [ 2097152, 16777235 ] } { this.snapMoveViews(0, -1 * moveY) }
+				{ [ 2097152, 16777237 ] } { this.snapMoveViews(0, moveY) }
 
-				{ Keys(\optMod, \left) 	} { this.moveOrigin(-10, 0) } //left
-				{ Keys(\optMod, \right) } { this.moveOrigin(10, 0) } //right
-				{ Keys(\optMod, \up) 		} { this.moveOrigin(0, -10) } //up
-				{ Keys(\optMod, \down) 	} { this.moveOrigin(0, 10) } //down
+				// { Keys(\optMod, \left) 	} { this.moveOrigin(-10, 0) } //left
+				// { Keys(\optMod, \right) } { this.moveOrigin(10, 0) } //right
+				// { Keys(\optMod, \up) 		} { this.moveOrigin(0, -10) } //up
+				// { Keys(\optMod, \down) 	} { this.moveOrigin(0, 10) } //down
+				{ Keys(\optMod, \left) 	} { this.moveViews(-1, 0)}
+				{ Keys(\optMod, \right) } { this.moveViews(1, 0)}
+				{ Keys(\optMod, \up) 		} { this.moveViews(0, -1 * moveY)}
+				{ Keys(\optMod, \down) 	} { this.moveViews(0, moveY)}
 
 				{ Keys(\noMod, \tab) } { this.cycleThroughViews }
 				{ Keys(\cmdMod, \z) } { this.historyAction('undo') } //cmd -z
 				{ [ 1179648, 90 ] } { this.historyAction('redo') } //cmd -shift -z
+				
 				{ Keys(\cmdMod, \s) } { this.save }
 				{ [ 1179648, 83 ] } { this.save(true) }
 				{ Keys(\cmdMod, \o) } { this.open }
+
+				{ Keys(\noMod, \q) } { this.toggleQuantization }
+				
 				{ [ 1179648, 91 ] } { this.subdivisions_(subdivisions - 1) }
  				{ [ 1179648, 93 ] } { this.subdivisions_(subdivisions + 1) };
 			this.refresh;
@@ -255,12 +299,25 @@ SequencerCanvas : UserView {
 			// this.updateGrid(origin, newBounds, zoom)
 		}
 
+
 		^this
 	}
 
+	showMenu {
+		^Menu(
+			MenuAction("A", { "A selected".postln }),
+   		MenuAction("B", { "B selected".postln }),
+   		MenuAction("C", { "C selected".postln }),
+		).front;
+	}
+
 	subdivisions_ { |newDivisions|
-		subdivisions = newDivisions;
+		subdivisions = max(1, newDivisions);
 		this.refresh;
+	}
+
+	toggleQuantization {
+		quantize = quantize.not;
 	}
 }
 

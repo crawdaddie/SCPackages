@@ -23,7 +23,7 @@
 		this.getContainedObjects(objects);
 
 		stream = CollStream.new;
-		stream << "var o,p;\n";
+		stream << "var o,p,n=nil;\n";
 
 		list = List.newClear(objects.size);
 		objects.keysValuesDo {|obj, index| list[index] = obj };
@@ -64,7 +64,9 @@
 							// if ((j != 0) && ((j & 3) == 0)) { stream << "\n\t\t" };
 							index = objects[slot];
 							if (index.isNil) {
-								stream << slot.asCompileString;
+								var slotcs = slot.asCompileString;
+								if (slotcs == "nil") { slotcs = "n"};
+								stream << slotcs;
 							}{
 								stream << "o[" << index << "]";
 							};
