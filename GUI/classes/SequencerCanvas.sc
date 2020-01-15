@@ -86,8 +86,18 @@ SequencerCanvas : UserView {
 	}
 
 	moveViews { arg x, y;
-		views.do(_.moveAction(x, y));
-		cursorView.moveAction(x, y);
+		var moveY = y * quantY * zoom.y;
+		var moveX = x;
+		// { [ 2097152, 16777234 ] } { this.snapMoveViews(-1 * quantX * zoom.x / subdivisions, 0) }
+		// { [ 2097152, 16777236 ] } { this.snapMoveViews(quantX * zoom.x / subdivisions, 0) }
+		// { [ 2097152, 16777235 ] } { this.snapMoveViews(0, -1 * moveY) }
+		// { [ 2097152, 16777237 ] } { this.snapMoveViews(0, moveY) }
+		if (quantize) {
+			moveX = moveX * quantX * zoom.x / subdivisions;
+		};
+		
+		views.do(_.moveAction(moveX, moveY, snap: quantize));
+		cursorView.moveAction(moveX, moveY, snap: quantize);
 	}
 
 	snapMoveViews { arg x, y;
@@ -265,19 +275,19 @@ SequencerCanvas : UserView {
 				{ [ 1310720, 61 ] }	{ this.zoomBy(1, 1.05) }
 				{ [ 1310720, 45 ] }	{ this.zoomBy(1, 1.05.reciprocal) }
 
-				{ [ 2097152, 16777234 ] } { this.snapMoveViews(-1 * quantX * zoom.x / subdivisions, 0) }
-				{ [ 2097152, 16777236 ] } { this.snapMoveViews(quantX * zoom.x / subdivisions, 0) }
-				{ [ 2097152, 16777235 ] } { this.snapMoveViews(0, -1 * moveY) }
-				{ [ 2097152, 16777237 ] } { this.snapMoveViews(0, moveY) }
+				{ [ 2097152, 16777234 ] } { this.moveViews(-1, 0) } //left
+				{ [ 2097152, 16777236 ] } { this.moveViews(1, 0) } 	//right
+				{ [ 2097152, 16777235 ] } { this.moveViews(0, -1) } //up
+				{ [ 2097152, 16777237 ] } { this.moveViews(0, 1) }  //down
 
 				// { Keys(\optMod, \left) 	} { this.moveOrigin(-10, 0) } //left
 				// { Keys(\optMod, \right) } { this.moveOrigin(10, 0) } //right
 				// { Keys(\optMod, \up) 		} { this.moveOrigin(0, -10) } //up
 				// { Keys(\optMod, \down) 	} { this.moveOrigin(0, 10) } //down
-				{ Keys(\optMod, \left) 	} { this.moveViews(-1, 0)}
-				{ Keys(\optMod, \right) } { this.moveViews(1, 0)}
-				{ Keys(\optMod, \up) 		} { this.moveViews(0, -1 * moveY)}
-				{ Keys(\optMod, \down) 	} { this.moveViews(0, moveY)}
+				// { Keys(\optMod, \left) 	} { this.moveViews(-1, 0)}
+				// { Keys(\optMod, \right) } { this.moveViews(1, 0)}
+				// { Keys(\optMod, \up) 		} { this.moveViews(0, -1 * moveY)}
+				// { Keys(\optMod, \down) 	} { this.moveViews(0, moveY)}
 
 				{ Keys(\noMod, \tab) } { this.cycleThroughViews }
 				{ Keys(\cmdMod, \z) } { this.historyAction('undo') } //cmd -z

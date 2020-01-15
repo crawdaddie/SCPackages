@@ -200,9 +200,14 @@ Cursor {
 	  Pen.stroke;
 	}
 
-	moveAction { arg x, y;
-		// if (selected) {
-		bounds = bounds.moveBy(x, y);
+	moveAction { arg x, y, snap;
+
+		if ((snap && (bounds.origin.x % x != 0)), {
+			var snappedValue = bounds.origin.x.roundUp(x);
+			bounds = bounds.moveTo(snappedValue, bounds.origin.y);
+			}, {
+				bounds = bounds.moveBy(x, y)
+		});
 		// };
 	}
 
@@ -431,9 +436,14 @@ SequenceableBlock {
 		};
 	}
 
-	moveAction { arg x, y;
+	moveAction { arg x, y, snap;
 		if (selected) {
-			bounds = bounds.moveBy(x, y);
+			if ((snap && (bounds.origin.x % x != 0)), {
+				var snappedValue = bounds.origin.x.roundUp(x);
+				bounds = bounds.moveTo(snappedValue, bounds.origin.y);
+				}, {
+					bounds = bounds.moveBy(x, y)
+				});
 		};
 		this.updateState;
 	}
