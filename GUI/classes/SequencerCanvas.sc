@@ -1,3 +1,14 @@
+SequencerTheme {
+	classvar <>grey;
+	classvar <>black;
+	classvar <>darkGrey;
+	*initClass {
+		grey = [Color.grey(0.5, 1), Color.grey(0.7, 0.5), Color.grey(0.7, 1)];
+		darkGrey = Color.grey(0.1, 1);
+		black = Color.black;
+	}
+}
+
 Keys {
 	classvar dict;
 	*initClass {
@@ -44,6 +55,8 @@ SequencerCanvas : UserView {
 	var <timingContextView;
 	var <>grid;
 	var <cursorView;
+	var <selectionBounds;
+	var initialMouse;
 
 	*new { arg argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
 		var parent = argParent ?? Window.new('sequencer', Rect(1040, 455, 400, 400))
@@ -65,15 +78,24 @@ SequencerCanvas : UserView {
 	}
 
 	renderView {
-		var bounds = this.parent.bounds;
-		grid.draw(quantX, origin, bounds, zoom, subdivisions);
+		var parentBounds = this.parent.bounds;
+		grid.draw(quantX, origin, parentBounds, zoom, subdivisions);
 		
 		timingContextView !? { |view|
-			view.draw(bounds, subdivisions);
+			view.draw(parentBounds, subdivisions, quantize);
 		};
 
-		views.do(_.renderView(origin));
+		views.do({ |view|
+			view.renderView(origin, parentBounds) 
+		});
 		cursorView.renderView(origin);
+
+		if (selectionBounds.notNil) {
+			var renderableSelectionBounds = selectionBounds.moveBy(origin.x, origin.y);
+			Pen.addRect(renderableSelectionBounds);
+   		Pen.strokeColor = SequencerTheme.darkGrey;
+   		Pen.stroke;
+		};
 	}
 
 
@@ -81,28 +103,51 @@ SequencerCanvas : UserView {
 		^views.reverse.detect(_.contains(x@y))
 	}
 
+	selectAll {
+		views.do(_.select)
+	}
+
 	deselectAll {
 		views.do(_.unselect)
+	}
+
+	selectedViews {
+		^views.select(_.selected);
 	}
 
 	moveViews { arg x, y;
 		var moveY = y * quantY * zoom.y;
 		var moveX = x;
-		// { [ 2097152, 16777234 ] } { this.snapMoveViews(-1 * quantX * zoom.x / subdivisions, 0) }
-		// { [ 2097152, 16777236 ] } { this.snapMoveViews(quantX * zoom.x / subdivisions, 0) }
-		// { [ 2097152, 16777235 ] } { this.snapMoveViews(0, -1 * moveY) }
-		// { [ 2097152, 16777237 ] } { this.snapMoveViews(0, moveY) }
-		if (quantize) {
-			moveX = moveX * quantX * zoom.x / subdivisions;
-		};
+		var selectedViews = this.selectedViews;
+		var mostLeft;
+		var tick;
+		var newLeft;
+		if (selectedViews.size > 0, {
+			mostLeft = selectedViews[0].bounds.left;
+			
+			// don't bother sorting array, this is a little quicker 
+			selectedViews.do { arg view;
+				mostLeft = min(mostLeft, view.bounds.left);
+			};
 		
-		views.do(_.moveAction(moveX, moveY, snap: quantize));
-		cursorView.moveAction(moveX, moveY, snap: quantize);
-	}
+		}, {
+			mostLeft = cursorView.bounds.left;
+		});
 
-	snapMoveViews { arg x, y;
-		views.do(_.snapMoveAction(x, y));
-		cursorView.snapMoveAction(x, y);
+		tick = this.getTick;
+
+
+		if (quantize) {
+			moveX = moveX * tick;
+			newLeft = mostLeft.round(tick) + moveX;
+			moveX = newLeft - mostLeft
+		};
+
+		selectedViews.do { |view|
+			view.moveBy(moveX, moveY);
+		};
+
+		cursorView.moveBy(moveX, moveY);
 	}
 
 	moveOrigin { arg x, y;
@@ -117,6 +162,10 @@ SequencerCanvas : UserView {
 		zoom.x = zoomX;
 		zoom.y = zoomY;
 
+		if (zoomX < 1) {
+			subdivisions = zoomX.floorBase2;
+		};
+
 		this.refresh;
 	}
 
@@ -127,11 +176,13 @@ SequencerCanvas : UserView {
 	}
 
 	cycleThroughViews {
+		var selectedBounds;
 		var selectedIndex = views.indexOf(_.selected) !? { |selectedIndex|
 			selectedIndex = (selectedIndex + 1) % views.size;
 		} ?? 0;
 		views.do(_.unselect);
-		views[selectedIndex].select;
+		selectedBounds = views[selectedIndex].select;
+		cursorView.moveTo(selectedBounds.left, selectedBounds.top);
 		^views;
 	}
 
@@ -153,19 +204,7 @@ SequencerCanvas : UserView {
 				views = views.add(SequenceableBlock(object))
 			}
 			{ object.type == 'timingContext' } {
-				timingContextView = (
-					bpm: object.bpm,
-					draw: { arg ev, bounds, subdivisions;
-						var color = Color.grey(0.7, 1);
-						var point = bounds.leftBottom;
-						var string = if (quantize, { "%bpm - Q".format(ev.bpm) }, { "%bpm".format(ev.bpm) });
-						Pen.stringAtPoint(string, point + Point(10, -20), color: color);
-					},
-					setBPM: { arg ev, newBPM;
-						Dispatcher((type: 'setBPM', payload: (id: object.id, bpm: newBPM)));
-						ev.bpm = newBPM;
-					}
-				) 
+				timingContextView = TimingContextView(object);
 			};
 	}
 
@@ -193,6 +232,10 @@ SequencerCanvas : UserView {
 		this.refresh;
 	}
 
+	getTick { 
+		^quantX * zoom.x / subdivisions
+	}
+
 	init { arg argviews, argQuantX, argQuantY;
 		var xGrid, yGrid;
 
@@ -208,7 +251,7 @@ SequencerCanvas : UserView {
 		subdivisions = 1;
 
 		grid = SequencerGrid();
-		cursorView = Cursor((timestamp: 0, channel: 0));
+		cursorView = Cursor((x: 0, y: 0));
 		
 		this.resize = 5;
 		this.parent.acceptsMouseOver_(true);
@@ -223,18 +266,23 @@ SequencerCanvas : UserView {
 			var x = translatedMouse.x;
 			var y = translatedMouse.y;
 			var topView = this.getTopView(x, y);
+			var cursorX = x;
+			initialMouse = translatedMouse;
 
 			this.deselectAll;
 
 			topView !? { |topView|
 				topView.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 			} ?? {
-				// cursorView.position = Point(x, y.trunc(quantY * zoom.y));
-				// cursorView.move
+				selectionBounds = Rect.fromPoints(translatedMouse, translatedMouse);
 				if (buttonNumber == 1) { this.showMenu }
 			};
+
+			if (quantize) {
+				cursorX = x.round(this.getTick);
+			};
 			
-			cursorView.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+			cursorView.mouseDownAction(cursorX, y, modifiers, buttonNumber, clickCount);
 
 			this.refresh;
 		};
@@ -244,20 +292,34 @@ SequencerCanvas : UserView {
 			var x = translatedMouse.x;
 			var y = translatedMouse.y;
 			var passedInQuant;
+			var selectedViews = this.selectedViews;
 
-
-			if (modifiers != 524288) {
-				passedInQuant = quantX * zoom.x / subdivisions
+			if (quantize) {
+				passedInQuant = this.getTick;
 			};
 
-			views.do(_.mouseMoveAction(x, y, modifiers, passedInQuant));
+			if (selectionBounds.isNil, {
+				selectedViews.do(_.mouseMoveAction(x, y, modifiers, passedInQuant))
+				}, {
+					var minX = min(initialMouse.x, translatedMouse.x);
+					var minY = min(initialMouse.y, translatedMouse.y);
+					var maxX = max(initialMouse.x, translatedMouse.x);
+					var maxY = max(initialMouse.y, translatedMouse.y);
+
+					selectionBounds = Rect.fromPoints(Point(minX, minY), Point(maxX, maxY));
+					views.do { | view |
+						if (view.bounds.intersects(selectionBounds),  { view.select });
+					}
+				});
+
 
 			this.refresh;
 		};
 
 		this.mouseUpAction = { |canvas, mouseX, mouseY, modifiers, buttonNumber, clickCount|
-
-			views.do(_.mouseUpAction);
+			var selectedViews = this.selectedViews;
+			if (selectedViews.size > 0, { selectedViews.do(_.mouseUpAction) });
+			selectionBounds = nil;
 
 			this.refresh;
 		};
@@ -279,15 +341,22 @@ SequencerCanvas : UserView {
 				{ [ 2097152, 16777236 ] } { this.moveViews(1, 0) } 	//right
 				{ [ 2097152, 16777235 ] } { this.moveViews(0, -1) } //up
 				{ [ 2097152, 16777237 ] } { this.moveViews(0, 1) }  //down
+				
+				// { [ 2228224, 16777234 ] } { this.extendSelectionRight(-1, 0) } //shift + left
+				// { [ 2228224, 16777236 ] } { this.extendSelectionRight(1, 0) } 	//shift + right
+				// { [ 2228224, 16777235 ] } { this.extendSelectionRight(0, -1) } //shift + up
+				// { [ 2228224, 16777237 ] } { this.extendSelectionRight(0, 1) }  //shift + down
 
-				// { Keys(\optMod, \left) 	} { this.moveOrigin(-10, 0) } //left
-				// { Keys(\optMod, \right) } { this.moveOrigin(10, 0) } //right
-				// { Keys(\optMod, \up) 		} { this.moveOrigin(0, -10) } //up
-				// { Keys(\optMod, \down) 	} { this.moveOrigin(0, 10) } //down
-				// { Keys(\optMod, \left) 	} { this.moveViews(-1, 0)}
-				// { Keys(\optMod, \right) } { this.moveViews(1, 0)}
-				// { Keys(\optMod, \up) 		} { this.moveViews(0, -1 * moveY)}
-				// { Keys(\optMod, \down) 	} { this.moveViews(0, moveY)}
+				// { [ 3276800, 16777234 ] } { this.extendSelectionLeft(-1, 0) } //cmd + shift + left
+				// { [ 3276800, 16777236 ] } { this.extendSelectionLeft(1, 0) } //cmd + shift + right
+				// { [ 3276800, 16777235 ] } { this.extendSelectionLeft(0, -1) } //cmd + shift + up
+				// { [ 3276800, 16777237 ] } { this.extendSelectionLeft(0, 1) } //cmd + shift + down
+
+				{ Keys(\optMod, \left) 	} { this.moveOrigin(-10, 0) } //left
+				{ Keys(\optMod, \right) } { this.moveOrigin(10, 0) } //right
+				{ Keys(\optMod, \up) 		} { this.moveOrigin(0, -10) } //up
+				{ Keys(\optMod, \down) 	} { this.moveOrigin(0, 10) } //down
+
 
 				{ Keys(\noMod, \tab) } { this.cycleThroughViews }
 				{ Keys(\cmdMod, \z) } { this.historyAction('undo') } //cmd -z
@@ -300,7 +369,10 @@ SequencerCanvas : UserView {
 				{ Keys(\noMod, \q) } { this.toggleQuantization }
 				
 				{ [ 1179648, 91 ] } { this.subdivisions_(subdivisions - 1) }
- 				{ [ 1179648, 93 ] } { this.subdivisions_(subdivisions + 1) };
+ 				{ [ 1179648, 93 ] } { this.subdivisions_(subdivisions + 1) }
+
+ 				{ [ 0, 16777216 ] } { this.deselectAll } // esc
+ 				{ [ 1048576, 65 ] } { this.selectAll }; // cmd - a 
 			this.refresh;
 		};
 
@@ -334,6 +406,7 @@ SequencerCanvas : UserView {
 SequencerGrid {
 	classvar mainGridColor;
 	classvar subdivisionColor;
+	var <tick;
 	
 	*new {
 		^super.new.init()
@@ -366,6 +439,10 @@ SequencerGrid {
 		var minorGap = gap / subdivisions;
 		var initSubOffset = origin.x + (0 - origin.x).roundUp(minorGap); 
 		var subOffset = initSubOffset;
+		// var tickNum = 0;
+		tick = minorGap;
+
+
 
 
 		
@@ -380,7 +457,10 @@ SequencerGrid {
 		Pen.strokeColor_(subdivisionColor);
 		while ({ subOffset < bounds.width }) {
 			Pen.line(Point(subOffset, 0), Point(subOffset, bounds.height));
+			
+			// [tickNum, subOffset, minorGap].postln;
 			subOffset = subOffset + minorGap;
+			// tickNum = tickNum + 1;
 		}; 
 		Pen.stroke;
 	}

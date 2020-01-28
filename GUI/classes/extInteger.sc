@@ -12,3 +12,10 @@
 		// ^(this.log / 2.log + 1e-10).asInteger
 	}
 }
+
++ Float {
+	floorBase2 {
+		var reciprocalInt = this.reciprocal.asInteger;
+		^reciprocalInt.floorBase2.reciprocal;
+	}
+}
