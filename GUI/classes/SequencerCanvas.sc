@@ -3,7 +3,7 @@ SequencerTheme {
 	classvar <>black;
 	classvar <>darkGrey;
 	*initClass {
-		grey = [Color.grey(0.5, 1), Color.grey(0.7, 0.5), Color.grey(0.7, 1)];
+		grey = [Color.grey(0.3, 1), Color.grey(0.5, 1), Color.grey(0.7, 1)];
 		darkGrey = Color.grey(0.1, 1);
 		black = Color.black;
 	}
@@ -157,7 +157,6 @@ SequencerCanvas : UserView {
 		this.refresh;
 	}
 
-
 	setZoom { arg zoomX, zoomY;
 		zoom.x = zoomX;
 		zoom.y = zoomY;
@@ -262,6 +261,17 @@ SequencerCanvas : UserView {
 		};
 
 		this.mouseDownAction = { |canvas, mouseX, mouseY, modifiers, buttonNumber, clickCount|
+			/* 
+			 * TODO IDEA:
+			 * in mouseDownAction, determine what type of action to take
+			 * (depending on modifiers, clicks, where it's clicked, what's selected etc)
+			 * then create a new 'MouseAction' object, which is passed it's own collection of objects
+			 * to operate on, and which has a
+			 * .mouseDownAction, .mouseMoveAction and .mouseUpAction interface
+			 * which is passed x, y, modifiers, quant
+			 * from SequencerCanvas' mouseDownAction, mouseMoveAction and mouseUpAction
+			 * methods
+			 */
 			var translatedMouse = Point(mouseX, mouseY) - origin;
 			var x = translatedMouse.x;
 			var y = translatedMouse.y;
@@ -285,6 +295,8 @@ SequencerCanvas : UserView {
 			cursorView.mouseDownAction(cursorX, y, modifiers, buttonNumber, clickCount);
 
 			this.refresh;
+
+
 		};
 
 		this.mouseMoveAction = { |v, mouseX, mouseY, modifiers|
@@ -308,7 +320,7 @@ SequencerCanvas : UserView {
 
 					selectionBounds = Rect.fromPoints(Point(minX, minY), Point(maxX, maxY));
 					views.do { | view |
-						if (view.bounds.intersects(selectionBounds),  { view.select });
+						if (view.bounds.intersects(selectionBounds), { view.select });
 					}
 				});
 
@@ -341,35 +353,24 @@ SequencerCanvas : UserView {
 				{ [ 2097152, 16777236 ] } { this.moveViews(1, 0) } 	//right
 				{ [ 2097152, 16777235 ] } { this.moveViews(0, -1) } //up
 				{ [ 2097152, 16777237 ] } { this.moveViews(0, 1) }  //down
-				
-				// { [ 2228224, 16777234 ] } { this.extendSelectionRight(-1, 0) } //shift + left
-				// { [ 2228224, 16777236 ] } { this.extendSelectionRight(1, 0) } 	//shift + right
-				// { [ 2228224, 16777235 ] } { this.extendSelectionRight(0, -1) } //shift + up
-				// { [ 2228224, 16777237 ] } { this.extendSelectionRight(0, 1) }  //shift + down
-
-				// { [ 3276800, 16777234 ] } { this.extendSelectionLeft(-1, 0) } //cmd + shift + left
-				// { [ 3276800, 16777236 ] } { this.extendSelectionLeft(1, 0) } //cmd + shift + right
-				// { [ 3276800, 16777235 ] } { this.extendSelectionLeft(0, -1) } //cmd + shift + up
-				// { [ 3276800, 16777237 ] } { this.extendSelectionLeft(0, 1) } //cmd + shift + down
 
 				{ Keys(\optMod, \left) 	} { this.moveOrigin(-10, 0) } //left
 				{ Keys(\optMod, \right) } { this.moveOrigin(10, 0) } //right
 				{ Keys(\optMod, \up) 		} { this.moveOrigin(0, -10) } //up
 				{ Keys(\optMod, \down) 	} { this.moveOrigin(0, 10) } //down
 
-
 				{ Keys(\noMod, \tab) } { this.cycleThroughViews }
 				{ Keys(\cmdMod, \z) } { this.historyAction('undo') } //cmd -z
 				{ [ 1179648, 90 ] } { this.historyAction('redo') } //cmd -shift -z
 				
-				{ Keys(\cmdMod, \s) } { this.save }
-				{ [ 1179648, 83 ] } { this.save(true) }
-				{ Keys(\cmdMod, \o) } { this.open }
+				{ Keys(\cmdMod, \s) } { this.save } // cmd-s
+				{ [ 1179648, 83 ] } 	{ this.save(true) } // cmd-shift-s
+				{ Keys(\cmdMod, \o) } { this.open } // cmd-o
 
-				{ Keys(\noMod, \q) } { this.toggleQuantization }
+				{ Keys(\noMod, \q) } { this.toggleQuantization } // Q
 				
-				{ [ 1179648, 91 ] } { this.subdivisions_(subdivisions - 1) }
- 				{ [ 1179648, 93 ] } { this.subdivisions_(subdivisions + 1) }
+				{ [ 1179648, 91 ] } { this.subdivisions_(subdivisions - 1) } // cmd-shift-[
+ 				{ [ 1179648, 93 ] } { this.subdivisions_(subdivisions + 1) } // cmd-shift-]
 
  				{ [ 0, 16777216 ] } { this.deselectAll } // esc
  				{ [ 1048576, 65 ] } { this.selectAll }; // cmd - a 
@@ -413,7 +414,7 @@ SequencerGrid {
 	}
 
 	*initClass {
-		mainGridColor = Color.grey(0.7, 1);
+		mainGridColor = Color.grey(0.8, 1);
 		subdivisionColor = Color.grey(0.7, 0.5);
 	}
 
