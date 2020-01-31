@@ -1,4 +1,5 @@
 BaseMouseAction {
+	var initialCursor;
 
 	mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount, quant;
 		// abstract method
@@ -14,4 +15,33 @@ BaseMouseAction {
 		// abstract method
 		this.subclassResponsibility(thisMethod);
 	}
+}
+
+MoveTopView {
+	var view;
+	*new { arg view, x, y, modifiers, buttonNumber, clickCount;
+		^super.new.init(view, x, y, modifiers, buttonNumber, clickCount);
+	}
+
+	init { arg view, x, y, modifiers, buttonNumber, clickCount;
+		view = view;
+		this.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+	}
+
+	mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;
+		view.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+
+	}
+
+	mouseMoveAction {
+		
+	}
+
+	mouseUpAction {
+
+	}
+}
+
+MoveViews {
+	
 }

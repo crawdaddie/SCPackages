@@ -8,6 +8,8 @@ Cursor {
 
 	var zoom;
 	var <selected = false;
+	var initialCursor;
+	var initialBounds;
 
 	*new { arg event;
 		^super.new.init(event)
@@ -72,6 +74,20 @@ Cursor {
 		bounds.left = x;
 		bounds.width = 1;
 		bounds.top = y.trunc(yFactor * zoom.y);
+		initialBounds = bounds.copy;
+		initialCursor = x@y;
+	}
+
+	mouseMoveAction { arg x, y, modifiers, quantX;
+		var difference, newOrigin, quantY;
+		quantX.postln;
+		newOrigin = x@y - (initialCursor - initialBounds.origin);
+			
+		quantY = yFactor * zoom.y;
+
+		quantX !? { newOrigin.x = newOrigin.x.round(quantX) };
+		quantY !? { newOrigin.y = max(0, newOrigin.y.round(quantY)) };
+		bounds.origin = newOrigin;
 	}
 
 	moveTo { arg x, y;
@@ -82,7 +98,6 @@ Cursor {
 	moveBy { arg x, y;
 		bounds = bounds.moveBy(x, y);
 	}
-
 
 	zoomBy { arg zoomX = 1, zoomY = 1;
 		zoom.x = zoom.x * zoomX;

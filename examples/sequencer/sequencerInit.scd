@@ -98,13 +98,25 @@ a = SequencerCanvas.fromObjects(Store.objects.values);
 
 
 
-
-r = Rect(0,0, 10, 10)
-
+intersects
+r = Rect.fromPoints(Point(0,0), Point(10, -10))
+r.intersect
 q = r.copy
+r
+
+r.rightBottom = Point(10, 20)
+
+r.rightBottom_(Point(10, 20))
+r = Rect(0, 0, 10, -10)
+
+r = Point(0, 0);
+q = Point(-1, -1)
 
 
-q
+
+
+
+qq
 377.7590998463
 0.000000000001
 
@@ -119,8 +131,14 @@ r.right
 
 r
 
-r = Rect(250.0, 200.0, 100.0, 40);
-q = Rect(0, 0, 400.0, 400.0)
+r = Rect(0, 200.0, 150.0, 40);
+q = Rect(0, 0, 400.0, 400.0);
+
+r.intersects(q)
+
+r & q
+
+
 a = 1.1;
 
 v = -1;

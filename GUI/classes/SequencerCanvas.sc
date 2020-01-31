@@ -57,6 +57,7 @@ SequencerCanvas : UserView {
 	var <cursorView;
 	var <selectionBounds;
 	var initialMouse;
+	var mouseActionObject;
 
 	*new { arg argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
 		var parent = argParent ?? Window.new('sequencer', Rect(1040, 455, 400, 400))
@@ -311,7 +312,8 @@ SequencerCanvas : UserView {
 			};
 
 			if (selectionBounds.isNil, {
-				selectedViews.do(_.mouseMoveAction(x, y, modifiers, passedInQuant))
+				selectedViews.do(_.mouseMoveAction(x, y, modifiers, passedInQuant));
+				cursorView.mouseMoveAction(x, y, modifiers, passedInQuant);
 				}, {
 					var minX = min(initialMouse.x, translatedMouse.x);
 					var minY = min(initialMouse.y, translatedMouse.y);
