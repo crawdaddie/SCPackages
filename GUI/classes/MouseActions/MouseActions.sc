@@ -19,7 +19,7 @@ BaseMouseAction {
 
 MoveViewsAction {
 	var views;
-	var cursor
+	var cursor;
 	*new { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
 		^super.new.init(views, cursor, x, y, modifiers, buttonNumber, clickCount);
 	}
@@ -46,7 +46,7 @@ MoveViewsAction {
 
 SelectionAction {
 	var views;
-	var cursor
+	var cursor;
 	*new { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
 		^super.new.init(views, cursor, x, y, modifiers, buttonNumber, clickCount);
 	}
