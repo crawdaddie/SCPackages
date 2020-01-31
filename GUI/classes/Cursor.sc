@@ -80,7 +80,6 @@ Cursor {
 
 	mouseMoveAction { arg x, y, modifiers, quantX;
 		var difference, newOrigin, quantY;
-		quantX.postln;
 		newOrigin = x@y - (initialCursor - initialBounds.origin);
 			
 		quantY = yFactor * zoom.y;

@@ -17,19 +17,21 @@ BaseMouseAction {
 	}
 }
 
-MoveTopView {
-	var view;
-	*new { arg view, x, y, modifiers, buttonNumber, clickCount;
-		^super.new.init(view, x, y, modifiers, buttonNumber, clickCount);
+MoveViewsAction {
+	var views;
+	var cursor
+	*new { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
+		^super.new.init(views, cursor, x, y, modifiers, buttonNumber, clickCount);
 	}
 
-	init { arg view, x, y, modifiers, buttonNumber, clickCount;
-		view = view;
+	init { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
+		views = views;
+		cursor = cursor;
 		this.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 	}
 
 	mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;
-		view.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+		// view.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 
 	}
 
@@ -42,6 +44,31 @@ MoveTopView {
 	}
 }
 
-MoveViews {
-	
+SelectionAction {
+	var views;
+	var cursor
+	*new { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
+		^super.new.init(views, cursor, x, y, modifiers, buttonNumber, clickCount);
+	}
+
+	init { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
+		views = views;
+		cursor = cursor;
+		this.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+	}
+
+	mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;
+		// view.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+
+	}
+
+	mouseMoveAction {
+		
+	}
+
+	mouseUpAction {
+
+	}
 }
+
+

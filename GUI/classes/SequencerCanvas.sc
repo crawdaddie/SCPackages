@@ -13,25 +13,25 @@ Keys {
 	classvar dict;
 	*initClass {
 		dict = Dictionary.with(*[
-			\noMod -> 0,
-			\cmdMod -> 1048576,
+			\noMod 		-> 0,
+			\cmdMod 	-> 1048576,
 			\shiftMod -> 1048576,
-			\optMod -> 2621440,
+			\optMod 	-> 2621440,
 
-			\tab -> 16777217,
+			\tab 			-> 16777217,
 
-			\plus -> 61,
-			\minus -> 45,
+			\plus 		-> 61,
+			\minus 		-> 45,
 
-			\left -> 16777234,
-			\right -> 16777236,
-			\up -> 16777235,
-			\down -> 16777237,
+			\left 		-> 16777234,
+			\right 		-> 16777236,
+			\up 			-> 16777235,
+			\down 		-> 16777237,
 
-			\s -> 83,
-			\z -> 90,
-			\o -> 79,
-			\q -> 81,
+			\s 				-> 83,
+			\z 				-> 90,
+			\o 				-> 79,
+			\q 				-> 81,
 		]);
   }
 
@@ -57,7 +57,7 @@ SequencerCanvas : UserView {
 	var <cursorView;
 	var <selectionBounds;
 	var initialMouse;
-	var mouseActionObject;
+	var mouseAction;
 
 	*new { arg argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
 		var parent = argParent ?? Window.new('sequencer', Rect(1040, 455, 400, 400))
@@ -282,6 +282,16 @@ SequencerCanvas : UserView {
 
 			this.deselectAll;
 
+			this.getTopView(x, y) !? { |topView|
+				switch (modifiers)
+					{ Keys(\cmdMod) }	{
+						topView.select;
+						action = MoveViewsAction(this.selectedViews, cursorView, x, y, modifiers, buttonNumber, clickCount);
+					};			
+			} ?? {
+				action = SelectionAction(views, cursorView, x, y, modifiers, buttonNumber, clickCount);
+			};
+
 			topView !? { |topView|
 				topView.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 			} ?? {
@@ -340,7 +350,7 @@ SequencerCanvas : UserView {
 
 		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
 			var moveY = quantY * zoom.y;
-			[modifiers, key].postln;
+			// [modifiers, key].postln;
 			switch ([modifiers, key])
 				{ Keys(\cmdMod, \plus) }	{ this.zoomBy(1.05, 1) }
 				{ Keys(\cmdMod, \minus) }	{ this.zoomBy(1.05.reciprocal, 1) }
