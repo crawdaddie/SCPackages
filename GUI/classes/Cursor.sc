@@ -70,24 +70,24 @@ Cursor {
 		}
 	}
 
-	mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;
-		bounds.left = x;
-		bounds.width = 1;
-		bounds.top = y.trunc(yFactor * zoom.y);
-		initialBounds = bounds.copy;
-		initialCursor = x@y;
-	}
+	// mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;
+	// 	bounds.left = x;
+	// 	bounds.width = 1;
+	// 	bounds.top = y.trunc(yFactor * zoom.y);
+	// 	initialBounds = bounds.copy;
+	// 	initialCursor = x@y;
+	// }
 
-	mouseMoveAction { arg x, y, modifiers, quantX;
-		var difference, newOrigin, quantY;
-		newOrigin = x@y - (initialCursor - initialBounds.origin);
+	// mouseMoveAction { arg x, y, modifiers, quantX;
+	// 	var difference, newOrigin, quantY;
+	// 	newOrigin = x@y - (initialCursor - initialBounds.origin);
 			
-		quantY = yFactor * zoom.y;
+	// 	quantY = yFactor * zoom.y;
 
-		quantX !? { newOrigin.x = newOrigin.x.round(quantX) };
-		quantY !? { newOrigin.y = max(0, newOrigin.y.round(quantY)) };
-		bounds.origin = newOrigin;
-	}
+	// 	quantX !? { newOrigin.x = newOrigin.x.round(quantX) };
+	// 	quantY !? { newOrigin.y = max(0, newOrigin.y.round(quantY)) };
+	// 	bounds.origin = newOrigin;
+	// }
 
 	moveTo { arg x, y;
 		bounds.left = x;
@@ -104,7 +104,7 @@ Cursor {
 		bounds.set(
 			bounds.left * zoomX,
 			bounds.top * zoomY,
-			bounds.width * zoomX,
+			1,
 			bounds.height * zoomY
 		);
 	}

@@ -20,13 +20,13 @@ BaseMouseAction {
 MoveViewsAction {
 	var views;
 	var cursor;
-	*new { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
-		^super.new.init(views, cursor, x, y, modifiers, buttonNumber, clickCount);
+	var canvas;
+	*new { arg canvas, x, y, modifiers, buttonNumber, clickCount;
+		^super.new.init(canvas, x, y, modifiers, buttonNumber, clickCount);
 	}
 
-	init { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
-		views = views;
-		cursor = cursor;
+	init { arg argCanvas, x, y, modifiers, buttonNumber, clickCount;
+		canvas = argCanvas;
 		this.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 	}
 
@@ -45,29 +45,43 @@ MoveViewsAction {
 }
 
 SelectionAction {
+	var canvas;
 	var views;
-	var cursor;
-	*new { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
-		^super.new.init(views, cursor, x, y, modifiers, buttonNumber, clickCount);
+	var cursorView;
+	var initialMouse;
+	var selectionBounds;
+
+	var initialMouse;
+	*new { arg canvas, x, y, modifiers, buttonNumber, clickCount;
+		^super.new.init(canvas, x, y, modifiers, buttonNumber, clickCount);
 	}
 
-	init { arg views, cursor, x, y, modifiers, buttonNumber, clickCount;
-		views = views;
-		cursor = cursor;
+	init { arg argCanvas, x, y, modifiers, buttonNumber, clickCount;
+		canvas = argCanvas;
+		views = canvas.views;
 		this.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 	}
 
 	mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;
-		// view.mouseDownAction(x, y, modifiers, buttonNumber, clickCount);
-
+		initialMouse = x@y;
+		canvas.selectionBounds = Rect.fromPoints(initialMouse, initialMouse);
 	}
 
-	mouseMoveAction {
-		
+	mouseMoveAction { arg x, y;
+		var minX = min(initialMouse.x, x);
+		var minY = min(initialMouse.y, y);
+		var maxX = max(initialMouse.x, x);
+		var maxY = max(initialMouse.y, y);
+
+		canvas.selectionBounds = Rect.fromPoints(Point(minX, minY), Point(maxX, maxY));
+		canvas.selectionBounds.postln;
+		views.do { | view |
+			if (view.bounds.intersects(canvas.selectionBounds), { view.select });
+		};
 	}
 
 	mouseUpAction {
-
+		canvas.selectionBounds = nil;
 	}
 }
 

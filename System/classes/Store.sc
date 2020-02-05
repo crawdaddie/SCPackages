@@ -12,6 +12,21 @@ Store {
 		object.init !? {
 			object.init;
 		}
+		^object;
+	}
+
+	*createAggregate { arg ... objects;
+		var ids = Set();
+		
+		objects.do { |object|
+			object.id !? { |id|
+				ids = ids.add(id) 
+			} ?? {
+				var storedObject = this.addObject(object);
+				ids = ids.add(storedObject.id);
+			}
+		};
+		^this.addObject((type: 'aggregate', ids: ids));
 	}
 
 	*updateObject { arg id, newState, history = true;
@@ -40,6 +55,10 @@ Store {
 
 	*at { arg key;
 		^objects.at(key)
+	}
+
+	*atAll { arg keys;
+		^objects.atAll(keys)
 	}
 
 	*clear {

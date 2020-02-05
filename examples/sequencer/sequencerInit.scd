@@ -8,6 +8,7 @@ var saveDir = thisProcess.nowExecutingPath !? _.dirname ?? "/Users/adamjuraszek/
 var projectFile = "/Users/adamjuraszek/PROJECTS/supercollider/test_piece/saves/opentest";
 var load;
 var clipboard;
+var aggregate;
 	
 t = (
 	type: 'timingContext',
@@ -15,6 +16,15 @@ t = (
 );
 	
 StoreHistory.enable;
+
+Dispatcher.addListener('addToAggregate', { arg payload;
+	var id = payload.id;
+	var aggregate = Store.at(id);
+	var ids = aggregate.ids;
+	var newState = (ids: ids.add(payload.newObjectId));
+	Store.updateObject(id, newState);
+	// Store.objects.postln;
+});
 
 Dispatcher.addListener('moveObject', { arg payload;
 	var id = payload.id;
@@ -68,9 +78,9 @@ events = [
 
 events = events.add((timestamp: 0, channel: 2).parent_(sequencerEvent));
 
-events.do { |event, index|
-	Store.addObject(event);
-};
+// events.do { |event, index|
+// 	Store.addObject(event);
+// };
 
 
 
@@ -92,65 +102,9 @@ load = { arg path;
 // 	Dispatcher((type: 'serverBooted'));
 // 	s.makeGui;
 // };
+aggregate = Store.createAggregate(*events);
 
-a = SequencerCanvas.fromObjects(Store.objects.values);
+a = SequencerCanvas.fromAggregate(aggregate);
 )
 
-
-
-intersects
-r = Rect.fromPoints(Point(0,0), Point(10, -10))
-r.intersect
-q = r.copy
-r
-
-r.rightBottom = Point(10, 20)
-
-r.rightBottom_(Point(10, 20))
-r = Rect(0, 0, 10, -10)
-
-r = Point(0, 0);
-q = Point(-1, -1)
-
-
-
-
-
-qq
-377.7590998463
-0.000000000001
-
-
-57.88120 % 57.88125
-
-r.rightTop = Point(20, 0)
-
-a.refresh;
-
-r.right
-
-r
-
-r = Rect(0, 200.0, 150.0, 40);
-q = Rect(0, 0, 400.0, 400.0);
-
-r.intersects(q)
-
-r & q
-
-
-a = 1.1;
-
-v = -1;
-
-v.round(a)
-
-
-r
-
-r.right = 20
-
-
-
-v = a.views[0]
-
+h = Store.at(1007);

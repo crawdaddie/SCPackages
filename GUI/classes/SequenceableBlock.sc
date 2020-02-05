@@ -19,7 +19,7 @@ SequenceableBlock {
 
 	// state-action variables
 	var action = nil;
-	var <selected = false, toRefresh = true;
+	var <>selected = false, toRefresh = true;
 	var zoom;
 
 
@@ -109,8 +109,6 @@ SequenceableBlock {
 		})
 	}
 
-
-
 	renderView { arg origin, parentBounds;
 		var renderBounds = bounds.moveBy(origin.x, origin.y);
 		if (renderBounds.intersects(parentBounds).not) { ^false };
@@ -153,60 +151,30 @@ SequenceableBlock {
 		this.updateState;
 	}
 
-	// getTick {
-	// 	^Store.at(id).timestamp;
-	// }
-	
-	mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;
+	setTransparent {
 		color.alpha = 0.8;
-		action = this.getAction(x, y);
-		selected = true;
-		initialBounds = bounds.copy;
-		initialCursor = x@y;
-
-
-		if (buttonNumber == 1) { this.showMenu(x, y) }
 	}
 
-	mouseMoveAction { arg x, y, modifiers, quantX;
-		var difference, newOrigin, quantY;
-		if (selected) {
-			newOrigin = x@y - (initialCursor - initialBounds.origin);
-
-			difference = bounds.origin - newOrigin;
-			toRefresh = bounds.origin != newOrigin;
-			
-			quantY = yFactor * zoom.y;
-
-			switch (action,
-				'move', {
-					quantX !? { newOrigin.x = newOrigin.x.round(quantX) };
-					quantY !? { newOrigin.y = max(0, newOrigin.y.round(quantY)) };
-					bounds.origin = newOrigin;
-				},
-				'resizeLeft', {
-					bounds.set(
-						bounds.left - difference.x,
-						bounds.top,
-						max(moveWidgetPixelsWidth, bounds.width + difference.x),
-						bounds.height);
-				},
-				'resizeRight', {
-					bounds.set(
-						bounds.left,
-						bounds.top,
-						max(moveWidgetPixelsWidth, initialBounds.width - difference.x),
-						bounds.height);
-				}
-			);
-		}
-	}
-
-	mouseUpAction {
+	setOpaque {
 		color.alpha = 1;
-		if (selected && bounds != initialBounds) {
-			this.updateState;
-		}
+	}
+
+	resizeLeftBy { arg difference;
+		bounds.set(
+			bounds.left - difference,
+			bounds.top,
+			max(moveWidgetPixelsWidth, bounds.width + difference),
+			bounds.height
+		);
+	}
+
+	resizeRightBy { arg difference;
+		bounds = Rect(
+			bounds.left,
+			bounds.top,
+			max(moveWidgetPixelsWidth, initialBounds.width - difference),
+			bounds.height
+		);
 	}
 
 	updateState {
