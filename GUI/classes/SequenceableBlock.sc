@@ -11,7 +11,7 @@ SequenceableBlock {
 	classvar <yFactor = 40;
 	classvar <moveWidgetPixelsWidth = 5;
 	// reference to state
-	var id;
+	var <id;
 
 	// view variables
 	var color, <bounds, initialBounds;

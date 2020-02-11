@@ -46,6 +46,8 @@ SequencerWindowKeyActions {
 		
 		if (canvas.hasFocus.not, {^nil});
 
+		[modifiers, key].postln;
+
 		switch ([modifiers, key])
 			{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
 			{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
@@ -80,7 +82,8 @@ SequencerWindowKeyActions {
  			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
 
  			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
- 			{ [ 1048576, 65 ] } { canvas.selectAll }; // cmd - a 
+ 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
+ 			{ [ 1048576, 16777219 ] } { Dispatcher((type: 'deleteObjects', payload: (ids: canvas.selectedViews.collect(_.id)))) }; // cmd - del 
 		canvas.refresh;
 	}
 }
@@ -169,8 +172,11 @@ SequencerCanvas : UserView {
 					topView.selected = topView.selected.not;
 					(mouseMoveAction: {}, mouseUpAction: {});
 				}
+				// { topView.notNil && buttonNumber == 1} {
+				// 	topView.select;
+
+				// }
 				{ topView.notNil && modifiers == 524288 } {
-					buttonNumber.postln;
 					topView.select;
 					this.selectionMoveMouseDownAction(topView, x, y, modifiers, buttonNumber, clickCount);
 				}
@@ -211,12 +217,24 @@ SequencerCanvas : UserView {
 		
 		};
 
+		Dispatcher.addListener('objectUpdated', { arg payload;
+			this.objectUpdated(payload);
+		});
+
 		^this
+	}
+
+	objectUpdated { arg aggregate;
+		if (aggregate.id == id) {
+			var objects = Store.atAll(aggregate.ids);
+			this.clear;
+			this.addObjects(objects);
+		}
 	}
 
 
 	clear {
-		this.init([], quantX, quantY);
+		this.init(id, [], quantX, quantY);
 		this.refresh;
 	}
 
@@ -492,21 +510,6 @@ SequencerCanvas : UserView {
 			}
 		)
 	}
-// difference = bounds.origin - newOrigin;
-				// 	'resizeLeft', {
-				// 	bounds.set(
-				// 		bounds.left - difference.x,
-				// 		bounds.top,
-				// 		max(moveWidgetPixelsWidth, bounds.width + difference.x),
-				// 		bounds.height);
-				// },
-				// 'resizeRight', {
-				// 	bounds.set(
-				// 		bounds.left,
-				// 		bounds.top,
-				// 		max(moveWidgetPixelsWidth, initialBounds.width - difference.x),
-				// 		bounds.height);
-				// }
 
 
 	showMenu {
@@ -566,10 +569,6 @@ SequencerGrid {
 		// var tickNum = 0;
 		tick = minorGap;
 
-
-
-
-		
 		Pen.strokeColor_(mainGridColor);
 		while ({ xOffset < bounds.width }) {
 			Pen.line(Point(xOffset, 0), Point(xOffset, bounds.height));
@@ -592,5 +591,19 @@ SequencerGrid {
 	draw { arg quantX, origin, bounds, zoom, subdivisions;
 		this.drawYGrid(origin, bounds, zoom);
 		this.drawXGrid(quantX, origin, bounds, zoom, subdivisions);
+	}
+}
+
+PianoGrid : SequencerGrid {
+	drawYGrid { arg origin, bounds, zoom;
+		var gap = SequenceableBlock.yFactor * zoom.y;
+		var yOffset = origin.y + (0 - origin.y).roundUp(gap);
+
+		Pen.strokeColor_(mainGridColor);
+		while ({ yOffset < bounds.height }) {
+			Pen.line(Point(0, yOffset), Point(bounds.width, yOffset));
+			Pen.stroke;
+			yOffset = yOffset + gap;
+		}
 	}
 }

@@ -14,16 +14,10 @@ t = (
 	type: 'timingContext',
 	bpm: 60
 );
-	
-StoreHistory.enable;
 
-Dispatcher.addListener('addToAggregate', { arg payload;
-	var id = payload.id;
-	var aggregate = Store.at(id);
-	var ids = aggregate.ids;
-	var newState = (ids: ids.add(payload.newObjectId));
-	Store.updateObject(id, newState);
-	// Store.objects.postln;
+
+Dispatcher.addListener('deleteObjects', { arg payload;
+	Store.removeObjects(*payload.ids)
 });
 
 Dispatcher.addListener('moveObject', { arg payload;
@@ -78,15 +72,18 @@ events = [
 
 events = events.add((timestamp: 0, channel: 2).parent_(sequencerEvent));
 
-// events.do { |event, index|
-// 	Store.addObject(event);
-// };
+events.do { |event, index|
+	Store.addObject(event);
+};
 
 
 
 load = { arg path;
 	var archive = Archive.read(path).global;
+	Store.objects.postln;
 	Store.replace(archive);
+	Store.objects.postln;
+
 	a.clear;
 	a.addObjects(Store.objects.values);
 
@@ -102,9 +99,101 @@ load = { arg path;
 // 	Dispatcher((type: 'serverBooted'));
 // 	s.makeGui;
 // };
-aggregate = Store.createAggregate(*events);
+// aggregate = Store.createAggregate(*events);
 
-a = SequencerCanvas.fromAggregate(aggregate);
+a = SequencerCanvas.fromAggregate(Store.base);
 )
+
+
+UniqueId.next()
+
+Store.at(1001)
+UniqueID.next
+Store.base
+
+Store.objects.do(_.postln)
+
+q = Dictionary.with(1001 -> "a", 1002 -> "b");
+StoreHistory.history
+q.
+q[1002]
+q = Dictionary();
+
+q.at(1001)
+
+q.class
+
+Store.objects.do(_.postln);
+
+h = (1001 -> nil)
+
+h = false;
+
+h ?? {"jj".postln}
+
+
+d = (
+	1001: 'a',
+	1002: (1003: 'b', 1004: 'c')
+);
+
+
+a = [
+	(a: 1, b: 2),
+	(a: 1, b: 2),
+	(a: 1, b: 2),
+	(a: 1, b: 2)
+];
+
+d = MultiLevelIdentityDictionary.with(*[
+	1001 -> a[0],
+	1002 -> a[1],
+	1003 -> Dictionary.with(*[
+		1004 -> a[2],
+		1005 -> a[3]
+	])
+]);
+d = MultiLevelIdentityDictionary()
+
+
+d.put(1001, 1002, 1003, 1004, (a: 1, b: 2))
+
+g = d[1001, 1002, 1003];
+
+
+g[1005] = (a: 3, b: 2)
+
+
+Store.base
+
+
+g
+
+ = nil
+
+
+
+
+d
+
+a = Store.new(*[(a: 1, b: 2), (a: 2, b: 3)]);
+
+b = 
+Store.objects;
+
+
+
+b = nil
+a.instanceObjects
+
+a
+d[1003][1004].b = 4
+ = nil
+
+d
+
+
+or
+Tree
 
 h = Store.at(1007);

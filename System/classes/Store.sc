@@ -1,32 +1,82 @@
 Store {
 	classvar <objects;
+	classvar <base;
+	classvar lastId;
 
-	*initClass {
-		objects = Dictionary();
+	*getId {
+		lastId = lastId + 1;
+		^lastId;
 	}
 
-	*addObject { arg object;
-		var id = UniqueID.next;
+
+	*initClass {
+		var baseId;
+		lastId = 1000;
+		
+		baseId = this.getId;
+		objects = Dictionary();
+		base = (id: baseId, type: 'aggregate', ids: Set());
+		objects.put(baseId, base);
+	}
+
+	*dispatchHistoryMarker { arg id, aggregate;
+		if (StoreHistory.enabled) {
+			var object = this.at(id);
+			var history = Dictionary();
+
+			history.put(id, this.at(id));
+			aggregate !? {
+				history.put(aggregate.id, (ids: aggregate.ids));
+			};
+			StoreHistory.store(history);
+		}
+	}
+
+	*addObject { arg object, argAggregate;
+		var id = this.getId;
+		var aggregate = argAggregate ?? base;
+
 		object.id = id;
+		object.aggregateId = aggregate.id;
+		
 		objects.put(id, object);
+		aggregate.ids.add(id);
+
 		object.init !? {
 			object.init;
-		}
+		};
+
 		^object;
 	}
 
-	*createAggregate { arg ... objects;
-		var ids = Set();
+	*removeObject { arg id;
+		var object = Store.at(id);
+		var aggregate = Store.at(object.aggregateId);
+
+		// this.dispatchHistoryMarker(id, aggregate);  
+
+		aggregate.ids.remove(id);
+		Dispatcher((type: 'objectUpdated', payload: aggregate));
+		objects[id] = nil;
+	}
+
+	*removeObjects { arg ... ids;
+		var aggregates = Set();
 		
-		objects.do { |object|
-			object.id !? { |id|
-				ids = ids.add(id) 
-			} ?? {
-				var storedObject = this.addObject(object);
-				ids = ids.add(storedObject.id);
-			}
+		ids.do { |id|
+			var object = Store.at(id);
+			var aggregate = Store.at(object.aggregateId);
+			aggregates.add(aggregate);
+
+			// this.dispatchHistoryMarker(id, aggregate);  
+
+			aggregate.ids.remove(id);
+			objects[id] = nil;
 		};
-		^this.addObject((type: 'aggregate', ids: ids));
+
+		aggregates.do { |aggregate|
+			Dispatcher((type: 'objectUpdated', payload: aggregate))
+		};
 	}
 
 	*updateObject { arg id, newState, history = true;
@@ -34,13 +84,7 @@ Store {
 		var diff = this.getDiff(object, newState);
 
 		if (diff.size > 0) {
-			if (history) {
-				var historyMarker = diff.collect { |val, key|
-					object[key]
-				};
-				historyMarker.id = id;
-				StoreHistory.store(historyMarker)
-			};
+			if (history, { this.dispatchHistoryMarker(id) });
 
 			object.putAll(diff);
 			Dispatcher((type: 'objectUpdated', payload: object));
@@ -62,11 +106,13 @@ Store {
 	}
 
 	*clear {
+		var baseId = this.getId;
 		objects = Dictionary();
+		base = (id: baseId, type: 'aggregate', ids: Set());
+		objects.put(baseId, base);
 	}
 
 	*replace { arg dict;
-		this.clear;
 		dict.keysValuesDo { |key, val|
 			this.addObject(val);
 		}
@@ -122,13 +168,16 @@ StoreHistory {
 	*restore { arg list;
 		if (list.size > 0 && enabled) {
 			var state = list.removeAt(list.size - 1);
-			var id = state.id;
-			var object = Store.at(id);
-			var marker = state.collect { |val, key|
-				object[key]
+			var marker = Dictionary();
+			state.keysValuesDo { |id, value|
+				var object = Store.at(id);
+				var subMarker = value.collect { |val, key|
+					object[key]
+				};
+				Store.updateObject(id, value, false);
+				marker.put(id, subMarker);
 			};
 
-			Store.updateObject(id, state, false);
 			^marker
 		} {
 			^nil
