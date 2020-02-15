@@ -1,4 +1,108 @@
 Store {
+	classvar <base;
+	classvar <lookups;
+	classvar <lastId;
+	var <objects;
+	var id;
+	var <>timestamp = 0; 
+
+	*getId {
+		lastId = lastId + 1;
+		^lastId;
+	}
+	
+	*initClass {
+		lastId = 1000;
+		base = Store();
+		lookups = Dictionary();
+	}
+
+	*new { arg id, timestamp;
+		^super.new.init(id, timestamp);
+	}
+
+	init { arg argId, argTimestamp = 0;
+		objects = IdentityDictionary();
+		id = argId ?? this.class.getId();
+		timestamp = argTimestamp;
+	}
+
+	*addStore { arg timestamp;
+		^base.addStore(timestamp);
+	}
+
+	addLookupPath { arg newId;
+		lookups.put(newId, lookups[id] ++ [newId]);
+	}
+
+	addStore { arg timestamp = 0;
+		var newId = Store.getId();
+		var newStore = Store(newId, timestamp);
+		objects.put(newId, newStore);
+		this.addLookupPath(newId);
+		^newStore;
+	}
+
+	addObject { arg object;
+		var newId = Store.getId();
+		object.id = newId;
+		objects.put(newId, object);
+		this.addLookupPath(newId);
+		^object;
+	}
+
+	*updateObject { arg id, newState, history = true;
+		var lookupPath = lookups[id];
+		var storeId = lookupPath[lookupPath.size - 2];
+		var store = Store.at(storeId);
+		^store.updateObject(id, newState, history);
+	}
+
+	updateObject { arg id, newState, history = true;
+		var object = objects[id];
+		var diff = getDiff(object, newState);
+
+		if (diff.size > 0) {
+			if (history) {
+				var historyMarker = diff.collect { |val, key|
+					object[key]
+				};
+				historyMarker.id = id;
+				StoreHistory.store(historyMarker)
+			};
+
+			object.putAll(diff);
+			Dispatcher((type: 'objectUpdated', payload: object));
+		};
+	}
+
+	at { arg id;
+		^objects[id];
+	}
+
+	*at { arg id;
+		var path = lookups[id];
+		var obj = base;
+		path.do { |id|
+			obj = obj.at(id);
+		};
+		^obj;
+	}
+
+	*archive { arg path;
+		(lookups: lookups, base: base, lastId: lastId).writeMinifiedTextArchive(path);
+	}
+	
+	*readFromArchive { arg path;
+		var archive = path.load;
+		lookups = archive.lookups;
+		base = archive.base;
+		lastId = archive.lastId;
+	}
+}
+
+
+StoreB {
 	classvar <objects;
 
 	*initClass {
@@ -76,6 +180,35 @@ Store {
 StoreHistory {
 	classvar <history, <future;
 	classvar <enabled;
+	/**
+	 * StoreHistory is made up of 2 stacks
+	 * history - list of HistoryMarkers
+ 	 * future  - list of HistoryMarkers
+ 	 *
+ 	 * when some change is made to objects in the store
+ 	 * (and we want to treat these changes as one 'action') 
+ 	 * eg objects with ids 1001, 1002 we create a HistoryMarker
+ 	 * out of the state of the objects before the change
+ 	 *
+ 	 * a HistoryMarker is an object (dictionary) with shape eg.
+ 	 * 1001 -> (
+ 	 *	changedKey1: previousValue1,
+ 	 *  changedKey2: previousValue2,
+ 	 * 	changedKey3: previousValue3,
+ 	 * ),
+ 	 * 1002 -> (
+ 	 *	changedKey1: previousValue1,
+ 	 *  changedKey2: previousValue2,
+ 	 * 	changedKey3: previousValue3,
+ 	 * )
+	 *
+ 	 * And then this HistoryMarker is pushed to the history stack 
+	 * when we want to restore the store's state to that historymarker
+	 * we pop that HistoryMarker from the history stack, prepend it to the future stack
+	 * and go through each id in the history marker, and for that object set the changedKey back
+	 * to the previousValue
+	 *
+	 **/
 
 	*initClass {
 		history = List();

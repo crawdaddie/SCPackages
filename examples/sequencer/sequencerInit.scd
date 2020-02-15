@@ -17,15 +17,6 @@ t = (
 	
 StoreHistory.enable;
 
-Dispatcher.addListener('addToAggregate', { arg payload;
-	var id = payload.id;
-	var aggregate = Store.at(id);
-	var ids = aggregate.ids;
-	var newState = (ids: ids.add(payload.newObjectId));
-	Store.updateObject(id, newState);
-	// Store.objects.postln;
-});
-
 Dispatcher.addListener('moveObject', { arg payload;
 	var id = payload.id;
 	var newState = (
@@ -83,28 +74,23 @@ events = events.add((timestamp: 0, channel: 2).parent_(sequencerEvent));
 // };
 
 
-
 load = { arg path;
-	var archive = Archive.read(path).global;
-	Store.replace(archive);
+	Store.readFromArchive(path);
 	a.clear;
-	a.addObjects(Store.objects.values);
+	// a.addObjects(Store.base.values);
 
 	projectFile = path;
 	a.parent.name = "sequencer - %".format(path.basename);
 };
-
-
-
 
 // s.waitForBoot {
 // 	"booting".postln;
 // 	Dispatcher((type: 'serverBooted'));
 // 	s.makeGui;
 // };
+
 aggregate = Store.createAggregate(*events);
 
 a = SequencerCanvas.fromAggregate(aggregate);
 )
 
-h = Store.at(1007);
