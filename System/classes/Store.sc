@@ -3,8 +3,9 @@ Store {
 	classvar <lookups;
 	classvar <lastId;
 	var <objects;
-	var id;
-	var <>timestamp = 0; 
+	var <id;
+	var <>timestamp;
+	var <type = 'Store'; 
 
 	*getId {
 		lastId = lastId + 1;
@@ -17,7 +18,7 @@ Store {
 		lookups = Dictionary();
 	}
 
-	*new { arg id, timestamp;
+	*new { arg id, timestamp = 0;
 		^super.new.init(id, timestamp);
 	}
 
@@ -31,16 +32,20 @@ Store {
 		^base.addStore(timestamp);
 	}
 
-	addLookupPath { arg newId;
-		lookups.put(newId, lookups[id] ++ [newId]);
-	}
-
 	addStore { arg timestamp = 0;
 		var newId = Store.getId();
 		var newStore = Store(newId, timestamp);
 		objects.put(newId, newStore);
 		this.addLookupPath(newId);
 		^newStore;
+	}
+	
+	addLookupPath { arg newId;
+		lookups.put(newId, lookups[id] ++ [newId]);
+	}
+
+	*addObject { arg object;
+		^base.addObject(object);
 	}
 
 	addObject { arg object;
@@ -76,6 +81,22 @@ Store {
 		};
 	}
 
+	*getStoreForObject { arg id;
+		var lookupPath = lookups[id];
+		var storeId = lookupPath[lookupPath.size - 2];
+
+		^Store.at(storeId);
+	}
+
+	*removeObject { arg id;
+		^this.getStoreForObject(id).removeObject(id);
+	}
+
+	removeObject { arg id;
+		objects[id] = nil;
+		lookups[id] = nil;
+	}
+
 	at { arg id;
 		^objects[id];
 	}
@@ -89,6 +110,11 @@ Store {
 		^obj;
 	}
 
+	*atAll { arg ids;
+		^ids.collect({ |id| Store.at(id) });
+	}
+
+
 	*archive { arg path;
 		(lookups: lookups, base: base, lastId: lastId).writeMinifiedTextArchive(path);
 	}
@@ -98,6 +124,10 @@ Store {
 		lookups = archive.lookups;
 		base = archive.base;
 		lastId = archive.lastId;
+	}
+
+	sortedObjects {
+		^objects.values.select({ |o| o.timestamp.notNil }).sort({ |a, b| a.timestamp < b.timestamp });
 	}
 }
 

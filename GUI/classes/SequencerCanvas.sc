@@ -117,10 +117,11 @@ SequencerCanvas : UserView {
 		^canvas
 	}
 
-	*fromAggregate { arg object;
-		var canvas = this.new(object.id);
-		var objects = Store.atAll(object.ids);
+	*fromStore { arg store;
+		var canvas = this.new(store.id);
+		var objects = store.objects.values;
 		canvas.addObjects(objects);
+		canvas.postln;
 		canvas;
 	}
 
@@ -340,6 +341,9 @@ SequencerCanvas : UserView {
 
 	addObject { arg object;
 		case
+			{ object.type == 'Store' } {
+				views = views.add(SequenceableBlock(object))
+			}
 			{ object.type == 'sampleEvent' } {
 				views = views.add(SequenceableSoundfileBlock(object))
 			}

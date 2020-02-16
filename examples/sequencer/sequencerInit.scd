@@ -69,9 +69,9 @@ events = [
 
 events = events.add((timestamp: 0, channel: 2).parent_(sequencerEvent));
 
-// events.do { |event, index|
-// 	Store.addObject(event);
-// };
+events.do { |event, index|
+	Store.addObject(event);
+};
 
 
 load = { arg path;
@@ -89,8 +89,44 @@ load = { arg path;
 // 	s.makeGui;
 // };
 
-aggregate = Store.createAggregate(*events);
+// aggregate = Store.createAggregate(*events);
 
-a = SequencerCanvas.fromAggregate(aggregate);
+a = SequencerCanvas.fromStore(Store.base);
 )
+
+Store.base.timestamp
+j = Store.base.sortedObjects()
+
+Store.base.objects.values.do({ arg o; o.timestamp.postln });
+
+Dictionary
+
+
+MultilevelIdentityDictionary {
+	
+}
+j.
+
+Store.base.objects;
+
+a = [0,1,2,3];
+
+a[a.size - 2]
+
+a[ .. (a.size - 2)]
+
+b = a.addStore;
+
+
+a = Store.base
+
+j = 'Store'
+
+j.class
+a.class == Store
+
+
+Store.lookups;
+
+
 
