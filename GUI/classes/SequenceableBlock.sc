@@ -21,6 +21,7 @@ SequenceableBlock {
 	var action = nil;
 	var <>selected = false, toRefresh = true;
 	var zoom;
+	var label;
 
 
 	getAction { arg x, y;
@@ -67,10 +68,13 @@ SequenceableBlock {
 	}
 
 	getRect { arg event;
+
 		var timestamp, length;
 
-		length = event.resolveLength;
-		timestamp = event.resolveTimestamp;
+		// "get rect".postln;
+		// event.postcs;
+		length = event.length;
+		timestamp = event.timestamp;
 
 
 		^Rect(
@@ -92,6 +96,8 @@ SequenceableBlock {
 
 	objectUpdated { arg payload;
 		if (id == payload.id) {
+			// "object updated".postln;
+			// payload.postcs;
 			this.resetBounds(payload);
 		}
 	}
@@ -105,10 +111,11 @@ SequenceableBlock {
 		initialBounds = bounds.copy;
 
 		Dispatcher.addListener('objectUpdated', { arg payload;
-			"receive object updated event".postln;
-			payload.postln;
-			this.objectUpdated(payload)
-		})
+			if (payload.id == id) {
+				this.objectUpdated(payload)
+			}
+		});
+		label = id.asString;
 	}
 
 	renderView { arg origin, parentBounds;
@@ -125,6 +132,11 @@ SequenceableBlock {
    		Pen.strokeColor = SequencerTheme.darkGrey;
    		Pen.stroke;
 		};
+
+		label !? {
+			var point = renderBounds.leftTop;
+			Pen.stringInRect(label, renderBounds, font: Font("Helvetica", 10), color: Color.grey(0.1, 0.5));
+		};
 	}
 
 	shouldMove {
@@ -140,17 +152,15 @@ SequenceableBlock {
 					bounds = bounds.moveBy(x, y)
 				});
 		};
-		this.updateState;
+
 	}
 
 	moveBy { arg x, y;
 		bounds = bounds.moveBy(x, y);
-		this.updateState;
 	}
 
 	moveTo { arg x, y;
 		bounds = bounds.moveTo(x, y);
-		this.updateState;
 	}
 
 	setTransparent {
@@ -179,25 +189,6 @@ SequenceableBlock {
 		);
 	}
 
-	updateState {
-		// call these variables 'absolute<Name>' because the store takes care of updating the events themselves with
-		// bpm values
-		var absoluteTime = bounds.origin.x / (xFactor * zoom.x);
-		var absoluteExtension = bounds.origin.y / (yFactor * zoom.y);
-		var absoluteLength = bounds.width / (xFactor * zoom.x);
-		Dispatcher((
-			type: 'moveObject',
-			payload: (
-				id: id,
-				x: absoluteTime,
-				y: absoluteExtension,
-				length: absoluteLength
-				)
-		));
-
-		^(id: id, x: absoluteTime, y: absoluteExtension, length: absoluteLength)
-	}
-
 	getUpdate {
 		// call these variables 'absolute<Name>' because the store takes care of updating the events themselves with
 		// bpm values
@@ -222,6 +213,10 @@ SequenceableBlock {
 			bounds.height * zoomY
 		);
 	}
+
+	edit {
+		// no-op
+	}
 }
 
 
@@ -234,6 +229,7 @@ SequenceableSoundfileBlock : SequenceableBlock {
 	initSoundfile { arg event;
 		soundfileMod = Mod(event.soundfile);
 		startPos = event.startPos;
+		label = "% - %".format(event.soundfile.basename, event.id);
 		this.getWaveform;
 		^this;
 	}
@@ -281,5 +277,24 @@ SequenceableSoundfileBlock : SequenceableBlock {
 				middle.x = middle.x + 1;
 			}
 		}
+	}
+
+	edit {
+		// no-op
+	}
+}
+
+
+StoreBlock : SequenceableBlock {
+	
+	init { arg event;
+		super.init(event);
+		label = "store - %".format(event.id);
+	}
+
+	edit {
+		var canvas = SequencerCanvas.fromStore(Store.getBase(id));
+		canvas.parent.name = "store - %".format(Store.getPath(id)); 
+		^canvas;
 	}
 }

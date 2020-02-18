@@ -143,7 +143,7 @@ SequencerCanvas : UserView {
 	addObject { arg object;
 		case
 			{ object.type == 'store' } {
-				views = views.add(SequenceableBlock(object))
+				views = views.add(StoreBlock(object))
 			}
 			{ object.type == 'sampleEvent' } {
 				views = views.add(SequenceableSoundfileBlock(object))
@@ -203,6 +203,7 @@ SequencerCanvas : UserView {
 					this.deselectAll;
 					this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 				}
+				{ topView.notNil && clickCount == 2 } { topView.edit }
 				{ topView.notNil && Keys(\cmdMod).includes(modifiers) } {
 					topView.selected = topView.selected.not;
 					(mouseMoveAction: {}, mouseUpAction: {});
@@ -252,6 +253,13 @@ SequencerCanvas : UserView {
 		this.onResize = { |canvas|
 		
 		};
+
+		Dispatcher.addListener('objectUpdated', { arg payload;
+			if (payload.id == id, {
+				"store updated".postln;
+				payload.postln; 
+			});
+		});
 
 		^this
 	}
@@ -452,8 +460,6 @@ SequencerCanvas : UserView {
 		var cursorOffset = newCursorPosition - initialOrigin;
 
 		cursorView.moveTo(newCursorPosition.x, newCursorPosition.y);
-
-
 
 		selectedViews.do { |view|
 			view.setTransparent;

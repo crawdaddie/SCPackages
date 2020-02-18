@@ -14,7 +14,7 @@ TimingContextView {
 	draw { arg bounds, subdivisions, quantize;
 		var point = bounds.leftBottom;
 		var string = if (quantize, { "%bpm - Q".format(bpm) }, { "%bpm".format(bpm) });
-		Pen.stringAtPoint(string, point + Point(10, -20), color: color);
+		Pen.stringAtPoint(string, point, color: color);
 	}
 
 	setBPM { arg newBPM;

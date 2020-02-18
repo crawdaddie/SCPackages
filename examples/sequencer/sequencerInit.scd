@@ -10,7 +10,7 @@ var projectFile = "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/
 var load;
 var clipboard;
 var aggregate;
-	
+var subStoreId;
 	
 StoreHistory.enable;
 
@@ -35,12 +35,20 @@ Dispatcher.addListener('moveObjects', { arg payloads;
 		var timingContext = Store.getTimingContext(id);
 		var path = Store.getPath(id);
 		var newState = (
+			id: payload.id,
 			timestamp: payload.x * 60 / timingContext.bpm,
 			channel: payload.y,
 			length: payload.length * 60 / timingContext.bpm
 		);
-		updates.put(*(path.add(newState)));
+		// (path ++ [newState]).postln;
+
+		updates.put(*(path ++ [newState]));
 	};
+
+	// updates.postln;
+	// updates.postTree;
+
+
 	Store.patch(updates);
 });
 
@@ -95,6 +103,11 @@ events.do { |event, index|
 };
 
 
+subStoreId = Store.addObject((type: 'store', timestamp: 2, channel: 5).parent_(sequencerEvent));
+Store.addObject((timestamp: 0, channel: 2).parent_(sequencerEvent), subStoreId);
+
+
+
 load = { arg path;
 	Store.readFromArchive(path);
 	a.fromStore(Store.getBase);
@@ -111,16 +124,23 @@ load = { arg path;
 a = SequencerCanvas.fromStore(Store.getBase);
 )
 
+Store.getBase;
+Store.postTree;
+r
+
+
 
 Store.global.put(1004, nil);
-
+Pen
 Store.global.postTree
-
+"/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/data/oxygen.wav".basename
 a.clear;
 a.refresh;
 a
 
 Store.postTree;
+
+Store.global.at(1006, 'channel')
 
 
 b = Store.getBase

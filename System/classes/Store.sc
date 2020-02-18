@@ -63,7 +63,7 @@ Store : LibraryBase {
 		var path = this.getPath(objectId);
 		var parentPath = path[ .. path.size - 2 ];
 		while ({ parentPath.size > 0 }, {
-			var parent = super.at(parentPath);
+			var parent = super.at(*parentPath);
 			parent['timingContext'] !? { arg timingContext;
 				^timingContext
 			};
@@ -111,22 +111,34 @@ Store : LibraryBase {
 	}
 
 	*patch { arg patch;
+		
 		var historyPatch = MultiLevelIdentityDictionary();
+		
 		patch.treeDo({ |path, object, argument|
-			if (object != global.at(path), {
-				historyPatch.put(path, object);
-				global.put(path, object);
-				Dispatcher((type: 'objectUpdated', payload: object));
+			if (path.size > 0, {
+				var oldObject = super.at(*path);
+				object.keysValuesDo { |key, value|
+					var oldValue = oldObject.at(key);
+					if (value != oldValue, {
+						historyPatch.put(*(path ++ [key, oldValue]));
+						oldObject[key] = value;
+					});
+				};
+				Dispatcher((type: 'objectUpdated', payload: oldObject));
 			});
 		});
+
+		StoreHistory.saveHistory(historyPatch);
+
 	}
 
-	*getBase {
+	*getBase { arg id;
 		var base = (type: 'store', timestamp: 0);
+		var g = id !? { Store.at(id) } ?? { global.dictionary };
 		^base
-			.putAll(global.dictionary)
+			.putAll(g)
 			.select({ |value, key|
-				key.class == Integer
+				(key.class == Integer) || (key == 'timingContext')
 			});
 	}
 }
@@ -190,6 +202,13 @@ StoreHistory {
 	*store { arg marker;
 		if (enabled) {
 			history.add(marker);
+			future = List();
+		}
+	}
+
+	*saveHistory { arg historyMarker;
+		if (enabled) {
+			history.add(historyMarker);
 			future = List();
 		}
 	}
