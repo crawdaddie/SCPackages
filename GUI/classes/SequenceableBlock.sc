@@ -105,6 +105,8 @@ SequenceableBlock {
 		initialBounds = bounds.copy;
 
 		Dispatcher.addListener('objectUpdated', { arg payload;
+			"receive object updated event".postln;
+			payload.postln;
 			this.objectUpdated(payload)
 		})
 	}
@@ -192,6 +194,18 @@ SequenceableBlock {
 				length: absoluteLength
 				)
 		));
+
+		^(id: id, x: absoluteTime, y: absoluteExtension, length: absoluteLength)
+	}
+
+	getUpdate {
+		// call these variables 'absolute<Name>' because the store takes care of updating the events themselves with
+		// bpm values
+		var absoluteTime = bounds.origin.x / (xFactor * zoom.x);
+		var absoluteExtension = bounds.origin.y / (yFactor * zoom.y);
+		var absoluteLength = bounds.width / (xFactor * zoom.x);
+
+		^(id: id, x: absoluteTime, y: absoluteExtension, length: absoluteLength)
 	}
 
 	contains { arg x_y;

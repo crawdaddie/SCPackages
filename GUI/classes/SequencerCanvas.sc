@@ -105,8 +105,8 @@ SequencerCanvas : UserView {
 	*new { arg argId, argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
 		var parent = argParent ?? Window.new('sequencer', Rect(1040, 455, 400, 400))
 			.front;
-		var bounds = argBounds ?? parent.view.bounds; 	
-
+		var bounds = argBounds ?? parent.view.bounds;
+	
 		^super.new(parent, bounds).init(argId, subviews ? [], quantX, quantY);
 	}
 
@@ -114,22 +114,59 @@ SequencerCanvas : UserView {
 		var aggregate = Store.createAggregate(*objects);
 		var canvas = this.new(aggregate.id);
 		canvas.addObjects(objects);
-		^canvas
+		^canvas;
 	}
 
-	*fromStore { arg store;
-		var canvas = this.new(store.id);
-		var objects = store.objects.values;
+	*fromStore { arg storeDict;
+		var canvas = this.new(storeDict.id);
+		var objects = storeDict.values;
 		canvas.addObjects(objects);
-		canvas.postln;
-		canvas;
+		^canvas;
+	}
+
+	fromStore { arg storeDict;
+		this.clear;
+		id = storeDict.id !? { id } ?? nil;
+		this.addObjects(storeDict.values);
+		^this;
+	}
+
+	addObjects { arg newObjects;
+		newObjects.do { |newObject|
+			this.addObject(newObject);
+		};
+
+		this.deselectAll();
+		this.refresh;
+	}
+
+	addObject { arg object;
+		case
+			{ object.type == 'store' } {
+				views = views.add(SequenceableBlock(object))
+			}
+			{ object.type == 'sampleEvent' } {
+				views = views.add(SequenceableSoundfileBlock(object))
+			}
+			{ object.type == 'sequencerEvent' } {
+				views = views.add(SequenceableBlock(object))
+			}
+			{ object.type == 'timingContext' } {
+				timingContextView = TimingContextView(object);
+			};
+
+		// Dispatcher((type: 'addToAggregate', payload: (id: id, newObjectId: object.id)))
+	}
+
+	clear {
+		this.init(id, [], quantX, quantY);
+		this.refresh;
 	}
 
 	init { arg argId, argviews, argQuantX, argQuantY;
 		var xGrid, yGrid;
 
 		id = argId;
-
 		quantize = true;
 		views = argviews;
 		zoom = 1@1;
@@ -171,7 +208,6 @@ SequencerCanvas : UserView {
 					(mouseMoveAction: {}, mouseUpAction: {});
 				}
 				{ topView.notNil && modifiers == 524288 } {
-					buttonNumber.postln;
 					topView.select;
 					this.selectionMoveMouseDownAction(topView, x, y, modifiers, buttonNumber, clickCount);
 				}
@@ -199,8 +235,13 @@ SequencerCanvas : UserView {
 			var translatedMouse = Point(mouseX, mouseY) - origin;
 			var x = translatedMouse.x;
 			var y = translatedMouse.y;
+			var updates; 
 			
 			action.mouseUpAction(x, y);
+
+			updates = action.updates;
+			
+			Dispatcher((type: 'moveObjects', payload: updates));
 			this.refresh;
 		};
 
@@ -215,11 +256,6 @@ SequencerCanvas : UserView {
 		^this
 	}
 
-
-	clear {
-		this.init([], quantX, quantY);
-		this.refresh;
-	}
 
 	renderView {
 		var parentBounds = this.parent.bounds;
@@ -267,6 +303,7 @@ SequencerCanvas : UserView {
 		var mostLeft;
 		var tick;
 		var newLeft;
+		var updates;
 		if (selectedViews.size > 0, {
 			mostLeft = selectedViews[0].bounds.left;
 			
@@ -288,9 +325,13 @@ SequencerCanvas : UserView {
 			moveX = newLeft - mostLeft
 		};
 
-		selectedViews.do { |view|
+		updates = selectedViews.collect { |view|
 			view.moveBy(moveX, moveY);
+			view.getUpdate;
 		};
+		Dispatcher((type: 'moveObjects', payload: updates));
+
+		
 
 		cursorView.moveBy(moveX, moveY);
 	}
@@ -330,32 +371,6 @@ SequencerCanvas : UserView {
 		^views;
 	}
 
-	addObjects { arg newObjects;
-		newObjects.do { |newObject|
-			this.addObject(newObject);
-		};
-
-		this.deselectAll();
-		this.refresh;
-	}
-
-	addObject { arg object;
-		case
-			{ object.type == 'Store' } {
-				views = views.add(SequenceableBlock(object))
-			}
-			{ object.type == 'sampleEvent' } {
-				views = views.add(SequenceableSoundfileBlock(object))
-			}
-			{ object.type == 'sequencerEvent' } {
-				views = views.add(SequenceableBlock(object))
-			}
-			{ object.type == 'timingContext' } {
-				timingContextView = TimingContextView(object);
-			};
-
-		Dispatcher((type: 'addToAggregate', payload: (id: id, newObjectId: object.id)))
-	}
 
 	getTick { 
 		^quantX * zoom.x / subdivisions
@@ -461,8 +476,9 @@ SequencerCanvas : UserView {
 						cursorView.moveTo(newOrigin.x + cursorOffset.x, newOrigin.y + cursorOffset.y);
 					},
 					mouseUpAction: { arg object, x, y;
-						selectedViews.do { |view|
+						object.updates = selectedViews.collect { |view|
 							view.setOpaque;
+							view.getUpdate;
 						}
 					}
 				);
@@ -479,6 +495,7 @@ SequencerCanvas : UserView {
 
 					},
 					mouseUpAction: { arg object, x, y;
+						object.updates = selectedViews.collect(_.getUpdate)
 					}
 				)
 			},
@@ -491,6 +508,7 @@ SequencerCanvas : UserView {
 						selectedViews.do(_.resizeRightBy(difference, quantX));
 					},
 					mouseUpAction: { arg object, x, y;
+						object.updates = selectedViews.collect(_.getUpdate)
 					}
 				)
 			}

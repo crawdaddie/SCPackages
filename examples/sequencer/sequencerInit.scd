@@ -4,29 +4,46 @@ var sampleEvent = 'sampleEvent'.importFrom('events/baseEvents');
 var sequencerEvent = 'sequencerEvent'.importFrom('events/baseEvents');
 var bpm = 60;
 var events;
-var saveDir = thisProcess.nowExecutingPath !? _.dirname ?? "/Users/adamjuraszek/PROJECTS/supercollider/saved_projects";
-var projectFile = "/Users/adamjuraszek/PROJECTS/supercollider/test_piece/saves/opentest";
+var saveDir = thisProcess.nowExecutingPath !? _.dirname +/+ "saves" ?? "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/";
+// var saveDir = "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/";
+var projectFile = "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest";
 var load;
 var clipboard;
 var aggregate;
 	
-t = (
-	type: 'timingContext',
-	bpm: 60
-);
 	
 StoreHistory.enable;
 
-Dispatcher.addListener('moveObject', { arg payload;
-	var id = payload.id;
-	var newState = (
-		timestamp: payload.x * 60 / t.bpm,
-		channel: payload.y,
-		length: payload.length * 60 / t.bpm
-	);
+// Dispatcher.addListener('moveObject', { arg payload;
+// 	var id = payload.id;
+// 	var timingContext = Store.getTimingContext(id);
+// 	var newState = (
+// 		timestamp: payload.x * 60 / timingContext.bpm,
+// 		channel: payload.y,
+// 		length: payload.length * 60 / timingContext.bpm
+// 	);
 
-	Store.updateObject(id, newState)
+// 	Store.updateObject(id, newState)
+// });
+
+Dispatcher.addListener('moveObjects', { arg payloads;
+
+	var updates = MultiLevelIdentityDictionary();
+
+	payloads.do { |payload|
+		var id = payload.id;
+		var timingContext = Store.getTimingContext(id);
+		var path = Store.getPath(id);
+		var newState = (
+			timestamp: payload.x * 60 / timingContext.bpm,
+			channel: payload.y,
+			length: payload.length * 60 / timingContext.bpm
+		);
+		updates.put(*(path.add(newState)));
+	};
+	Store.patch(updates);
 });
+
 
 Dispatcher.addListener('save', { arg payload;
 
@@ -35,15 +52,16 @@ Dispatcher.addListener('save', { arg payload;
 
 			projectFile = path;
 			"saving to %".format(projectFile).postln;
-			Store.objects.writeMinifiedTextArchive(projectFile);
+			Store.archive(projectFile);
 			a.parent.name = "sequencer - %".format(projectFile.basename);
-
+			saveDir = projectFile.dirName;
 			},
 			path: saveDir
 		);
 	}, {
 		"saving to %".format(projectFile).postln;
-		Store.objects.writeMinifiedTextArchive(projectFile)
+		Store.archive(projectFile);
+		saveDir = projectFile.dirName;
 	});
 });
 
@@ -57,7 +75,10 @@ Dispatcher.addListener('pasteObjects', { arg payload;
 	// payload.postln;
 });
 
-Store.addObject(t);
+Store.addTimingContext((
+	type: 'timingContext',
+	bpm: 60
+));
 
 
 events = [
@@ -76,9 +97,7 @@ events.do { |event, index|
 
 load = { arg path;
 	Store.readFromArchive(path);
-	a.clear;
-	// a.addObjects(Store.base.values);
-
+	a.fromStore(Store.getBase);
 	projectFile = path;
 	a.parent.name = "sequencer - %".format(path.basename);
 };
@@ -89,44 +108,39 @@ load = { arg path;
 // 	s.makeGui;
 // };
 
-// aggregate = Store.createAggregate(*events);
-
-a = SequencerCanvas.fromStore(Store.base);
+a = SequencerCanvas.fromStore(Store.getBase);
 )
 
-Store.base.timestamp
-j = Store.base.sortedObjects()
 
-Store.base.objects.values.do({ arg o; o.timestamp.postln });
+Store.global.put(1004, nil);
 
-Dictionary
+Store.global.postTree
 
+a.clear;
+a.refresh;
+a
 
-MultilevelIdentityDictionary {
-	
-}
-j.
-
-Store.base.objects;
-
-a = [0,1,2,3];
-
-a[a.size - 2]
-
-a[ .. (a.size - 2)]
-
-b = a.addStore;
+Store.postTree;
 
 
-a = Store.base
+b = Store.getBase
 
-j = 'Store'
+b.select({ arg value, key; [key, value].postln; true})
 
-j.class
-a.class == Store
+j
+
+Store.archive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest")
+
+Store.readFromArchive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest");
+
+Store.addObject((a: 'something', b: 6, timestamp: 0), 1002)
+
+Store.addObject((type: 'store', timestamp: 1))
 
 
-Store.lookups;
+
+
+MultiLevelIdentityDictionary
 
 
 
