@@ -89,25 +89,31 @@ Store : LibraryBase {
 		this.setPath(id, lookupPath);
 		
 		this.put(*(lookupPath ++ [object]));
+		Dispatcher((type: 'objectAdded', payload: object));
 		^id
 	}
 
 	*removeObject { arg id;
 		var path = this.getPath(id);
 		this.put(*(path ++ [nil]));
-		this.setPath(id, nil)
+		this.setPath(id, nil);
+		Dispatcher((type: 'objectRemoved', payload: (objectId: id, parentId: path[ path.size - 2 ])));
 	}
 
 	*updateObject { arg id, newState;
 		var object = this.at(id);
 		var prevState = object.copy;
 		var diff = getDiff(object, newState);
+		var historyMarker = getDiff(newState, object);
 
 		if (diff.size > 0) {
 			object.putAll(diff);
 		};
 
-		^object;
+		Dispatcher((type: 'objectUpdated', payload: object));
+
+
+		^(newState: object, prevState: historyMarker);
 	}
 
 	*patch { arg patch;
@@ -116,15 +122,29 @@ Store : LibraryBase {
 		
 		patch.treeDo({ |path, object, argument|
 			if (path.size > 0, {
-				var oldObject = super.at(*path);
-				object.keysValuesDo { |key, value|
-					var oldValue = oldObject.at(key);
-					if (value != oldValue, {
-						historyPatch.put(*(path ++ [key, oldValue]));
-						oldObject[key] = value;
-					});
-				};
-				Dispatcher((type: 'objectUpdated', payload: oldObject));
+				super.at(*path) !? { |oldObject|
+					var id = oldObject.id;
+				
+					if (object == [nil], {
+						this.removeObject(id);
+					}, {
+						// object.keysValuesDo { |key, value|
+						// 	var oldValue = oldObject.at(key);		
+						// 	if (value != oldValue, {
+						// 		historyPatch.put(*(path ++ [key, oldValue]));
+						// 		oldObject[key] = value;
+						// 	});
+						// };
+
+						var update = this.updateObject(id, object);
+						historyPatch.put(*(path ++ [update.historyMarker]));
+						// Dispatcher((type: 'objectUpdated', payload: oldObject));
+					});	
+				} ?? {
+					// path is nil, so new object
+					var parentId = path[ path.size - 2];
+					this.addObject(object, parentId);
+				}
 			});
 		});
 
@@ -225,17 +245,10 @@ StoreHistory {
 		}
 	}
 
-	*restore { arg list;
-		if (list.size > 0 && enabled) {
-			var state = list.removeAt(list.size - 1);
-			var id = state.id;
-			var object = Store.at(id);
-			var marker = state.collect { |val, key|
-				object[key]
-			};
-
-			Store.updateObject(id, state, false);
-			^marker
+	*restore { arg patch;
+		if (enabled) {
+			Store.patch(patch);
+			^patch
 		} {
 			^nil
 		}
