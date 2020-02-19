@@ -255,10 +255,9 @@ SequencerCanvas : UserView {
 		};
 
 		Dispatcher.addListener('objectUpdated', { arg payload;
-			if (payload.id == id, {
-				"store updated".postln;
-				payload.postln; 
-			});
+			// if ((payload.id == id) || (views.collect(_.id).includes(payload.id)), {
+			// });
+			this.refresh;
 		});
 
 		^this

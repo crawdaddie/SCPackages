@@ -11,7 +11,7 @@ SequenceableBlock {
 	classvar <yFactor = 40;
 	classvar <moveWidgetPixelsWidth = 5;
 	// reference to state
-	var id;
+	var <id;
 
 	// view variables
 	var color, <bounds, initialBounds;
@@ -22,6 +22,7 @@ SequenceableBlock {
 	var <>selected = false, toRefresh = true;
 	var zoom;
 	var label;
+	var parent;
 
 
 	getAction { arg x, y;
@@ -96,8 +97,6 @@ SequenceableBlock {
 
 	objectUpdated { arg payload;
 		if (id == payload.id) {
-			// "object updated".postln;
-			// payload.postcs;
 			this.resetBounds(payload);
 		}
 	}
@@ -116,6 +115,7 @@ SequenceableBlock {
 			}
 		});
 		label = id.asString;
+
 	}
 
 	renderView { arg origin, parentBounds;
@@ -293,8 +293,10 @@ StoreBlock : SequenceableBlock {
 	}
 
 	edit {
-		var canvas = SequencerCanvas.fromStore(Store.getBase(id));
-		canvas.parent.name = "store - %".format(Store.getPath(id)); 
+		var path = Store.getPath(id);
+		var store = Store.getBase(id);
+		var canvas = SequencerCanvas.fromStore(store);
+		canvas.parent.name = "store - %".format(path); 
 		^canvas;
 	}
 }

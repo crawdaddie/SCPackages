@@ -138,7 +138,7 @@ Store : LibraryBase {
 		^base
 			.putAll(g)
 			.select({ |value, key|
-				(key.class == Integer) || (key == 'timingContext')
+				key.class == Integer
 			});
 	}
 }
