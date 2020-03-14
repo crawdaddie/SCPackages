@@ -14,22 +14,27 @@ var subStoreId;
 	
 StoreHistory.enable;
 
-// Dispatcher.addListener('moveObject', { arg payload;
-// 	var id = payload.id;
-// 	var timingContext = Store.getTimingContext(id);
-// 	var newState = (
-// 		timestamp: payload.x * 60 / timingContext.bpm,
-// 		channel: payload.y,
-// 		length: payload.length * 60 / timingContext.bpm
-// 	);
-
-// 	Store.updateObject(id, newState)
-// });
-
 Dispatcher.addListener('moveObjects', { arg payloads;
 
-	var updates = MultiLevelIdentityDictionary();
+	// var updates = MultiLevelIdentityDictionary();
 
+	// payloads.do { |payload|
+	// 	var id = payload.id;
+	// 	var timingContext = Store.getTimingContext(id);
+	// 	var path = Store.getPath(id);
+	// 	var newState = (
+	// 		id: payload.id,
+	// 		timestamp: payload.x * 60 / timingContext.bpm,
+	// 		channel: payload.y,
+	// 		length: payload.length * 60 / timingContext.bpm
+	// 	);
+
+	// 	updates.put(*(path ++ [newState]));
+	// };
+
+	// Store.patch(updates);
+
+	var updates = Dictionary();
 	payloads.do { |payload|
 		var id = payload.id;
 		var timingContext = Store.getTimingContext(id);
@@ -40,16 +45,12 @@ Dispatcher.addListener('moveObjects', { arg payloads;
 			channel: payload.y,
 			length: payload.length * 60 / timingContext.bpm
 		);
-		// (path ++ [newState]).postln;
 
-		updates.put(*(path ++ [newState]));
+		updates.put(id, newState);
 	};
 
-	// updates.postln;
-	// updates.postTree;
-
-
 	Store.patch(updates);
+
 });
 
 
@@ -80,7 +81,15 @@ Dispatcher.addListener('open', {
 });
 
 Dispatcher.addListener('pasteObjects', { arg payload;
-	// payload.postln;
+
+	var newItems = payload.items.collect({ arg item;
+		item.timestamp = payload.x + item.timestamp;
+		item.channel = payload.y + item.channel;
+		item;
+	});
+	newItems.do { arg item;
+		Store.addObject(item, payload.parentId)
+	}
 });
 
 Store.addTimingContext((
@@ -104,7 +113,11 @@ events.do { |event, index|
 
 
 subStoreId = Store.addObject((type: 'store', timestamp: 2, channel: 5).parent_(sequencerEvent));
-Store.addObject((timestamp: 0, channel: 2).parent_(sequencerEvent), subStoreId);
+Store.addObject(
+	(soundfile: soundfile.path, timestamp: 6.5, startPos: 0.2, length: 2)
+		.parent_(sampleEvent),
+	subStoreId
+);
 
 
 
@@ -121,46 +134,21 @@ load = { arg path;
 // 	s.makeGui;
 // };
 
-a = SequencerCanvas.fromStore(Store.getBase);
+// Store.getBase.postln;
+
+a = SequencerCanvas.fromStore();
 )
 
-Store.getBase;
-Store.postTree;
-r
+k = ( 'startPos': 0, 'timestamp': 4, 'length': 2, 'soundfile': "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/data/oxygen.wav", 
+  'id': 1003 );
 
+k.timestamp
 
+j = k.copy;
 
-Store.global.put(1004, nil);
-Pen
-Store.global.postTree
-"/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/data/oxygen.wav".basename
-a.clear;
-a.refresh;
-a
+j.timestamp = k.timestamp - 2;
 
-Store.postTree;
-
-Store.global.at(1006, 'channel')
-
-
-b = Store.getBase
-
-b.select({ arg value, key; [key, value].postln; true})
 
 j
 
-Store.archive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest")
-
-Store.readFromArchive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest");
-
-Store.addObject((a: 'something', b: 6, timestamp: 0), 1002)
-
-Store.addObject((type: 'store', timestamp: 1))
-
-
-
-
-MultiLevelIdentityDictionary
-
-
-
+s

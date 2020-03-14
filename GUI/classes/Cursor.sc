@@ -25,6 +25,14 @@ Cursor {
 		);
 	}
 
+	x {
+		^bounds.left
+	}
+
+	y { 
+		^bounds.top
+	}
+
 	init { arg event;
 		color = SequencerTheme.darkGrey;
 		zoom = 1@1;

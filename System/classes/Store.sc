@@ -89,8 +89,12 @@ Store : LibraryBase {
 		this.setPath(id, lookupPath);
 		
 		this.put(*(lookupPath ++ [object]));
-		Dispatcher((type: 'objectAdded', payload: object));
+		Dispatcher((type: 'objectAdded', payload: (object: object, parentId: parentId ? 0)));
 		^id
+	}
+
+	*getCopy { arg id;
+		^();
 	}
 
 	*removeObject { arg id;
@@ -102,12 +106,13 @@ Store : LibraryBase {
 
 	*updateObject { arg id, newState;
 		var object = this.at(id);
-		var prevState = object.copy;
 		var diff = getDiff(object, newState);
 		var historyMarker = getDiff(newState, object);
 
 		if (diff.size > 0) {
-			object.putAll(diff);
+			diff.keysValuesDo { arg key, value;
+				object[key] = value;
+			};
 		};
 
 		Dispatcher((type: 'objectUpdated', payload: object));
@@ -116,50 +121,53 @@ Store : LibraryBase {
 		^(newState: object, prevState: historyMarker);
 	}
 
+	// *patch { arg patch;
+		
+	// 	var historyPatch = MultiLevelIdentityDictionary();
+		
+	// 	var idsToUpdate = [];
+	// 	patch.leafDo { arg path, value;
+	// 		var oldValue = super.at(*path);
+
+	// 		oldValue !? { |oldValue|
+	// 			if (oldValue != value) {
+	// 				super.put(*(path ++ [value]));
+	// 			};
+	// 			if (path[path.size - 1] == 'id') {
+	// 				idsToUpdate = idsToUpdate.add(value);
+	// 			}
+	// 		}
+	// 	};
+		
+	// 	idsToUpdate.do { arg id;
+	// 		Dispatcher((type: 'objectUpdated', payload: this.at(id)));
+	// 	};
+
+	// 	StoreHistory.saveHistory(historyPatch);
+
+	// }
+
 	*patch { arg patch;
 		
-		var historyPatch = MultiLevelIdentityDictionary();
+		var historyPatch = Dictionary();
 		
-		patch.treeDo({ |path, object, argument|
-			if (path.size > 0, {
-				super.at(*path) !? { |oldObject|
-					var id = oldObject.id;
-				
-					if (object == [nil], {
-						this.removeObject(id);
-					}, {
-						// object.keysValuesDo { |key, value|
-						// 	var oldValue = oldObject.at(key);		
-						// 	if (value != oldValue, {
-						// 		historyPatch.put(*(path ++ [key, oldValue]));
-						// 		oldObject[key] = value;
-						// 	});
-						// };
-
-						var update = this.updateObject(id, object);
-						historyPatch.put(*(path ++ [update.historyMarker]));
-						// Dispatcher((type: 'objectUpdated', payload: oldObject));
-					});	
-				} ?? {
-					// path is nil, so new object
-					var parentId = path[ path.size - 2];
-					this.addObject(object, parentId);
-				}
-			});
-		});
+		patch.keysValuesDo { arg id, newState;
+			var object = this.at(id);
+			object !? {
+				var update = this.updateObject(id, newState);
+				historyPatch.put(id, update.historyMarker);
+			} ?? {
+				// new object
+				this.addObject(id, newState)
+			}
+		};
 
 		StoreHistory.saveHistory(historyPatch);
 
 	}
 
-	*getBase { arg id;
-		var base = (type: 'store', timestamp: 0);
-		var g = id !? { Store.at(id) } ?? { global.dictionary };
-		^base
-			.putAll(g)
-			.select({ |value, key|
-				key.class == Integer
-			});
+	*getBase {
+		^global.dictionary;
 	}
 }
 
@@ -245,10 +253,14 @@ StoreHistory {
 		}
 	}
 
-	*restore { arg patch;
+	*restore { arg list;
 		if (enabled) {
-			Store.patch(patch);
-			^patch
+			if (list.size > 0) {
+				var patch = list[list.size - 1];
+				Store.patch(patch);
+				^patch
+			}
+			^nil
 		} {
 			^nil
 		}

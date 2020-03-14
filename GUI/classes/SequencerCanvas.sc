@@ -46,6 +46,8 @@ SequencerWindowKeyActions {
 		
 		if (canvas.hasFocus.not, {^nil});
 
+		[modifiers, key].postln;
+
 		switch ([modifiers, key])
 			{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
 			{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
@@ -80,7 +82,11 @@ SequencerWindowKeyActions {
  			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
 
  			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
- 			{ [ 1048576, 65 ] } { canvas.selectAll }; // cmd - a 
+ 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
+ 			{ [ 1048576, 67 ] } { this.selectedViews.do { arg view; Clipboard.add(view.id) } } // cmd - c
+ 			{ [ 1048576, 86 ] } { };   
+
+
 		canvas.refresh;
 	}
 }
@@ -117,10 +123,11 @@ SequencerCanvas : UserView {
 		^canvas;
 	}
 
-	*fromStore { arg storeDict;
-		var canvas = this.new(storeDict.id);
-		var objects = storeDict.values;
-		canvas.addObjects(objects);
+	*fromStore { arg id;
+		var store = id !? Store.at(id) ?? Store.getBase;
+		var canvas = this.new(id);
+		var items = Store.getItems(id);
+		canvas.addObjects(items.values);
 		^canvas;
 	}
 
@@ -132,6 +139,7 @@ SequencerCanvas : UserView {
 	}
 
 	addObjects { arg newObjects;
+
 		newObjects.do { |newObject|
 			this.addObject(newObject);
 		};
@@ -141,6 +149,7 @@ SequencerCanvas : UserView {
 	}
 
 	addObject { arg object;
+
 		case
 			{ object.type == 'store' } {
 				views = views.add(StoreBlock(object))
@@ -155,7 +164,6 @@ SequencerCanvas : UserView {
 				timingContextView = TimingContextView(object);
 			};
 
-		// Dispatcher((type: 'addToAggregate', payload: (id: id, newObjectId: object.id)))
 	}
 
 	clear {
@@ -200,10 +208,25 @@ SequencerCanvas : UserView {
 					this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
 				}
 				{ topView.isNil } {
-					this.deselectAll;
-					this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+					var action;
+					if (buttonNumber == 1, {
+						action = (mouseMoveAction: {}, mouseUpAction: { this.showMenuForBackgroundClick(x, y) });
+					}, {
+						this.deselectAll;
+						action = this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+					});
+					action;
 				}
-				{ topView.notNil && clickCount == 2 } { topView.edit }
+				{ topView.notNil && clickCount == 2 } { (mouseMoveAction: {}, mouseUpAction: { topView.edit }) }
+				{ topView.notNil && buttonNumber == 1 } {
+					if (modifiers == 524288, {
+							topView.select 
+						}, {
+							this.deselectAll;
+							topView.select;
+					});
+					(mouseMoveAction: {}, mouseUpAction: { this.showMenuForItemClick(x, y) });
+				}
 				{ topView.notNil && Keys(\cmdMod).includes(modifiers) } {
 					topView.selected = topView.selected.not;
 					(mouseMoveAction: {}, mouseUpAction: {});
@@ -240,14 +263,56 @@ SequencerCanvas : UserView {
 			
 			action.mouseUpAction(x, y);
 
-			updates = action.updates;
+			action.updates !? { |updates|
+				Dispatcher((type: 'moveObjects', payload: updates));
+			};
 			
-			Dispatcher((type: 'moveObjects', payload: updates));
 			this.refresh;
 		};
 
 		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
-			SequencerWindowKeyActions.canvasKeyDown(canvas, char, modifiers, unicode, keycode, key);
+			if (this.hasFocus.not, {^nil});
+			
+			switch ([modifiers, key])
+				{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
+				{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
+
+				{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
+				{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) }
+
+				{ [ 1310720, 61 ] }	{ canvas.zoomBy(1, 1.05) }
+				{ [ 1310720, 45 ] }	{ canvas.zoomBy(1, 1.05.reciprocal) }
+
+				{ [ 2097152, 16777234 ] } { canvas.moveViews(-1, 0) } //left
+				{ [ 2097152, 16777236 ] } { canvas.moveViews(1, 0) } 	//right
+				{ [ 2097152, 16777235 ] } { canvas.moveViews(0, -1) } //up
+				{ [ 2097152, 16777237 ] } { canvas.moveViews(0, 1) }  //down
+
+				{ Keys(\optMod, \left) 	} { canvas.moveOrigin(-10, 0) } //left
+				{ Keys(\optMod, \right) } { canvas.moveOrigin(10, 0) } //right
+				{ Keys(\optMod, \up) 		} { canvas.moveOrigin(0, -10) } //up
+				{ Keys(\optMod, \down) 	} { canvas.moveOrigin(0, 10) } //down
+
+				{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
+				{ Keys(\cmdMod, \z) } { Dispatcher((type: 'undo')) } //cmd -z
+				{ [ 1179648, 90 ] } 	{ Dispatcher((type: 'redo')) } //cmd -shift -z
+					
+				{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
+				{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } // cmd-shift-s
+				{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o
+
+				{ Keys(\noMod, \q) } { canvas.toggleQuantization } // Q
+					
+				{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
+	 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
+
+	 			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
+	 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
+	 			{ [ 1048576, 67 ] } { this.selectedViews.do { arg view; Clipboard.add(view.id) } } // cmd - c
+	 			{ [ 1048576, 86 ] } { this.pasteObjects(cursorView.x, cursorView.y, Clipboard.normalizedItems) }; // cmd-v    
+
+
+			this.refresh;
 		};
 
 		this.onResize = { |canvas|
@@ -260,9 +325,17 @@ SequencerCanvas : UserView {
 			this.refresh;
 		});
 
+		Dispatcher.addListener('objectAdded', { arg payload;
+			var parentId = id ? 0;
+			if (payload.parentId == parentId, {
+				this.addObject(payload.object)	
+			});
+
+			this.refresh;
+		});
+
 		^this
 	}
-
 
 	renderView {
 		var parentBounds = this.parent.bounds;
@@ -394,7 +467,7 @@ SequencerCanvas : UserView {
 		if (quantize) {
 			x = max(0, x.round(this.getTick));
 		};
-		y = max(0, y.round(this.getTickY));
+		y = max(0, y.trunc		(this.getTickY));
 		
 		^Point(x, y);
 	}
@@ -413,6 +486,7 @@ SequencerCanvas : UserView {
 				var maxY = max(initialMouse.y, y);
 
 				selectionBounds = Rect.fromPoints(Point(minX, minY), Point(maxX, maxY));
+				
 				views.do { | view |
 					if (view.bounds.intersects(selectionBounds), {
 						view.select;
@@ -435,34 +509,42 @@ SequencerCanvas : UserView {
 	selectionMoveMouseDownAction { |topView, x, y, modifiers, buttonNumber, clickCount|
 		var actionType = topView.getAction(x, y);		
 		var initialCursor = x@y;
-		var selectedViews = this.selectedViews;
-		var mostLeftView = (
+		var selectedViews, unselectedViews;
+		var mostLeftView, mostTopView, verticalDifference, initialOrigin, offsets, newCursorPosition, cursorOffset;
+ 
+		// #selectedViews, unselectedViews = this.views.partition({ _.selected });
+		
+		selectedViews = this.selectedViews;
+		unselectedViews = this.views.select({ arg view; view.selected.not });
+
+		mostLeftView = (
 			selectedViews.sort { arg viewA, viewB;
 				viewA.bounds.left < viewB.bounds.left;
 			}
 		)[0];
 
-		var mostTopView = (
+		mostTopView = (
 			selectedViews.sort { arg viewA, viewB;
 				viewA.bounds.top < viewB.bounds.top;
 			}
 		)[0];
 
-		var verticalDifference = mostLeftView.bounds.top - mostTopView.bounds.top;
+		verticalDifference = mostLeftView.bounds.top - mostTopView.bounds.top;
 
-		var initialOrigin = mostLeftView.bounds.origin;
-		var offsets = selectedViews.collect({ arg view;
+		initialOrigin = mostLeftView.bounds.origin;
+		offsets = selectedViews.collect({ arg view;
 			view.bounds.origin - initialOrigin;
 		});
 		
-		var newCursorPosition = this.quantizePoint(Point(initialCursor.x, topView.bounds.top));
-		var cursorOffset = newCursorPosition - initialOrigin;
+		newCursorPosition = this.quantizePoint(Point(initialCursor.x, topView.bounds.top));
+		cursorOffset = newCursorPosition - initialOrigin;
 
 		cursorView.moveTo(newCursorPosition.x, newCursorPosition.y);
 
 		selectedViews.do { |view|
 			view.setTransparent;
 		};
+
 
 		^switch(actionType,
 			{ 'move' }, {
@@ -481,10 +563,28 @@ SequencerCanvas : UserView {
 						cursorView.moveTo(newOrigin.x + cursorOffset.x, newOrigin.y + cursorOffset.y);
 					},
 					mouseUpAction: { arg object, x, y;
+						var selectedViewsByChannel = selectedViews
+							.groupBy({ | view | view.bounds.top.asInteger })
+							.collect(_.sort({ |a, b| a.bounds.left < b.bounds.left }));
+
+						var unselectedViewsByChannel =  unselectedViews
+							.groupBy({ | view | view.bounds.top.asInteger })
+							.collect(_.sort({ |a, b| a.bounds.left < b.bounds.left }));
+
+						var overlapUpdates = [];
+
 						object.updates = selectedViews.collect { |view|
+							// var overlappedUpdates = view.findOverlapUpdates(unselectedViews);
+							// overlappedUpdates.postln;
 							view.setOpaque;
 							view.getUpdate;
+						};
+
+						unselectedViewsByChannel.keysValuesDo { | channel, group |
+							var selectedViewsGroup = selectedViewsByChannel[channel];
+
 						}
+
 					}
 				);
 			},
@@ -520,12 +620,48 @@ SequencerCanvas : UserView {
 		)
 	}
 
-	showMenu {
+	showMenuForItemClick { arg x, y;
+		var selection = this.selectedViews;
+
 		^Menu(
-			MenuAction("A", { "A selected".postln }),
-   		MenuAction("B", { "B selected".postln }),
-   		MenuAction("C", { "C selected".postln }),
+			MenuAction("copy (cmd-c)", 	{
+				// selection.postln;
+				selection.do { arg view; Clipboard.add(view.id) }
+			}),
+			MenuAction("paste (cmd-v)", {
+				this.pasteObjects(x, y, Clipboard.normalizedItems);
+
+			}),
+   		MenuAction("cut (cmd-x)", 	{ "cut item".postln; }),
+   		MenuAction("slice (cmd-d)", { "slice".postln 	}),
 		).front;
+	}
+
+	showMenuForBackgroundClick { arg x, y;
+		var selection = this.selectedViews;
+		if (Clipboard.items.size > 0) {
+			^Menu(
+				MenuAction("paste (cmd-v)", {
+					this.pasteObjects(x, y, Clipboard.normalizedItems);
+					}),
+			).front;
+		}
+
+	}
+	pasteObjects { arg x, y, items;
+		var newCursorPosition = this.quantizePoint(x@y);
+		var absoluteTime = newCursorPosition.x / (SequenceableBlock.xFactor * zoom.x);
+		var absoluteExtension = newCursorPosition.y / (SequenceableBlock.yFactor * zoom.y);
+		Dispatcher((
+			type: 'pasteObjects',
+			payload: (
+				x: absoluteTime,
+				y: absoluteExtension,
+				items: items,
+				parentId: id
+			))
+		);
+		Clipboard.clear;
 	}
 
 	subdivisions_ { |newDivisions|

@@ -11,7 +11,7 @@ SequenceableBlock {
 	classvar <yFactor = 40;
 	classvar <moveWidgetPixelsWidth = 5;
 	// reference to state
-	var id;
+	var <id;
 
 	// view variables
 	var color, <bounds, initialBounds;
@@ -171,6 +171,15 @@ SequenceableBlock {
 		color.alpha = 1;
 	}
 
+	setRightTo { arg right;
+		bounds.width = right - bounds.left;
+	}
+
+	setLeftTo { arg left;
+		bounds.left = left;
+		bounds.width = left - bounds.right;
+	}
+
 	resizeLeftBy { arg difference;
 		bounds.set(
 			bounds.left - difference,
@@ -216,6 +225,41 @@ SequenceableBlock {
 
 	edit {
 		// no-op
+	}
+
+	findOverlapUpdates { arg otherViews;
+		// var intersections = otherViews
+		// 	.select(_.bounds.intersects(bounds))
+		// 	.collect({ arg view;
+		// 	if (view.bounds.right > bounds.left) {
+		// 		// view.setRightTo(bounds.left);
+		// 	};
+		// 	if (view.bounds.left < bounds.right) {
+		// 		// view.setLeftTo(bounds.right);
+		// 	};
+		// 	if ((view.bounds.left < bounds.left) && (view.bounds.right > bounds.right)) {
+		// 		// view.splitAt(bounds.left, bounds.right);
+		// 	};
+		// 	if ((view.bounds.left >= bounds.left) && (view.bounds.right <= bounds.right)) {
+		// 		// view.delete;
+		// 	};
+		// 	view;
+		// });
+
+		// ^intersections;
+	}
+
+	*partitionByChannel { arg views;
+		var partition = ();
+		views.do { | view |
+			var chan = view.bounds.top.asInteger;
+			partition[chan] !? { | set |
+				set.add(view)
+				} ?? {
+					partition[chan] = Set[view]
+				}
+		};
+		^partition;
 	}
 }
 
@@ -282,6 +326,11 @@ SequenceableSoundfileBlock : SequenceableBlock {
 	edit {
 		// no-op
 	}
+
+	setLeftTo { arg left;
+		super.setLeftTo(left);
+		// startPos = 
+	}
 }
 
 
@@ -294,11 +343,8 @@ StoreBlock : SequenceableBlock {
 
 	edit {
 		var path = Store.getPath(id);
-		var store = Store.getBase(id);
-		var canvas = SequencerCanvas.fromStore(store);
-		store.postln;
-		canvas.postln;
-		canvas.parent.name = "store - %".format(path); 
+		var canvas = SequencerCanvas.fromStore(id);
+		canvas.parent.name = "store - %".format(path);
 		^canvas;
 	}
 }
