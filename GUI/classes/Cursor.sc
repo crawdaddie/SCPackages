@@ -50,7 +50,7 @@ Cursor {
 	  	Pen.stroke;
 	  	}, {
 	  	Pen.addRect(renderBounds);
-	  	Pen.draw;
+	  	Pen.stroke;
 	  });
 	}
 

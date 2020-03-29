@@ -88,7 +88,6 @@ SequenceableBlock {
 
 	select {
 		selected = true;
-		^this.bounds;
 	}
 
 	unselect {
@@ -190,12 +189,8 @@ SequenceableBlock {
 	}
 
 	resizeRightBy { arg difference;
-		bounds = Rect(
-			bounds.left,
-			bounds.top,
-			max(moveWidgetPixelsWidth, initialBounds.width - difference),
-			bounds.height
-		);
+		bounds.setExtent(max(moveWidgetPixelsWidth, initialBounds.width - difference), bounds.height);
+			
 	}
 
 	getUpdate {
