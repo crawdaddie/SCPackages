@@ -138,17 +138,3 @@ load = { arg path;
 
 a = SequencerCanvas.fromStore();
 )
-
-k = ( 'startPos': 0, 'timestamp': 4, 'length': 2, 'soundfile': "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/data/oxygen.wav", 
-  'id': 1003 );
-
-k.timestamp
-
-j = k.copy;
-
-j.timestamp = k.timestamp - 2;
-
-
-j
-
-s
