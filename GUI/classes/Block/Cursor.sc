@@ -4,8 +4,7 @@ Cursor {
 	classvar <yFactor = 40;
 
 	// view variables
-	var color, <>bounds, initialBounds;
-
+	var color, <>bounds;
 	var zoom;
 	var <selected = false;
 	var initialCursor;
@@ -76,6 +75,16 @@ Cursor {
 					bounds = bounds.moveBy(x, y)
 			});
 		}
+	}
+
+	getMouseAction { arg x, y;
+		^(
+			mouseMoveAction: { arg x, y;
+			},
+			mouseUpAction: { arg x, y;
+				// clean up and return update
+			}
+		);
 	}
 
 	// mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;

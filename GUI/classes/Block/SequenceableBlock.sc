@@ -1,65 +1,58 @@
-SequenceableBlock {
-	/**
+CanvasBlockBase {
+
+	/*
 	 * xFactor = 50
 	 * default value for a 1-second long block, or equivalently:
 	 * 1 beat at 60 bpm
 	 * so ordinarily, let's say a soundfile block lasts 2 seconds, and zoom = 1@1 
 	 * this block will render with a width of 100 pixels
-	 **/
+	 */
+
 	classvar <xFactor = 50; 
-	
 	classvar <yFactor = 40;
-	classvar <moveWidgetPixelsWidth = 5;
-	// reference to state
-	var <id;
-
+	
 	// view variables
-	var color, <bounds, initialBounds;
-	var initialCursor;
+	var color, <>bounds;
+	var initialBounds;
 
-	// state-action variables
-	var action = nil;
-	var <>selected = false, toRefresh = true;
+	var <>selected = false;
 	var zoom;
-	var label;
-	var parent;
-
-
-	getAction { arg x, y;
-		var innerArea = bounds.insetBy(moveWidgetPixelsWidth, 0);
-		^case
-			{innerArea.contains(x@y)} {'move'}
-			{x < innerArea.left} {'resizeLeft'}
-			{x > innerArea.right} {'resizeRight'};
-	}
 
 	*new { arg event;
 		^super.new.init(event)
 	}
 
-	showMenu { arg x, y;
-		^Menu(
-			MenuAction("copy (cmd-c)", 	{ Clipboard.add(id) }),
-			MenuAction("paste (cmd-v)", {
-				var absoluteTime = x / (xFactor * zoom.x);
-				var absoluteExtension = y / (yFactor * zoom.y);
-				Dispatcher((
-					type: 'pasteObjects',
-					payload: (
-						x: absoluteTime,
-						y: absoluteExtension,
-						items: Clipboard.normalizedItems
-					))
-				);
-				Clipboard.clear;
-			}),
-   		MenuAction("cut (cmd-x)", 	{ "cut item".postln; }),
-   		MenuAction("slice (cmd-d)", { "slice".postln 	}),
-		).front;
+	init { arg event;
+		"base class init".postln;
+		color = Color.rand;
+		zoom = 1@1;
+		bounds = this.getRectFromEvent(event);
+		initialBounds = bounds.copy;
+	}
+
+	getMouseAction { arg x, y;
+		^(
+			mouseMoveAction: { arg x, y;
+			
+			},
+			mouseUpAction: { arg x, y;
+				// clean up and return update
+			}
+		);
 	}
 
 	resetBounds { arg event;
-		var rect = this.getRect(event);
+		var rect = this.getRectFromEvent(event);
+		bounds.set(
+			rect.left,
+			rect.top,
+			rect.width,
+			rect.height
+		);
+	}
+
+	resetBoundsFromEvent { arg event;
+		var rect = this.getRectFromEvent(event);
 		bounds.set(
 			rect.left,
 			rect.top,
@@ -86,6 +79,24 @@ SequenceableBlock {
 		);
 	}
 
+	getRectFromEvent { arg event;
+
+		var timestamp, length;
+
+		// "get rect".postln;
+		// event.postcs;
+		length = event.length;
+		timestamp = event.timestamp;
+
+
+		^Rect(
+			timestamp * xFactor * zoom.x,
+			event.channel * yFactor * zoom.y,
+			length * xFactor * zoom.x,
+			yFactor * zoom.y
+		);
+	}
+
 	select {
 		selected = true;
 	}
@@ -94,32 +105,152 @@ SequenceableBlock {
 		selected = false;
 	}
 
-	objectUpdated { arg payload;
-		if (id == payload.id) {
-			this.resetBounds(payload);
-		}
+	renderView { arg origin, parentBounds;
+		/*
+		 * subclass responsibility - implementation tip:
+		 * { arg origin, parentBounds;
+		 *   var renderBounds = super.renderView(origin, parentBounds) // <- will return early if shouldn't render
+		 *   // subclass-specific rendering code
+		 * }
+		 */		
+		var renderBounds = bounds.moveBy(origin.x, origin.y);
+		if (renderBounds.intersects(parentBounds).not) { ^false };
+		^renderBounds;
+
+	}
+
+	shouldMove {
+		^selected
+	}
+
+	moveAction { arg x, y, snap;
+		if (this.shouldMove) {
+			if ((snap && ((bounds.origin.x % x.asInteger).magnitude != 0.0)), {
+				var snappedValue = bounds.origin.x.roundUp(x);
+				bounds = bounds.moveTo(snappedValue, bounds.origin.y);
+				}, {
+					bounds = bounds.moveBy(x, y)
+				});
+		};
+
+	}
+
+	moveBy { arg x, y;
+		bounds = bounds.moveBy(x, y);
+	}
+
+	moveTo { arg x, y;
+		bounds = bounds.moveTo(x, y);
+	}
+
+	setTransparent {
+		color.alpha = 0.8;
+	}
+
+	setOpaque {
+		color.alpha = 1;
+	}
+
+	setRightTo { arg right;
+		bounds.width = right - bounds.left;
+	}
+
+	setLeftTo { arg left;
+		bounds.left = left;
+		bounds.width = left - bounds.right;
+	}
+
+
+	contains { arg x_y;
+		^bounds.contains(x_y)
+	}
+
+	zoomBy { arg zoomX = 1, zoomY = 1;
+		zoom.x = zoom.x * zoomX;
+		zoom.y = zoom.y * zoomY;
+		bounds.set(
+			bounds.left * zoomX,
+			bounds.top * zoomY,
+			bounds.width * zoomX,
+			bounds.height * zoomY
+		);
+	}
+}
+
+SequenceableBlock : CanvasBlockBase {
+
+	classvar <moveWidgetPixelsWidth = 5;
+	// reference to state
+	var <id;
+	var label;
+
+	*new { arg event;
+		^super.new.init(event)
 	}
 
 	init { arg event;
+		"subclass init".postln;
+		super.init(event);
 		id = event.id;
-		color = Color.rand;
-		initialCursor = 0@0;
-		zoom = 1@1;
-		bounds = this.getRect(event);
-		initialBounds = bounds.copy;
+		label = id.asString;
 
 		Dispatcher.addListener('objectUpdated', { arg payload;
 			if (payload.id == id) {
 				this.objectUpdated(payload)
 			}
 		});
-		label = id.asString;
+	}
 
+	getAction { arg x, y;
+		var innerArea = bounds.insetBy(moveWidgetPixelsWidth, 0);
+		^case
+			{innerArea.contains(x@y)} {'move'}
+			{x < innerArea.left} {'resizeLeft'}
+			{x > innerArea.right} {'resizeRight'};
+	}
+
+	getMouseAction { arg x, y;
+		^(
+			mouseMoveAction: { arg x, y;
+			
+			},
+			mouseUpAction: { arg x, y;
+				// clean up and return update
+			}
+		);
+	}
+
+	showMenu { arg x, y;
+		^Menu(
+			MenuAction("copy (cmd-c)", 	{ Clipboard.add(id) }),
+			MenuAction("paste (cmd-v)", {
+				var absoluteTime = x / (xFactor * zoom.x);
+				var absoluteExtension = y / (yFactor * zoom.y);
+				Dispatcher((
+					type: 'pasteObjects',
+					payload: (
+						x: absoluteTime,
+						y: absoluteExtension,
+						items: Clipboard.normalizedItems
+					))
+				);
+				Clipboard.clear;
+			}),
+   		MenuAction("cut (cmd-x)", 	{ "cut item".postln; }),
+   		MenuAction("slice (cmd-d)", { "slice".postln 	}),
+		).front;
+	}
+
+
+	objectUpdated { arg payload;
+		if (id == payload.id) {
+			this.resetBoundsFromEvent(payload);
+		}
 	}
 
 	renderView { arg origin, parentBounds;
-		var renderBounds = bounds.moveBy(origin.x, origin.y);
-		if (renderBounds.intersects(parentBounds).not) { ^false };
+		var renderBounds = super.renderView(origin, parentBounds);
+
 		
 		Pen.smoothing = true;
 		Pen.addRect(renderBounds);
@@ -132,10 +263,8 @@ SequenceableBlock {
    		Pen.stroke;
 		};
 
-		label !? {
-			var point = renderBounds.leftTop;
-			Pen.stringInRect(label, renderBounds, font: Font("Helvetica", 10), color: Color.grey(0.1, 0.5));
-		};
+	
+		Pen.stringInRect(label, renderBounds, font: Font("Helvetica", 10), color: Color.grey(0.1, 0.5));
 	}
 
 	shouldMove {

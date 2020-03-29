@@ -41,6 +41,110 @@ Keys {
 	}
 }
 
+		// this.mouseDownAction = { |canvas, mouseX, mouseY, modifiers, buttonNumber, clickCount|
+		// 	var translatedMouse = Point(mouseX, mouseY) - origin;
+		// 	var x = translatedMouse.x;
+		// 	var y = translatedMouse.y;
+		// 	var topView = this.getTopView(x, y);
+
+		// 	action = case
+		// 		{ topView.isNil && Keys(\cmdMod).includes(modifiers) } {
+		// 			this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+		// 		}
+
+		// 		{ topView.isNil } {
+		// 			var action;
+		// 			if (buttonNumber == 1, {
+		// 				action = (mouseMoveAction: {}, mouseUpAction: { this.showMenuForBackgroundClick(x, y) });
+		// 			}, {
+		// 				this.deselectAll;
+		// 				action = this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
+		// 			});
+		// 			action;
+		// 		}
+
+		// 		{ topView.notNil && clickCount == 2 } { (mouseMoveAction: {}, mouseUpAction: { topView.edit }) }
+				
+		// 		{ topView.notNil && buttonNumber == 1 } {
+		// 			if (modifiers == 524288, {
+		// 					topView.select 
+		// 				}, {
+		// 					this.deselectAll;
+		// 					topView.select;
+		// 			});
+		// 			(mouseMoveAction: {}, mouseUpAction: { this.showMenuForItemClick(x, y) });
+		// 		}
+				
+		// 		{ topView.notNil && Keys(\cmdMod).includes(modifiers) } {
+		// 			topView.selected = topView.selected.not;
+		// 			(mouseMoveAction: {}, mouseUpAction: {});
+		// 		}
+				
+		// 		{ topView.notNil && modifiers == 524288 } {
+		// 			topView.select;
+		// 			this.selectionMoveMouseDownAction(topView, x, y, modifiers, buttonNumber, clickCount);
+		// 		}
+				
+		// 		{ topView.notNil } {
+		// 			this.deselectAll;
+		// 			topView.select;
+		// 			this.selectionMoveMouseDownAction(topView, x, y, modifiers, buttonNumber, clickCount);
+		// 		}
+				
+		// 		// default action:
+		// 		{ (mouseMoveAction: {}, mouseUpAction: {}) };
+
+		// 	this.refresh;
+		// };
+
+		// this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
+		// 	if (this.hasFocus.not, {^nil});
+			
+		// 	switch ([modifiers, key])
+		// 		{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
+		// 		{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
+
+		// 		{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
+		// 		{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) }
+
+		// 		{ [ 1310720, 61 ] }	{ canvas.zoomBy(1, 1.05) }
+		// 		{ [ 1310720, 45 ] }	{ canvas.zoomBy(1, 1.05.reciprocal) }
+
+		// 		{ [ 2097152, 16777234 ] } { canvas.moveViews(-1, 0) } //left
+		// 		{ [ 2097152, 16777236 ] } { canvas.moveViews(1, 0) } 	//right
+		// 		{ [ 2097152, 16777235 ] } { canvas.moveViews(0, -1) } //up
+		// 		{ [ 2097152, 16777237 ] } { canvas.moveViews(0, 1) }  //down
+
+		// 		{ Keys(\optMod, \left) 	} { canvas.moveOrigin(-10, 0) } //left
+		// 		{ Keys(\optMod, \right) } { canvas.moveOrigin(10, 0) } //right
+		// 		{ Keys(\optMod, \up) 		} { canvas.moveOrigin(0, -10) } //up
+		// 		{ Keys(\optMod, \down) 	} { canvas.moveOrigin(0, 10) } //down
+
+		// 		{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
+		// 		{ Keys(\cmdMod, \z) } { Dispatcher((type: 'undo')) } //cmd -z
+		// 		{ [ 1179648, 90 ] } 	{ Dispatcher((type: 'redo')) } //cmd -shift -z
+					
+		// 		{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
+		// 		{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } // cmd-shift-s
+		// 		{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o
+
+		// 		{ Keys(\noMod, \q) } { canvas.toggleQuantization } // Q
+					
+		// 		{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
+	 // 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
+
+	 // 			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
+	 // 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
+	 // 			{ [ 1048576, 67 ] } {
+	 // 				Clipboard.clear;
+	 // 				this.selectedViews.do { arg view; Clipboard.add(view.id);
+	 // 				canvas.deselectAll;
+	 // 			} } // cmd - c
+	 // 			{ [ 1048576, 86 ] } { this.pasteObjects(cursorView.x, cursorView.y, Clipboard.normalizedItems) }; // cmd-v    
+
+
+		// 	this.refresh;
+		// };
 
 
 SequencerCanvas : UserView {
@@ -119,7 +223,6 @@ SequencerCanvas : UserView {
 			{ object.type == 'timingContext' } {
 				timingContextView = TimingContextView(object);
 			};
-		
 
 	}
 
@@ -130,6 +233,7 @@ SequencerCanvas : UserView {
 
 	init { arg argId, argviews, argQuantX, argQuantY;
 		var xGrid, yGrid;
+		var action;
 
 		id = argId;
 		quantize = true;
@@ -159,52 +263,27 @@ SequencerCanvas : UserView {
 			var y = translatedMouse.y;
 			var topView = this.getTopView(x, y);
 
-			action = case
-				{ topView.isNil && Keys(\cmdMod).includes(modifiers) } {
-					this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
-				}
+			var actions = [];
 
-				{ topView.isNil } {
-					var action;
-					if (buttonNumber == 1, {
-						action = (mouseMoveAction: {}, mouseUpAction: { this.showMenuForBackgroundClick(x, y) });
-					}, {
-						this.deselectAll;
-						action = this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
-					});
-					action;
-				}
+			topView !? {
+				actions = actions.add(topView.getMouseAction(x, y, modifiers, buttonNumber, clickCount)) 
+			};
+			actions.add(cursorView.getMouseAction(x, y, modifiers, buttonNumber, clickCount));
+			actions.addAll(this.selectedViews.collect(_.getMouseAction(x, y, modifiers, buttonNumber, clickCount)));
 
-				{ topView.notNil && clickCount == 2 } { (mouseMoveAction: {}, mouseUpAction: { topView.edit }) }
-				
-				{ topView.notNil && buttonNumber == 1 } {
-					if (modifiers == 524288, {
-							topView.select 
-						}, {
-							this.deselectAll;
-							topView.select;
-					});
-					(mouseMoveAction: {}, mouseUpAction: { this.showMenuForItemClick(x, y) });
-				}
-				
-				{ topView.notNil && Keys(\cmdMod).includes(modifiers) } {
-					topView.selected = topView.selected.not;
-					(mouseMoveAction: {}, mouseUpAction: {});
-				}
-				
-				{ topView.notNil && modifiers == 524288 } {
-					topView.select;
-					this.selectionMoveMouseDownAction(topView, x, y, modifiers, buttonNumber, clickCount);
-				}
-				
-				{ topView.notNil } {
-					this.deselectAll;
-					topView.select;
-					this.selectionMoveMouseDownAction(topView, x, y, modifiers, buttonNumber, clickCount);
-				}
-				
-				// default action:
-				{ (mouseMoveAction: {}, mouseUpAction: {}) };
+
+			action = (
+				mouseMoveAction: { arg x, y;
+					actions.do { arg action;
+						action.mouseMoveAction(x, y);
+					}
+				},
+				mouseUpAction: { arg x, y;
+					var updates = actions.collect { arg action;
+						action.mouseUpAction(x, y)
+					};
+					updates.select(_.notNil);
+				});
 
 			this.refresh;
 		};
@@ -236,48 +315,7 @@ SequencerCanvas : UserView {
 		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
 			if (this.hasFocus.not, {^nil});
 			
-			switch ([modifiers, key])
-				{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
-				{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
-
-				{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
-				{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) }
-
-				{ [ 1310720, 61 ] }	{ canvas.zoomBy(1, 1.05) }
-				{ [ 1310720, 45 ] }	{ canvas.zoomBy(1, 1.05.reciprocal) }
-
-				{ [ 2097152, 16777234 ] } { canvas.moveViews(-1, 0) } //left
-				{ [ 2097152, 16777236 ] } { canvas.moveViews(1, 0) } 	//right
-				{ [ 2097152, 16777235 ] } { canvas.moveViews(0, -1) } //up
-				{ [ 2097152, 16777237 ] } { canvas.moveViews(0, 1) }  //down
-
-				{ Keys(\optMod, \left) 	} { canvas.moveOrigin(-10, 0) } //left
-				{ Keys(\optMod, \right) } { canvas.moveOrigin(10, 0) } //right
-				{ Keys(\optMod, \up) 		} { canvas.moveOrigin(0, -10) } //up
-				{ Keys(\optMod, \down) 	} { canvas.moveOrigin(0, 10) } //down
-
-				{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
-				{ Keys(\cmdMod, \z) } { Dispatcher((type: 'undo')) } //cmd -z
-				{ [ 1179648, 90 ] } 	{ Dispatcher((type: 'redo')) } //cmd -shift -z
-					
-				{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
-				{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } // cmd-shift-s
-				{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o
-
-				{ Keys(\noMod, \q) } { canvas.toggleQuantization } // Q
-					
-				{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
-	 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
-
-	 			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
-	 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
-	 			{ [ 1048576, 67 ] } {
-	 				Clipboard.clear;
-	 				this.selectedViews.do { arg view; Clipboard.add(view.id);
-	 				canvas.deselectAll;
-	 			} } // cmd - c
-	 			{ [ 1048576, 86 ] } { this.pasteObjects(cursorView.x, cursorView.y, Clipboard.normalizedItems) }; // cmd-v    
-
+			// switch ([modifiers, key])
 
 			this.refresh;
 		};
