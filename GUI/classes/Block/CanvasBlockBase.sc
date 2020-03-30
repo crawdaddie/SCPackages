@@ -25,7 +25,7 @@ CanvasBlockBase {
 
 	init { arg event, argzoom = Point(1, 1);
 		color = Color.rand;
-		zoom = argzoom;
+		zoom = argzoom.copy;
 		bounds = this.getRectFromEvent(event);
 		initialBounds = bounds.copy;
 	}
@@ -159,9 +159,9 @@ CanvasBlockBase {
 	}
 
 	zoomBy { arg x = 1, y = 1;
-
 		zoom.x = zoom.x * x;
 		zoom.y = zoom.y * y;
+		["block zoom", zoom].postln;
 		
 		bounds.set(
 			bounds.left * x,

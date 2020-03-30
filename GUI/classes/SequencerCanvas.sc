@@ -315,37 +315,37 @@ SequencerCanvas : UserView {
 		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
 			if (this.hasFocus.not, {^nil});
 			switch ([modifiers, key])
-				// { Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
-				// { Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
+				{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
+				{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
 
 				{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
-				{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) };
+				{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) }
 
-				// { [ 1310720, 61 ] }	{ canvas.zoomBy(1, 1.05) }
-				// { [ 1310720, 45 ] }	{ canvas.zoomBy(1, 1.05.reciprocal) };
+				{ [ 1310720, 61 ] }	{ canvas.zoomBy(1, 1.05) }
+				{ [ 1310720, 45 ] }	{ canvas.zoomBy(1, 1.05.reciprocal) }
 
 		// 		{ [ 2097152, 16777234 ] } { canvas.moveViews(-1, 0) } //left
 		// 		{ [ 2097152, 16777236 ] } { canvas.moveViews(1, 0) } 	//right
 		// 		{ [ 2097152, 16777235 ] } { canvas.moveViews(0, -1) } //up
 		// 		{ [ 2097152, 16777237 ] } { canvas.moveViews(0, 1) }  //down
 
-		// 		{ Keys(\optMod, \left) 	} { canvas.moveOrigin(-10, 0) } //left
-		// 		{ Keys(\optMod, \right) } { canvas.moveOrigin(10, 0) } //right
-		// 		{ Keys(\optMod, \up) 		} { canvas.moveOrigin(0, -10) } //up
-		// 		{ Keys(\optMod, \down) 	} { canvas.moveOrigin(0, 10) } //down
+				{ Keys(\optMod, \left) 	} { canvas.moveOrigin(-10, 0) } //left
+				{ Keys(\optMod, \right) } { canvas.moveOrigin(10, 0) } //right
+				{ Keys(\optMod, \up) 		} { canvas.moveOrigin(0, -10) } //up
+				{ Keys(\optMod, \down) 	} { canvas.moveOrigin(0, 10) } //down
 
 		// 		{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
-		// 		{ Keys(\cmdMod, \z) } { Dispatcher((type: 'undo')) } //cmd -z
-		// 		{ [ 1179648, 90 ] } 	{ Dispatcher((type: 'redo')) } //cmd -shift -z
+				{ Keys(\cmdMod, \z) } { Dispatcher((type: 'undo')) } //cmd -z
+				{ [ 1179648, 90 ] } 	{ Dispatcher((type: 'redo')) } //cmd -shift -z
 					
-		// 		{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
-		// 		{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } // cmd-shift-s
-		// 		{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o
+				{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
+				{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } // cmd-shift-s
+				{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o
 
-		// 		{ Keys(\noMod, \q) } { canvas.toggleQuantization } // Q
+				{ Keys(\noMod, \q) } { canvas.toggleQuantization } // Q
 					
-		// 		{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
-	 // 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
+				{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
+	 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) }; // cmd-shift-]
 
 	 // 			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
 	 // 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
@@ -468,23 +468,18 @@ SequencerCanvas : UserView {
 		this.refresh;
 	}
 
-	setZoom { arg zoomX, zoomY;
-		zoom.x = zoomX;
-		zoom.y = zoomY;
-
-		if (zoomX < 1) {
-			subdivisions = zoomX.floorBase2;
-		};
-
-		// this.refresh;
-	}
-
 	zoomBy { arg x, y;
-		this.setZoom(zoom.x * x, zoom.y * y);
-		zoom.postln;
-
-		views.do({ arg view; view.zoomBy(x, y)});
+		
+		views.do(_.zoomBy(x, y));
 		cursorView.zoomBy(x, y);
+		
+		zoom.x = zoom.x * x;
+		zoom.y = zoom.y * y;
+		
+		if (zoom.x < 1) {
+			subdivisions = zoom.x.floorBase2;
+		};
+		
 		this.refresh;
 	}
 

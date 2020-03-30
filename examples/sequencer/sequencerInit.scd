@@ -63,14 +63,14 @@ Dispatcher.addListener('save', { arg payload;
 			"saving to %".format(projectFile).postln;
 			Store.archive(projectFile);
 			a.parent.name = "sequencer - %".format(projectFile.basename);
-			saveDir = projectFile.dirName;
+			saveDir = projectFile.dirname;
 			},
 			path: saveDir
 		);
 	}, {
 		"saving to %".format(projectFile).postln;
 		Store.archive(projectFile);
-		saveDir = projectFile.dirName;
+		saveDir = projectFile.dirname;
 	});
 });
 
