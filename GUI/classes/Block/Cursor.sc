@@ -1,21 +1,14 @@
-Cursor {
-
-	classvar <xFactor = 50; 
-	classvar <yFactor = 40;
-
-	// view variables
-	var color, <>bounds;
-	var zoom;
-	var <selected = false;
-	var initialCursor;
-	var initialBounds;
+Cursor : CanvasBlockBase {
 
 	*new { arg event;
-		^super.new.init(event)
+		^super.new(event).initCursor(event);
 	}
 
-	getRect { arg event;
-		
+	initCursor { arg event;
+		color = SequencerTheme.darkGrey;
+	}
+
+	getRectFromEvent { arg event;	
 		^Rect(
 			event.x,
 			event.y,
@@ -32,15 +25,19 @@ Cursor {
 		^bounds.top
 	}
 
-	init { arg event;
-		color = SequencerTheme.darkGrey;
-		zoom = 1@1;
-
-		bounds = this.getRect(event);
+	zoomBy { arg zoomX = 1, zoomY = 1;
+		zoom.x = zoom.x * zoomX;
+		zoom.y = zoom.y * zoomY;
+		bounds.set(
+			bounds.left * zoomX,
+			bounds.top * zoomY,
+			1,
+			bounds.height * zoomY
+		);
 	}
 
-	renderView { arg origin;
-		var renderBounds = bounds.moveBy(origin.x, origin.y);
+	renderView { arg origin, parentBounds;
+		var renderBounds = super.renderView(origin, parentBounds);
 		Pen.smoothing = true;
 		Pen.color = color;
 		
@@ -51,78 +48,5 @@ Cursor {
 	  	Pen.addRect(renderBounds);
 	  	Pen.stroke;
 	  });
-	}
-
-	setBounds { arg rect;
-		bounds.set(
-			rect.left,
-			rect.top,
-			rect.width,
-			rect.height
-		);
-	}
-
-	shouldMove {
-		^true
-	}
-
-	moveAction { arg x, y, snap;
-		if (this.shouldMove) {
-			if ((snap && (bounds.origin.x % x != 0)), {
-				var snappedValue = bounds.origin.x.roundUp(x);
-				bounds = bounds.moveTo(snappedValue, bounds.origin.y);
-				}, {
-					bounds = bounds.moveBy(x, y)
-			});
-		}
-	}
-
-	getMouseAction { arg x, y;
-		^(
-			mouseMoveAction: { arg x, y;
-			},
-			mouseUpAction: { arg x, y;
-				// clean up and return update
-			}
-		);
-	}
-
-	// mouseDownAction { arg x, y, modifiers, buttonNumber, clickCount;
-	// 	bounds.left = x;
-	// 	bounds.width = 1;
-	// 	bounds.top = y.trunc(yFactor * zoom.y);
-	// 	initialBounds = bounds.copy;
-	// 	initialCursor = x@y;
-	// }
-
-	// mouseMoveAction { arg x, y, modifiers, quantX;
-	// 	var difference, newOrigin, quantY;
-	// 	newOrigin = x@y - (initialCursor - initialBounds.origin);
-			
-	// 	quantY = yFactor * zoom.y;
-
-	// 	quantX !? { newOrigin.x = newOrigin.x.round(quantX) };
-	// 	quantY !? { newOrigin.y = max(0, newOrigin.y.round(quantY)) };
-	// 	bounds.origin = newOrigin;
-	// }
-
-	moveTo { arg x, y;
-		bounds.left = x;
-		bounds.top = y;
-	}
-
-	moveBy { arg x, y;
-		bounds = bounds.moveBy(x, y);
-	}
-
-	zoomBy { arg zoomX = 1, zoomY = 1;
-		zoom.x = zoom.x * zoomX;
-		zoom.y = zoom.y * zoomY;
-		bounds.set(
-			bounds.left * zoomX,
-			bounds.top * zoomY,
-			1,
-			bounds.height * zoomY
-		);
 	}
 }

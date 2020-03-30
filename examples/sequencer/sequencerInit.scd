@@ -139,3 +139,8 @@ load = { arg path;
 
 a = SequencerCanvas.fromStore();
 )
+
+
+
+
+
