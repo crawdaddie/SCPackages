@@ -315,8 +315,8 @@ SequencerCanvas : UserView {
 		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
 			if (this.hasFocus.not, {^nil});
 			switch ([modifiers, key])
-		// 		{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
-		// 		{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
+				// { Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
+				// { Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
 
 				{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
 				{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) };
@@ -476,13 +476,16 @@ SequencerCanvas : UserView {
 			subdivisions = zoomX.floorBase2;
 		};
 
-		this.refresh;
+		// this.refresh;
 	}
 
-	zoomBy { arg zoomX, zoomY;
-		views.do(_.zoomBy(zoomX, zoomY));
-		cursorView.zoomBy(zoomX, zoomY);
-		this.setZoom(zoom.x * zoomX, zoom.y * zoomY);	
+	zoomBy { arg x, y;
+		this.setZoom(zoom.x * x, zoom.y * y);
+		zoom.postln;
+
+		views.do({ arg view; view.zoomBy(x, y)});
+		cursorView.zoomBy(x, y);
+		this.refresh;
 	}
 
 	cycleThroughViews {
@@ -512,7 +515,7 @@ SequencerCanvas : UserView {
 		if (quantize) {
 			x = max(0, x.round(this.getTick));
 		};
-		y = max(0, y.trunc		(this.getTickY));
+		y = max(0, y.trunc(this.getTickY));
 		
 		^Point(x, y);
 	}

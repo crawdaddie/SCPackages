@@ -25,6 +25,10 @@ Cursor : CanvasBlockBase {
 		^bounds.top
 	}
 
+	asPoint {
+		^Point(this.x, this.y)
+	}
+
 	zoomBy { arg zoomX = 1, zoomY = 1;
 		zoom.x = zoom.x * zoomX;
 		zoom.y = zoom.y * zoomY;

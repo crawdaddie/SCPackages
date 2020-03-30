@@ -158,19 +158,20 @@ CanvasBlockBase {
 		^bounds.contains(x_y)
 	}
 
-	zoomBy { arg zoomX = 1, zoomY = 1;
-		[zoom, zoomX, zoomY].postln;
-		zoom.x = zoom.x * zoomX;
-		zoom.y = zoom.y * zoomY;
+	zoomBy { arg x = 1, y = 1;
+
+		zoom.x = zoom.x * x;
+		zoom.y = zoom.y * y;
+		
 		bounds.set(
-			bounds.left * zoomX,
-			bounds.top * zoomY,
-			bounds.width * zoomX,
-			bounds.height * zoomY
+			bounds.left * x,
+			bounds.top * y,
+			bounds.width * x,
+			bounds.height * y
 		);
 	}
 
-	zoomTo { arg argzoom;
+	zoom_ { arg argzoom;
 		zoom = argzoom;
 		bounds.set(
 			bounds.left * zoom.x,
@@ -179,6 +180,7 @@ CanvasBlockBase {
 			bounds.height * zoom.y
 		);
 	}
+
 
 
 	edit {
