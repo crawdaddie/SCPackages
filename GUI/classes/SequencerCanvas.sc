@@ -41,112 +41,6 @@ Keys {
 	}
 }
 
-		// this.mouseDownAction = { |canvas, mouseX, mouseY, modifiers, buttonNumber, clickCount|
-		// 	var translatedMouse = Point(mouseX, mouseY) - origin;
-		// 	var x = translatedMouse.x;
-		// 	var y = translatedMouse.y;
-		// 	var topView = this.getTopView(x, y);
-
-		// 	action = case
-		// 		{ topView.isNil && Keys(\cmdMod).includes(modifiers) } {
-		// 			this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
-		// 		}
-
-		// 		{ topView.isNil } {
-		// 			var action;
-		// 			if (buttonNumber == 1, {
-		// 				action = (mouseMoveAction: {}, mouseUpAction: { this.showMenuForBackgroundClick(x, y) });
-		// 			}, {
-		// 				this.deselectAll;
-		// 				action = this.selectMouseDownAction(x, y, modifiers, buttonNumber, clickCount);
-		// 			});
-		// 			action;
-		// 		}
-
-		// 		{ topView.notNil && clickCount == 2 } { (mouseMoveAction: {}, mouseUpAction: { topView.edit }) }
-				
-		// 		{ topView.notNil && buttonNumber == 1 } {
-		// 			if (modifiers == 524288, {
-		// 					topView.select 
-		// 				}, {
-		// 					this.deselectAll;
-		// 					topView.select;
-		// 			});
-		// 			(mouseMoveAction: {}, mouseUpAction: { this.showMenuForItemClick(x, y) });
-		// 		}
-				
-		// 		{ topView.notNil && Keys(\cmdMod).includes(modifiers) } {
-		// 			topView.selected = topView.selected.not;
-		// 			(mouseMoveAction: {}, mouseUpAction: {});
-		// 		}
-				
-		// 		{ topView.notNil && modifiers == 524288 } {
-		// 			topView.select;
-		// 			this.selectionMoveMouseDownAction(topView, x, y, modifiers, buttonNumber, clickCount);
-		// 		}
-				
-		// 		{ topView.notNil } {
-		// 			this.deselectAll;
-		// 			topView.select;
-		// 			this.selectionMoveMouseDownAction(topView, x, y, modifiers, buttonNumber, clickCount);
-		// 		}
-				
-		// 		// default action:
-		// 		{ (mouseMoveAction: {}, mouseUpAction: {}) };
-
-		// 	this.refresh;
-		// };
-
-		// this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
-		// 	if (this.hasFocus.not, {^nil});
-			
-		// 	switch ([modifiers, key])
-		// 		{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
-		// 		{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
-
-		// 		{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
-		// 		{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) }
-
-		// 		{ [ 1310720, 61 ] }	{ canvas.zoomBy(1, 1.05) }
-		// 		{ [ 1310720, 45 ] }	{ canvas.zoomBy(1, 1.05.reciprocal) }
-
-		// 		{ [ 2097152, 16777234 ] } { canvas.moveViews(-1, 0) } //left
-		// 		{ [ 2097152, 16777236 ] } { canvas.moveViews(1, 0) } 	//right
-		// 		{ [ 2097152, 16777235 ] } { canvas.moveViews(0, -1) } //up
-		// 		{ [ 2097152, 16777237 ] } { canvas.moveViews(0, 1) }  //down
-
-		// 		{ Keys(\optMod, \left) 	} { canvas.moveOrigin(-10, 0) } //left
-		// 		{ Keys(\optMod, \right) } { canvas.moveOrigin(10, 0) } //right
-		// 		{ Keys(\optMod, \up) 		} { canvas.moveOrigin(0, -10) } //up
-		// 		{ Keys(\optMod, \down) 	} { canvas.moveOrigin(0, 10) } //down
-
-		// 		{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
-		// 		{ Keys(\cmdMod, \z) } { Dispatcher((type: 'undo')) } //cmd -z
-		// 		{ [ 1179648, 90 ] } 	{ Dispatcher((type: 'redo')) } //cmd -shift -z
-					
-		// 		{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
-		// 		{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } // cmd-shift-s
-		// 		{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o
-
-		// 		{ Keys(\noMod, \q) } { canvas.toggleQuantization } // Q
-					
-		// 		{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
-	 // 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
-
-	 // 			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
-	 // 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
-	 // 			{ [ 1048576, 67 ] } {
-	 // 				Clipboard.clear;
-	 // 				this.selectedViews.do { arg view; Clipboard.add(view.id);
-	 // 				canvas.deselectAll;
-	 // 			} } // cmd - c
-	 // 			{ [ 1048576, 86 ] } { this.pasteObjects(cursorView.x, cursorView.y, Clipboard.normalizedItems) }; // cmd-v    
-
-
-		// 	this.refresh;
-		// };
-
-
 SequencerCanvas : UserView {
 	var <views;
 	var zoom;
@@ -234,7 +128,7 @@ SequencerCanvas : UserView {
 	init { arg argId, argviews, argQuantX, argQuantY;
 		var xGrid, yGrid;
 		var mouseAction;
-		var keyAction;
+		var keyUpHandler;
 
 		id = argId;
 		quantize = true;
@@ -314,8 +208,6 @@ SequencerCanvas : UserView {
 		};
 
 		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
-
-			var keyUpActions;
 			if (this.hasFocus.not, {^nil});
 
 			[modifiers, key].postln;
@@ -346,40 +238,40 @@ SequencerCanvas : UserView {
 				{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
 	 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
 
-				// { Keys(\noMod, \tab) } { canvas.cycleThroughViews }
-	 			// { [ 0, 16777216 ] } { "canvas.deselectAll".postln; } // esc
-	 			// { [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
+				{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
+	 			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
+	 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
 				
-				{ [ 2097152, 16777234 ] } { keyUpAction = canvas.moveViewsHandler(-1, 0, modifiers) } //left
-				{ [ 2097152, 16777236 ] } { keyUpAction = canvas.moveViewsHandler(1, 0, modifiers) } 	//right
-				{ [ 2097152, 16777235 ] } { keyUpAction = canvas.moveViewsHandler(0, -1, modifiers) } //up
-				{ [ 2097152, 16777237 ] } { keyUpAction = canvas.moveViewsHandler(0, 1, modifiers) }  //down
+				{ [ 2097152, 16777234 ] } { keyUpHandler = canvas.moveViewsHandler(-1, 0, modifiers) } //left
+				{ [ 2097152, 16777236 ] } { keyUpHandler = canvas.moveViewsHandler(1, 0, modifiers) } 	//right
+				{ [ 2097152, 16777235 ] } { keyUpHandler = canvas.moveViewsHandler(0, -1, modifiers) } //up
+				{ [ 2097152, 16777237 ] } { keyUpHandler = canvas.moveViewsHandler(0, 1, modifiers) }  //down
 
-				{ [ 2228224, 16777234 ] } { keyUpAction = canvas.extendSelectionHandler(-1, 0) } //shift-left
-				{ [ 2228224, 16777236 ] } { keyUpAction = canvas.extendSelectionHandler(1,  0) } //shift-right
-				{ [ 2228224, 16777235 ] } { keyUpAction = canvas.extendSelectionHandler(0, -1) } //shift-up
-				{ [ 2228224, 16777237 ] } { keyUpAction = canvas.extendSelectionHandler(0,  1) } //shift-down
+				{ [ 2228224, 16777234 ] } { keyUpHandler = canvas.extendSelectionHandler(-1, 0) } //shift-left
+				{ [ 2228224, 16777236 ] } { keyUpHandler = canvas.extendSelectionHandler(1,  0) } //shift-right
+				{ [ 2228224, 16777235 ] } { keyUpHandler = canvas.extendSelectionHandler(0, -1) } //shift-up
+				{ [ 2228224, 16777237 ] } { keyUpHandler = canvas.extendSelectionHandler(0,  1) } //shift-down
 
 
 	 			{ [ 1048576, 67 ] } {
-	 				keyUpAction = {
+	 				keyUpHandler = {
 	 					Clipboard.clear;
 	 					this.selectedViews.do { arg view; Clipboard.add(view.id) };
 	 					canvas.deselectAll;
 	 				}
 	 			} // cmd - c
 	 			{ [ 1048576, 86 ] } {
-	 				keyUpAction = {
+	 				keyUpHandler = {
 	 					this.pasteObjects(cursorView.x, cursorView.y, Clipboard.normalizedItems) 
 	 				} 
-	 			}; 
-	 			// cmd-v
+	 			}; // cmd-v
 	 	
 			this.refresh;
 		};
 
+
 		this.keyUpAction = { |canvas, char, modifiers, unicode, keycode, key|
-			Dispatcher((type: 'userAction', payload: keyUpAction.value()));
+			keyUpHandler !? Dispatcher((type: 'userAction', payload: keyUpHandler.value()));
 		};
 
 		this.onResize = { |canvas|
