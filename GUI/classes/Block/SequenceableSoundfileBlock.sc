@@ -14,6 +14,7 @@ SequenceableSoundfileBlock : SequenceableBlock {
 
 	renderView { arg origin, parentBounds;
 		super.renderView(origin, parentBounds);
+		
 		this.renderWaveform(origin);
 	}
 

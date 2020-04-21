@@ -135,12 +135,10 @@ load = { arg path;
 // 	s.makeGui;
 // };
 
-// Store.getBase.postln;
 
 a = SequencerCanvas.fromStore();
+// a.views[0].select;
+a.refresh;
 )
-
-
-
 
 

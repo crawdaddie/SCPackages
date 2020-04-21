@@ -67,7 +67,8 @@ SequenceableBlock : CanvasBlockBase {
 	}
 
 	renderView { arg origin, parentBounds;
-		var renderBounds = super.renderView(origin, parentBounds);
+		var renderBounds = bounds.moveBy(origin.x, origin.y);
+		if (renderBounds.intersects(parentBounds).not) { ^false };
 
 		
 		Pen.smoothing = true;
@@ -120,25 +121,5 @@ SequenceableBlock : CanvasBlockBase {
 				}
 		};
 		^partition;
-	}
-}
-
-
-
-StoreBlock : SequenceableBlock {
-	
-	*new { arg event, zoom = Point(1, 1);
-		^super.new(event, zoom).initStoreView(event);
-	}
-
-	initStoreView { arg event;
-		label = "store - %".format(event.id);
-	}
-
-	edit {
-		var path = Store.getPath(id);
-		var canvas = SequencerCanvas.fromStore(id);
-		canvas.parent.name = "store - %".format(path);
-		^canvas;
 	}
 }

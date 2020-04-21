@@ -54,9 +54,6 @@ CanvasBlockBase {
 	getRectFromEvent { arg event;
 
 		var timestamp, length;
-		event.postcs;
-		// "get rect".postln;
-		// event.postcs;
 		length = event.length;
 		timestamp = event.timestamp;
 
@@ -83,6 +80,7 @@ CanvasBlockBase {
 	}
 
 	unselect {
+		// "unselect".postln;
 		selected = false;
 	}
 
@@ -119,6 +117,13 @@ CanvasBlockBase {
 	moveBy { arg x, y;
 		bounds = bounds.moveBy(x, y);
 	}
+
+	// moveByAction { arg x, y;
+	// 	bounds = bounds.moveBy(x, y);
+	// 	^{
+	// 		this.getUpdate()
+	// 	}
+	// }
 
 	moveTo { arg x, y;
 		bounds = bounds.moveTo(x, y);
@@ -161,7 +166,6 @@ CanvasBlockBase {
 	zoomBy { arg x = 1, y = 1;
 		zoom.x = zoom.x * x;
 		zoom.y = zoom.y * y;
-		["block zoom", zoom].postln;
 		
 		bounds.set(
 			bounds.left * x,
@@ -171,19 +175,15 @@ CanvasBlockBase {
 		);
 	}
 
-	zoom_ { arg argzoom;
-		zoom = argzoom;
-		bounds.set(
-			bounds.left * zoom.x,
-			bounds.top * zoom.y,
-			bounds.width * zoom.x,
-			bounds.height * zoom.y
-		);
-	}
-
-
 
 	edit {
 		// subclass responsibility
+	}
+
+	keyDownAction { |modifiers, key| 
+		if (this.selected.not, {
+			^nil;
+		});
+		^nil
 	}
 }

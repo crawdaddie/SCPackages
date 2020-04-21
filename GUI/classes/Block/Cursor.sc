@@ -41,7 +41,8 @@ Cursor : CanvasBlockBase {
 	}
 
 	renderView { arg origin, parentBounds;
-		var renderBounds = super.renderView(origin, parentBounds);
+		var renderBounds = bounds.moveBy(origin.x, origin.y);
+		if (renderBounds.intersects(parentBounds).not) { ^false };
 		Pen.smoothing = true;
 		Pen.color = color;
 		
