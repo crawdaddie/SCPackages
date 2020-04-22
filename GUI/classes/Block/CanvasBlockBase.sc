@@ -162,6 +162,10 @@ CanvasBlockBase {
 	contains { arg x_y;
 		^bounds.contains(x_y)
 	}
+	
+	intersects { arg rect;
+		^bounds.intersects(rect)
+	}
 
 	zoomBy { arg x = 1, y = 1;
 		zoom.x = zoom.x * x;
@@ -186,4 +190,5 @@ CanvasBlockBase {
 		});
 		^nil
 	}
+
 }

@@ -54,4 +54,34 @@ Cursor : CanvasBlockBase {
 	  	Pen.stroke;
 	  });
 	}
+
+	extendSelectionHandler { |moveX, moveY|
+		var newWidth;
+		var newHeight;
+		if (bounds.width == 1) {
+			newWidth = moveX;
+		} {
+			newWidth = bounds.width + moveX;
+		};
+
+		newHeight = bounds.height + moveY;
+
+		bounds.set(
+			bounds.left,
+			bounds.top,
+			newWidth,
+			newHeight
+		);
+		^bounds;
+	}
+
+	resetSelection {
+		bounds.set(
+			bounds.left,
+			bounds.top,
+			1,
+			yFactor
+		)
+	}
+
 }

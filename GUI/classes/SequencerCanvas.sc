@@ -9,37 +9,6 @@ SequencerTheme {
 	}
 }
 
-Keys {
-	classvar dict;
-	*initClass {
-		dict = Dictionary.with(*[
-			\noMod 		-> 0,
-			\cmdMod 	-> 1048576,
-			\shiftMod -> 1048576,
-			\optMod 	-> 2621440,
-			\ctrlMod 	-> 262144,
-
-			\tab 			-> 16777217,
-
-			\plus 		-> 61,
-			\minus 		-> 45,
-
-			\left 		-> 16777234,
-			\right 		-> 16777236,
-			\up 			-> 16777235,
-			\down 		-> 16777237,
-
-			\s 				-> 83,
-			\z 				-> 90,
-			\o 				-> 79,
-			\q 				-> 81,
-		]);
-  }
-
-	*new { arg ... keys;
-		^dict.atAll(keys)
-	}
-}
 
 SequencerCanvas : UserView {
 	var <views;
@@ -128,7 +97,6 @@ SequencerCanvas : UserView {
 	init { arg argId, argviews, argQuantX, argQuantY;
 		var xGrid, yGrid;
 		var mouseAction;
-		var keyUpHandler;
 
 		id = argId;
 		quantize = true;
@@ -209,69 +177,14 @@ SequencerCanvas : UserView {
 
 		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
 			if (this.hasFocus.not, {^nil});
-
-			[modifiers, key].postln;
-			switch ([modifiers, key])
-				{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
-				{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
-
-				{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
-				{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) }
-
-				{ [ 1310720, 61 ] }	{ canvas.zoomBy(1, 1.05) }
-				{ [ 1310720, 45 ] }	{ canvas.zoomBy(1, 1.05.reciprocal) }
-
-				{ Keys(\optMod, \left) 	} { canvas.moveOrigin(-10, 0) } //left
-				{ Keys(\optMod, \right) } { canvas.moveOrigin(10, 0) } //right
-				{ Keys(\optMod, \up) 		} { canvas.moveOrigin(0, -10) } //up
-				{ Keys(\optMod, \down) 	} { canvas.moveOrigin(0, 10) } //down
-
-				{ Keys(\cmdMod, \z) } { Dispatcher((type: 'undo')) } //cmd -z
-				{ [ 1179648, 90 ] } 	{ Dispatcher((type: 'redo')) } //cmd -shift -z
-					
-				{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
-				{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } // cmd-shift-s
-				{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o	
-
-				{ Keys(\noMod, \q) } { canvas.toggleQuantization } // Q
-					
-				{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
-	 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
-
-				{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
-	 			{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
-	 			{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
-				
-				{ [ 2097152, 16777234 ] } { keyUpHandler = canvas.moveViewsHandler(-1, 0, modifiers) } //left
-				{ [ 2097152, 16777236 ] } { keyUpHandler = canvas.moveViewsHandler(1, 0, modifiers) } 	//right
-				{ [ 2097152, 16777235 ] } { keyUpHandler = canvas.moveViewsHandler(0, -1, modifiers) } //up
-				{ [ 2097152, 16777237 ] } { keyUpHandler = canvas.moveViewsHandler(0, 1, modifiers) }  //down
-
-				{ [ 2228224, 16777234 ] } { keyUpHandler = canvas.extendSelectionHandler(-1, 0) } //shift-left
-				{ [ 2228224, 16777236 ] } { keyUpHandler = canvas.extendSelectionHandler(1,  0) } //shift-right
-				{ [ 2228224, 16777235 ] } { keyUpHandler = canvas.extendSelectionHandler(0, -1) } //shift-up
-				{ [ 2228224, 16777237 ] } { keyUpHandler = canvas.extendSelectionHandler(0,  1) } //shift-down
-
-
-	 			{ [ 1048576, 67 ] } {
-	 				keyUpHandler = {
-	 					Clipboard.clear;
-	 					this.selectedViews.do { arg view; Clipboard.add(view.id) };
-	 					canvas.deselectAll;
-	 				}
-	 			} // cmd - c
-	 			{ [ 1048576, 86 ] } {
-	 				keyUpHandler = {
-	 					this.pasteObjects(cursorView.x, cursorView.y, Clipboard.normalizedItems) 
-	 				} 
-	 			}; // cmd-v
-	 	
+			KeyActionManager.keyDownHandler(canvas, char, modifiers, unicode, keycode, key);
 			this.refresh;
+
 		};
 
 
 		this.keyUpAction = { |canvas, char, modifiers, unicode, keycode, key|
-			keyUpHandler !? Dispatcher((type: 'userAction', payload: keyUpHandler.value()));
+			KeyActionManager.keyUpHandler(canvas, char, modifiers, unicode, keycode, key)
 		};
 
 		this.onResize = { |canvas|
@@ -335,7 +248,7 @@ SequencerCanvas : UserView {
 		^views.select(_.selected);
 	}
 
-	moveViewsHandler { arg x, y, modifiers;
+	moveViewsHandler { arg x, y;
 		var moveY = y * quantY * zoom.y;
 		var moveX = x;
 		var selectedViews = this.selectedViews;
@@ -378,6 +291,8 @@ SequencerCanvas : UserView {
 		}
 	}
 
+
+
 	extendSelectionHandler { arg x, y;
 		var moveY = y * quantY * zoom.y;
 		var moveX = x;
@@ -385,19 +300,22 @@ SequencerCanvas : UserView {
 		var mostTop = cursorView.bounds.top;
 		var tick = this.getTick;
 		var newLeft;
-
+		var newBounds;
 		if (quantize) {
 			moveX = moveX * tick;
 			newLeft = mostLeft.round(tick) + moveX;
 			moveX = newLeft - mostLeft
 		};
-
-		if (this.selectedViews.size == 0) {
-			^cursorView.extendSelectionHandler(moveX, moveY);
-		};
+		newBounds = cursorView.extendSelectionHandler(moveX, moveY);
 		
-		^{
+		views.do { arg view;
+			if (view.intersects(newBounds)) { view.select } { view.unselect };
+		};
 
+		// callback to call when the KeyActionManager gives up its action
+		^{
+			cursorView.resetSelection;
+			this.refresh;
 		}
 
 	}
@@ -679,7 +597,9 @@ SequencerCanvas : UserView {
 		}
 
 	}
-	pasteObjects { arg x, y, items;
+	pasteObjects { arg items;
+		var x = cursorView.x;
+		var y = cursorView.y;
 		var newCursorPosition = this.quantizePoint(x@y);
 		var absoluteTime = newCursorPosition.x / (SequenceableBlock.xFactor * zoom.x);
 		var absoluteExtension = newCursorPosition.y / (SequenceableBlock.yFactor * zoom.y);
