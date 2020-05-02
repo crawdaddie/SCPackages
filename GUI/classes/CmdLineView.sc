@@ -1,9 +1,8 @@
 CmdLineView {
-	var textField;
+	var searchField;
 	var listView;
-	var query;
-	var selectedValue;
-
+	var container;
+	
 	classvar list;
 	*initClass {
 		list = [
@@ -17,96 +16,79 @@ CmdLineView {
 		];
 	}
 
-	*new { arg bounds = Rect(0, 0, 200, 40);
+	*new { arg bounds = Rect(0, 0, 200, 50);
 		^super.new.init(bounds);
 	}
 	
 	init { arg bounds;
-		var container;
-		query = "";
-		textField = TextField();
-		listView = ListView().canFocus_(false);
-
-		container = View(
-			bounds: bounds
+		// var window = Window(border: false);
+		container = Window(
+			// parent: window,
+			// bounds: bounds,
+			border: false
 		)
-		.layout_(VLayout(textField, listView));
+		.layout_(VLayout());
+
+		// container.parent.asView.border_(false);
 		
 		container.layout.spacing = 0;
 		container.layout.margins = 0!4;
 
-		textField.keyUpAction = { | textField ...keyArgs |
-			this.keyUpHandler(*keyArgs);
+		// create search field
+		searchField = TextField(container);
+		searchField.background_(Color.clear);
+		searchField.string = "";
+		// searchField pixel height = 24;
+
+
+		// create list view
+		listView = EZListView(container, bounds: container.bounds)
+			.globalAction_({ arg view;
+				var value = view.value;
+				view.items[value].postln;
+			})
+		;
+
+		listView.listView.background = Color.clear;
+		listView.items_(list);
+
+
+		searchField.action = { arg field; var search = field.value; this.find(search) };
+		searchField.keyUpAction = { arg view; view.doAction };
+
+		searchField.asView.keyDownAction = { arg view, char, mod, unicode, keycode, key;
+			[char, mod, unicode, keycode, key].postln;
+			if ([mod, key] == [0, 16777216]) {
+				container.close;
+			}
+
 		};
-
-		textField.keyDownAction = { | textField ...keyArgs |
-			this.keyDownHandler(*keyArgs);
-		};
-
-		selectedValue = nil;
-
-
-		// listView.action = { }
 
 		container.front;
 	}
 
-	keyDownHandler { | char, modifiers, unicode, keycode, key |
-		var originalVal = listView.value;
-		query = textField.string;
-		if (char.isPrint) {
-			query = query ++ char;
-			listView.items_(this.filterList(query));
-			selectedValue = 0;
-			listView.value = selectedValue;
-		}; // character press
-
-		if ([modifiers, key] == [ 0, 16777219 ] && query != "") {
-			query = query[0 .. (query.size - 1)];
-			listView.items_(this.filterList(query));
-			selectedValue = 0;
-			listView.value = selectedValue;
-		}; // backspace
-
-
-		if ([modifiers, key] == [0, 16777217]) {
-			this.tabThroughList()
-		}; // tab
-
-		if ([modifiers, key] == [ 0, 16777220 ]) {
-			// query.postln;
-		}; // enter
+	find { arg query;
+		if (query == "") {
+			this.displayItems(list);
+		} { 
+			var filtered = list.select(_.contains(query.asString));
+			filtered.postln;
+			this.displayItems(filtered);
+		}
 	}
 
-	keyUpHandler { | char, modifiers, unicode, keycode, key |
-		// if (query.size != textField.string.size) {
-		// 	var filteredList;
-		// 	query = textField.string;
-		// 	listView.items_(this.filterList);
-		// 	listView.value = 0;
-		// };
-	}
+	displayItems { arg items;
+		// var bounds = container.bounds;
+		// bounds.postln;
+		// container.bounds = bounds.set(
+		// 	argLeft: bounds.left,
+		// 	argTop: bounds.top,
+		// 	argWidth: bounds.width,
+		// 	argHeight: 24 + (items.size * 17)
+		// );
 
-	filterList { arg queryString;
-		^list.select(_.contains(queryString.asString));
-	}
-
-	tabThroughList {
-		selectedValue = (selectedValue + 1) % listView.items.size;
-		listView.value = selectedValue;
-		// var size = listView.items.size;
-		// var val = listView.value;
-		// "orig".postln;
-		// listView.value.postln;
-		// listView.items.postln;
-		// val !? { arg val;
-		// 	listView.value = (val + 1) % size; 
-		// } ?? {
-		// 	listView.value = 0;
-		// };
-		// "after".postln;
-		// listView.value.postln;
-		// listView.items.postln;
+		listView.items_(items);
 
 	}
+
 }
