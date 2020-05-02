@@ -67,7 +67,7 @@ WaveformCache {
 
 	createWaveform { arg zoom;
 		var duration = soundfile.duration;
-		var chunks = (duration * SequenceableBlock.xFactor * zoom).asInt;
+		var chunks = (duration * Theme.horizontalUnit * zoom).asInt;
 		var waveform = Waveform(chunks);
 		waveform.computeWaveform();
 		cache.put(zoom, waveform);

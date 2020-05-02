@@ -147,7 +147,7 @@ Store : LibraryBase {
 
 	// }
 
-	*patch { arg patch;
+	*patch { arg patch, save = true;
 		
 		var historyPatch = Dictionary();
 		
@@ -155,19 +155,27 @@ Store : LibraryBase {
 			var object = this.at(id);
 			object !? {
 				var update = this.updateObject(id, newState);
-				historyPatch.put(id, update.historyMarker);
+				historyPatch.put(id, update.prevState);
+				// historyPatch.postln;
 			} ?? {
 				// new object
-				this.addObject(id, newState)
+				// this.addObject(newState, id);
+				// historyPatch.put(id)
 			}
 		};
 
-		StoreHistory.saveHistory(historyPatch);
+		if(save, {
+			StoreHistory.saveHistory(historyPatch);
+		});
 
 	}
 
 	*getBase {
 		^global.dictionary;
+	}
+
+	*postTree {
+		^global.postTree;
 	}
 }
 
@@ -214,6 +222,7 @@ StoreHistory {
 		enabled = true;
 
 		Dispatcher.addListener('undo', {
+			history.postln;
 			this.restoreFromHistory;
 		});
 
@@ -242,13 +251,18 @@ StoreHistory {
 	}
 
 	*restoreFromHistory {
+		"restore from past".postln;
 		this.restore(history) !? { |marker|
+			marker.postln;
 			future.add(marker);
 		}
 	}
 
 	*restoreFromFuture {
+		"restore from future".postln;
+		// future.postln;
 		this.restore(future) !? { |marker|
+			marker.postln;
 			history.add(marker)
 		}
 	}
@@ -257,7 +271,7 @@ StoreHistory {
 		if (enabled) {
 			if (list.size > 0) {
 				var patch = list[list.size - 1];
-				Store.patch(patch);
+				Store.patch(patch, false);
 				^patch
 			}
 			^nil

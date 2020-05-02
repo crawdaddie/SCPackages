@@ -11,7 +11,7 @@ var load;
 var clipboard;
 var aggregate;
 var subStoreId;
-	
+
 StoreHistory.enable;
 
 Dispatcher.addListener('moveObjects', { arg payloads;
@@ -56,21 +56,21 @@ Dispatcher.addListener('moveObjects', { arg payloads;
 
 Dispatcher.addListener('save', { arg payload;
 
-	if ((payload.newFile || projectFile.isNil), {		
+	if ((payload.newFile || projectFile.isNil), {
 		Dialog.savePanel({ arg path;
 
 			projectFile = path;
 			"saving to %".format(projectFile).postln;
 			Store.archive(projectFile);
 			a.parent.name = "sequencer - %".format(projectFile.basename);
-			saveDir = projectFile.dirName;
+			saveDir = projectFile.dirname;
 			},
 			path: saveDir
 		);
 	}, {
 		"saving to %".format(projectFile).postln;
 		Store.archive(projectFile);
-		saveDir = projectFile.dirName;
+		saveDir = projectFile.dirname;
 	});
 });
 
@@ -123,6 +123,7 @@ Store.addObject(
 
 load = { arg path;
 	Store.readFromArchive(path);
+	Store.postTree;
 	a.fromStore(Store.getBase);
 	projectFile = path;
 	a.parent.name = "sequencer - %".format(path.basename);
@@ -134,7 +135,9 @@ load = { arg path;
 // 	s.makeGui;
 // };
 
-// Store.getBase.postln;
 
 a = SequencerCanvas.fromStore();
+// a.views[0].select;
+a.refresh;
 )
+

@@ -54,8 +54,7 @@ Routine({
 			var channelData;
 			var startFrame = index * chunkSize;
 			channelData = rawArray[startFrame .. (startFrame + chunkSize - 1)];
-			maxVal = channelData[0];
-			minVal = channelData[0];
+			minVal = maxVal = channelData[0];
 			channelData.do { |data, index|
 				maxVal = max(maxVal, data);
 				minVal = min(minVal, data);
