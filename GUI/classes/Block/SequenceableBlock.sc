@@ -43,8 +43,8 @@ SequenceableBlock : CanvasBlockBase {
 		^Menu(
 			MenuAction("copy (cmd-c)", 	{ Clipboard.add(id) }),
 			MenuAction("paste (cmd-v)", {
-				var absoluteTime = x / (xFactor * zoom.x);
-				var absoluteExtension = y / (yFactor * zoom.y);
+				var absoluteTime = x / (Theme.horizontalUnit * zoom.x);
+				var absoluteExtension = y / (Theme.verticalUnit * zoom.y);
 				Dispatcher((
 					type: 'pasteObjects',
 					payload: (
@@ -83,15 +83,15 @@ SequenceableBlock : CanvasBlockBase {
 		};
 
 	
-		Pen.stringInRect(label, renderBounds, font: Font("Helvetica", 10), color: Color.grey(0.1, 0.5));
+		Pen.stringInRect(label, renderBounds, font: Theme.font, color: Theme.grey);
 	}
 
 	getUpdate {
 		// call these variables 'absolute<Name>' because the store takes care of updating the events themselves with
 		// bpm values
-		var absoluteTime = bounds.origin.x / (xFactor * zoom.x);
-		var absoluteExtension = bounds.origin.y / (yFactor * zoom.y);
-		var absoluteLength = bounds.width / (xFactor * zoom.x);
+		var absoluteTime = bounds.origin.x / (Theme.horizontalUnit * zoom.x);
+		var absoluteExtension = bounds.origin.y / (Theme.verticalUnit * zoom.y);
+		var absoluteLength = bounds.width / (Theme.horizontalUnit * zoom.x);
 
 		^(id: id, x: absoluteTime, y: absoluteExtension, length: absoluteLength)
 	}

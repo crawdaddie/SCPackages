@@ -13,7 +13,7 @@ Cursor : CanvasBlockBase {
 			event.x,
 			event.y,
 			1,
-			yFactor
+			Theme.verticalUnit
 		);
 	}
 
@@ -42,7 +42,7 @@ Cursor : CanvasBlockBase {
 
 	renderView { arg origin, parentBounds;
 		var renderBounds = bounds.moveBy(origin.x, origin.y);
-		if (renderBounds.intersects(parentBounds).not) { ^false };
+		// if (renderBounds.intersects(parentBounds).not) { /*^false*/ [renderBounds, parentBounds].postln; };
 		Pen.smoothing = true;
 		Pen.color = color;
 		
@@ -58,11 +58,9 @@ Cursor : CanvasBlockBase {
 	extendSelectionHandler { |moveX, moveY|
 		var newWidth;
 		var newHeight;
-		if (bounds.width == 1) {
-			newWidth = moveX;
-		} {
-			newWidth = bounds.width + moveX;
-		};
+		var startingWidth;
+		
+		newWidth = bounds.width + moveX;
 
 		newHeight = bounds.height + moveY;
 
@@ -80,8 +78,7 @@ Cursor : CanvasBlockBase {
 			bounds.left,
 			bounds.top,
 			1,
-			yFactor
+			Theme.verticalUnit
 		)
 	}
-
 }

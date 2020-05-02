@@ -2,6 +2,7 @@ SequencerTheme {
 	classvar <>grey;
 	classvar <>black;
 	classvar <>darkGrey;
+	
 	*initClass {
 		grey = [Color.grey(0.3, 1), Color.grey(0.5, 1), Color.grey(0.7, 1)];
 		darkGrey = Color.grey(0.1, 1);
@@ -26,8 +27,9 @@ SequencerCanvas : UserView {
 	var mouseAction;
 	var id;
 
+
 	*new { arg argId, argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
-		var parent = argParent ?? Window.new('sequencer', Rect(1040, 455, 400, 400))
+		var parent = argParent ?? Window.new('sequencer', Rect(740, 455, 700, 400))
 			.front;
 		var bounds = argBounds ?? parent.view.bounds;
 	
@@ -105,8 +107,8 @@ SequencerCanvas : UserView {
 		origin = 0@0;
 
 
-		quantX = argQuantX ?? SequenceableBlock.xFactor;
-		quantY = argQuantY ?? SequenceableBlock.yFactor;
+		quantX = argQuantX ?? CanvasBlockBase.xFactor;
+		quantY = argQuantY ?? CanvasBlockBase.yFactor;
 		subdivisions = 1;
 
 		grid = SequencerGrid();
@@ -175,16 +177,16 @@ SequencerCanvas : UserView {
 			this.refresh;
 		};
 
-		this.keyDownAction = { |canvas, char, modifiers, unicode, keycode, key|
-			if (this.hasFocus.not, {^nil});
-			KeyActionManager.keyDownHandler(canvas, char, modifiers, unicode, keycode, key);
-			this.refresh;
-
+		this.keyDownAction = { arg ...keyArgs;
+			if (this.hasFocus) {
+				KeyActionManager.keyDownHandler(*keyArgs);
+				this.refresh;
+			}
 		};
 
 
-		this.keyUpAction = { |canvas, char, modifiers, unicode, keycode, key|
-			KeyActionManager.keyUpHandler(canvas, char, modifiers, unicode, keycode, key)
+		this.keyUpAction = { arg ...keyArgs;
+			KeyActionManager.keyUpHandler(*keyArgs)
 		};
 
 		this.onResize = { |canvas|
@@ -254,7 +256,7 @@ SequencerCanvas : UserView {
 		var selectedViews = this.selectedViews;
 		var mostLeft;
 		var mostTop;
-		var tick;
+		var tick = this.getTick;
 		var newLeft;
 		var keyUpActions;
 		// if (selectedViews.size == 0, {^cursorView.move}, {});
@@ -276,8 +278,6 @@ SequencerCanvas : UserView {
 			mostTop = cursorView.bounds.top;
 		});
 
-		tick = this.getTick;
-
 		if (quantize) {
 			moveX = moveX * tick;
 			newLeft = mostLeft.round(tick) + moveX;
@@ -291,7 +291,35 @@ SequencerCanvas : UserView {
 		}
 	}
 
+	moveCursorHandler { arg x, y;
+		var moveY = y * quantY * zoom.y;
+		var moveX = x;
+		var mostLeft = cursorView.bounds.left;
+		var mostTop = cursorView.bounds.top;
+		var newLeft;
+		var tick = this.getTick;
 
+		if (quantize) {
+			moveX = moveX * tick;
+			newLeft = mostLeft.round(tick) + moveX;
+			moveX = newLeft - mostLeft
+		};
+		cursorView.moveBy(moveX, moveY);
+	}
+
+	selectViewsUnderCursor {
+		var cursorBounds = cursorView.bounds;
+		views.do { |view|
+			if (view.intersects(cursorBounds)) { view.select } { view.unselect };
+		}
+	}
+
+	toggleSelectViewsUnderCursor {
+		var cursorBounds = cursorView.bounds;
+		views.do { |view|
+			if (view.intersects(cursorBounds)) { view.selected = view.selected.not };
+		}
+	}
 
 	extendSelectionHandler { arg x, y;
 		var moveY = y * quantY * zoom.y;
@@ -306,11 +334,11 @@ SequencerCanvas : UserView {
 			newLeft = mostLeft.round(tick) + moveX;
 			moveX = newLeft - mostLeft
 		};
-		newBounds = cursorView.extendSelectionHandler(moveX, moveY);
+
+		"extend selection handler".postln;
 		
-		views.do { arg view;
-			if (view.intersects(newBounds)) { view.select } { view.unselect };
-		};
+		cursorView.extendSelectionHandler(moveX, moveY);
+		this.selectViewsUnderCursor;
 
 		// callback to call when the KeyActionManager gives up its action
 		^{
@@ -601,8 +629,8 @@ SequencerCanvas : UserView {
 		var x = cursorView.x;
 		var y = cursorView.y;
 		var newCursorPosition = this.quantizePoint(x@y);
-		var absoluteTime = newCursorPosition.x / (SequenceableBlock.xFactor * zoom.x);
-		var absoluteExtension = newCursorPosition.y / (SequenceableBlock.yFactor * zoom.y);
+		var absoluteTime = newCursorPosition.x / (Theme.horizontalUnit * zoom.x);
+		var absoluteExtension = newCursorPosition.y / (Theme.verticalUnit * zoom.y);
 		items !? {
 			Dispatcher((
 				type: 'pasteObjects',
@@ -629,6 +657,14 @@ SequencerCanvas : UserView {
 		}, {
 			"quantization off".postln;
 		});
+	}
+
+	renderText { arg text;
+		cursorView.renderText(text);
+	}
+
+	openTextView {
+		^CmdLineView();
 	}
 }
 

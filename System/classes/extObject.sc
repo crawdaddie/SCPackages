@@ -94,4 +94,7 @@
 		stream << "prUnarchive(o,p);\n";
 		^stream.contents
 	}
+	tryEval { arg ...args;
+		^this !? this.value(*args) ?? this
+	}
 }

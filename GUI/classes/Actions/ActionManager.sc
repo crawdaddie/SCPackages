@@ -113,15 +113,21 @@ KeyActionManager {
 	classvar <>keyUpVar;
 	classvar <>keyDownVar;
 
-	*keyDownHandler { |canvas, char, modifiers, unicode, keycode, key|
+	*keyDownHandler { arg canvas, char, modifiers, unicode, keycode, key;
 		keyDownVar !? {
 			^keyDownVar.value(canvas, char, modifiers, unicode, keycode, key);
 		};
 
+
 		^switch ([modifiers, key])
 			{ [ 131072, 16777248 ] } {
-				this.shiftActionManager();
+				this.shiftActionManager(canvas, char, modifiers, unicode, keycode, key);
 			} // shift
+
+			{ [ 1048576, 16777249 ] } {
+			 this.cmdActionManager(canvas, char, modifiers, unicode, keycode, key);
+			} // cmd
+
 			
 			{ Keys(\cmdMod, \plus) }	{ canvas.zoomBy(1.05, 1) }
 			{ Keys(\cmdMod, \minus) }	{ canvas.zoomBy(1.05.reciprocal, 1) }
@@ -150,19 +156,19 @@ KeyActionManager {
 	 		{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
 
 			{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
-	 		{ [ 0, 16777216 ] } { canvas.deselectAll } // esc
+	 		{ [ 0, 16777216 ] } { this.reset; } // esc
 	 		{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
 
-	 		{ [ 2097152, 16777234 ] } { canvas.moveViewsHandler(-1, 0); } //left
-			{ [ 2097152, 16777236 ] } { canvas.moveViewsHandler(1, 	0);	} //right
-			{ [ 2097152, 16777235 ] } { canvas.moveViewsHandler(0, -1);	} //up
-			{ [ 2097152, 16777237 ] } { canvas.moveViewsHandler(0, 	1);	} //down
+	 		{ [ 2097152, 16777234 ] } { canvas.moveCursorHandler(-1, 0); } //left
+			{ [ 2097152, 16777236 ] } { canvas.moveCursorHandler(1,  0); } //right
+			{ [ 2097152, 16777235 ] } { canvas.moveCursorHandler(0, -1); } //up
+			{ [ 2097152, 16777237 ] } { canvas.moveCursorHandler(0,  1); } //down
 		;
 	}
 
-	*keyUpHandler { |canvas, char, modifiers, unicode, keycode, key|
+	*keyUpHandler { arg ...keyArgs;
 		keyUpVar !? {
-			keyUpVar.value(canvas, char, modifiers, unicode, keycode, key);
+			keyUpVar.value(*keyArgs);
 		}
 	}
 
@@ -171,26 +177,64 @@ KeyActionManager {
 		keyUpVar = nil;
 	}
 
-	*shiftActionManager {
+	*shiftActionManager { arg canvas, char, modifiers, unicode, keycode, key;
+		var initModKey = [modifiers, key];
 		var result;
+
+		// canvas.selectViewsUnderCursor();
 		keyDownVar = { |canvas, char, modifiers, unicode, keycode, key|
+			// ["shift keydown", canvas, char, modifiers, unicode, keycode, key].postln;
 			[modifiers, key].postln;
 			result = switch ([modifiers, key])
-				{ [ 2228224, 16777234 ] } { canvas.extendSelectionHandler(-1, 0); } //left
-				{ [ 2228224, 16777236 ] } { canvas.extendSelectionHandler(1,  0); } //right
-				{ [ 2228224, 16777235 ] } { canvas.extendSelectionHandler(0, -1); } //up
-				{ [ 2228224, 16777237 ] } { canvas.extendSelectionHandler(0,  1); } //down
+				{ [ 2228224, 16777234 ] } { "left".postln; canvas.extendSelectionHandler(-1, 0); } //left
+				{ [ 2228224, 16777236 ] } { "right".postln; canvas.extendSelectionHandler(1,  0); } //right
+				{ [ 2228224, 16777235 ] } { "up".postln; canvas.extendSelectionHandler(0, -1); } //up
+				{ [ 2228224, 16777237 ] } { "down".postln; canvas.extendSelectionHandler(0,  1); } //down
 			;
 			
 		};
 
 		keyUpVar = { |canvas, char, modifiers, unicode, keycode, key|
-			if ([modifiers, key] == [ 0, 16777248 ]) {
-				"cleanup".postln;
-				result !? _.();
+			if (this.shouldRelease([modifiers, key], initModKey)) {
+				"release shift".postln;
+				result.tryEval;
 				this.reset;
 			}
 		}
+	}
+
+	*cmdActionManager { arg canvas, char, modifiers, unicode, keycode, key;
+		var initModKey = [modifiers, key];
+		var result;
+		
+		if (canvas.selectedViews.size > 1) {
+			canvas.deselectAll;
+		} {
+			canvas.toggleSelectViewsUnderCursor();
+		};
+
+
+		keyDownVar = { |canvas, char, modifiers, unicode, keycode, key|
+			switch ([modifiers, key])
+				{ [ 3145728, 16777234 ] } { canvas.moveViewsHandler(-1, 0); } //left
+				{ [ 3145728, 16777236 ] } { canvas.moveViewsHandler(1,  0); } //right
+				{ [ 3145728, 16777235 ] } { canvas.moveViewsHandler(0, -1); } //up
+				{ [ 3145728, 16777237 ] } { canvas.moveViewsHandler(0,  1); } //down
+				{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
+				{ [ 1048576, 75 ] } { canvas.openTextView; } // cmd - k
+			;
+		};
+
+		keyUpVar = { |canvas, char, modifiers, unicode, keycode, key|
+			if (this.shouldRelease([modifiers, key], initModKey)) {
+				result.tryEval;
+				this.reset;
+			}
+		}
+	}
+
+	*shouldRelease { arg modKey, initModKey;
+		^modKey == [ 0, initModKey[1] ]
 	}
 
 }
