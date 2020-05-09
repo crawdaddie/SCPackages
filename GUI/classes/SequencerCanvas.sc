@@ -43,10 +43,10 @@ SequencerCanvas : UserView {
 		^canvas;
 	}
 
-	*fromStore { arg id;
-		var store = id !? Store.at(id) ?? Store.getBase;
+	*fromStore { arg store;
+		var id = store.id;
 		var canvas = this.new(id);
-		var items = Store.getItems(id);
+		var items = store.getItems;
 		canvas.addObjects(items.values);
 		^canvas;
 	}

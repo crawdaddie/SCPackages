@@ -1,7 +1,11 @@
-Store : LibraryBase {
+Store : Dictionary {
 	classvar global;
 	classvar lastId = 1000;
-	classvar lookups;
+	classvar <lookups;
+
+
+	var <type = 'store';
+	var <>id;
 	
 	*getId {
 		lastId = lastId + 1;
@@ -12,18 +16,46 @@ Store : LibraryBase {
 	*global_ { arg obj; global = obj; }
 
 	*initClass {
-		global = this.new;
-		global.put('timingContext', (type: 'timingContext', bpm: 60));
-		global.put('type', 'store');
 		lookups = Dictionary();
+		global = this.new().addTimingContext;
+	}
+
+	addTimingContext { arg ctx = ();
+		var defaultTimingCtx = (bpm: 60);
+		super.put('timingContext',
+			defaultTimingCtx.putAll(ctx)
+		);
+	}
+
+	getTimingContext {
+		this.at('timingContext') !? { arg ctx;
+			^ctx
+		} ?? {
+			var parent = this.getParent;
+			^parent.getTimingContext 
+		};
+	}
+
+	getParent {
+		var path = this.getPath;
+		if (path.size > 1) {
+			^Store.at(path[ path.size - 2 ]);
+		} {
+			^global
+		};
 	}
 
 	*getPath { arg id;
 		^lookups[id];
 	}
+	getPath {
+		^lookups[id];
+	}
 
 	*setPath { arg id, path;
-		lookups[id] = path;
+		if (id.class == Integer) {
+			lookups[id] = path;
+		}
 	}
 
 	*archive { arg path;
@@ -31,151 +63,194 @@ Store : LibraryBase {
 	}
 
 	*readFromArchive { arg path;
-		var maxArchiveId = 0;
 		global = path.load;
-		global.treeDo({ |path, object, argument|
-			var id = path[ path.size -1 ];
-			if (id.class == Integer) {
-				maxArchiveId = max(maxArchiveId, id);
-				this.setPath(id, path);
+		this.resetPaths;
+	}
+
+	*resetPaths {
+		var pathTraverse = { arg store, maxArchiveId, path;
+			store.keysValuesDo { arg id, value;
+				if (id.class == Integer) {
+					maxArchiveId = max(maxArchiveId, id);
+					this.setPath(id, path ++ [id]);
+					if (value.type == 'store') {
+						pathTraverse(value, maxArchiveId, path ++ [id])
+					}
+				}
 			};
-		});	
-		lastId = maxArchiveId;
-
+			maxArchiveId;
+		};
+		lastId = pathTraverse(global, 0, []);
 	}
 
-	*getItems { arg id;
-		var store = id !? { this.at(id) } ?? { global.dictionary };
-		^store.select({ | value, key | key.class == Integer });
+	*new { arg ...objects;
+		^super.new.init(*objects)
 	}
 
-	*getSortedItems { arg id;
-		var items = this.getItems(id);
-		^items.values.sort({ |a, b| a.timestamp < b.timestamp });
+	init { arg ...objects;
+		objects !? {
+			objects.do { arg obj;
+				this.addObject(obj);
+			}
+		};
 	}
 
-	*addTimingContext { arg timingContext, id;
-		var store = id !? { this.at(id) } ?? { global };
-		store.put('timingContext', timingContext);
+	put { arg key, value;
+		var lookupPath = Store.getPath(id);
+		super.at(key) !? {
+			// update objectx
+		} ?? {
+			// new object
+			super.put(key, value);
+		};
+
+		Store.setPath(key, lookupPath ++ [key]);
 	}
 
-	*getTimingContext { arg objectId;
-		var path = this.getPath(objectId);
-		var parentPath = path[ .. path.size - 2 ];
-		while ({ parentPath.size > 0 }, {
-			var parent = super.at(*parentPath);
-			parent['timingContext'] !? { arg timingContext;
-				^timingContext
-			};
-			parentPath = parentPath[ .. parentPath.size - 2];
-		});
-		^global['timingContext'];
+	addObject { arg object;
+		var id = Store.getId;
+		object.id = id;
+		this.put(id, object);
+	}
+
+	*getStoreOrGlobal { arg storeId;
+		^(storeId !? this.at(storeId) ?? global);
+	}
+
+	*addObject { arg object, storeId;
+		var store = this.getStoreOrGlobal(storeId);
+		store.addObject(object);
 	}
 
 	*at { arg id;
-		var path = this.getPath(id);
-		path ?? { ^nil };
-		^super.at(*path);
-	}	
+		var fullPath = lookups[id];
+		fullPath ?? { ^nil };
+		if (fullPath.size > 1) {
+			var parentId = fullPath[fullPath.size - 2];
+			^Store.at(parentId).at(id);
+		} { 
+			^global.at(id);
+		}
+	}
+	
+	/*
+	patch will look like this
+	CURRENT STATE:
+	(
+		1001: (a: 1, timestamp: 3),
+		1002: (a: 1, b: 2, timestamp: 1),
+		1003: ( // substore which contains object at 1004
+			type: 'store',
+			1004: (
+				a: 1, b: 2, timestamp: 0
+			)
+		)
+	)
 
-	*addObject { arg object, parentId;
-		var id = this.getId();
-		var lookupPath = parentId !? {
-			this.getPath(parentId) ?? { ^nil };
-		} ?? [];
+	PATCH:
+	(
+		1001: (a: 2), // <-- update 'a' key of object 1001
+		1002: [nil], // <-- delete object 1002 
+		1003: (
+			type: 'store',
+			1004: [nil] // <-- delete object 1004
+		),
+		1005: (
+			type: 'store',
+			new: [
+				(a: 1, b: 2, timestamp: 0), // <-- add new object (copy of 1004) to new store 1005
+				(a: 2, b: 2, timestamp: 1), // <-- totally new object
+			]
+			// 'moving' an object around means deleting it and adding a copy of it as a new object somewhere else
+			// means a new ID is created for it
+		)
+	)
 
-		object.id = id;
-		lookupPath = lookupPath.add(id);
-		this.setPath(id, lookupPath);
-		
-		this.put(*(lookupPath ++ [object]));
-		Dispatcher((type: 'objectAdded', payload: (object: object, parentId: parentId ? 0)));
-		^id
+	NEW STATE:
+	(
+		1001: (a: 2, timestamp: 3),
+		1003: ( // substore is now empty because 1004 was moved out
+			type: 'store',
+		)
+		1005: (
+			type: 'store',
+			1006: (a: 1, b: 2, timestamp: 0), // <-- copy of old 1004 but with new ID
+			1007: (a: 2, b: 2, timestamp: 1), // <-- new object
+		)
+	 )
+	*/
+
+	patch { arg patch, history;
+		patch.keysValuesDo { arg id, subPatch;
+			var target = this.at(id);
+			case 
+				{ id == 'new' } { ^subPatch.do { arg object; this.addObject(object)} }
+				{ target.notNil && subPatch == [nil] } { this.deleteObject(id) }
+				{ target.notNil && target.type == 'store' } { ^target.patch(subPatch) }
+				{ target.notNil } { ^this.updateObject(id, subPatch) }
+			;
+		};
 	}
 
-	*getCopy { arg id;
-		^();
+	*patch { arg patch, storeId, history;
+		var store = storeId !? this.at(storeId) ?? global; 
+		store.patch(patch, history);
 	}
 
-	*removeObject { arg id;
-		var path = this.getPath(id);
-		this.put(*(path ++ [nil]));
-		this.setPath(id, nil);
-		Dispatcher((type: 'objectRemoved', payload: (objectId: id, parentId: path[ path.size - 2 ])));
+	deleteObject { arg id;
+		super.put(id, nil);
+		lookups[id] = nil;
 	}
 
-	*updateObject { arg id, newState;
+	updateObject { arg id, newState, history;
 		var object = this.at(id);
 		var diff = getDiff(object, newState);
-		var historyMarker = getDiff(newState, object);
-
+		// var historyMarker = getDiff(newState, object);
 		if (diff.size > 0) {
 			diff.keysValuesDo { arg key, value;
-				object[key] = value;
-			};
-		};
-
-		Dispatcher((type: 'objectUpdated', payload: object));
-
-
-		^(newState: object, prevState: historyMarker);
-	}
-
-	// *patch { arg patch;
-		
-	// 	var historyPatch = MultiLevelIdentityDictionary();
-		
-	// 	var idsToUpdate = [];
-	// 	patch.leafDo { arg path, value;
-	// 		var oldValue = super.at(*path);
-
-	// 		oldValue !? { |oldValue|
-	// 			if (oldValue != value) {
-	// 				super.put(*(path ++ [value]));
-	// 			};
-	// 			if (path[path.size - 1] == 'id') {
-	// 				idsToUpdate = idsToUpdate.add(value);
-	// 			}
-	// 		}
-	// 	};
-		
-	// 	idsToUpdate.do { arg id;
-	// 		Dispatcher((type: 'objectUpdated', payload: this.at(id)));
-	// 	};
-
-	// 	StoreHistory.saveHistory(historyPatch);
-
-	// }
-
-	*patch { arg patch, save = true;
-		
-		var historyPatch = Dictionary();
-		
-		patch.keysValuesDo { arg id, newState;
-			var object = this.at(id);
-			object !? {
-				var update = this.updateObject(id, newState);
-				historyPatch.put(id, update.prevState);
-				// historyPatch.postln;
-			} ?? {
-				// new object
-				// this.addObject(newState, id);
-				// historyPatch.put(id)
+				object[key] = value
 			}
-		};
-
-		if(save, {
-			StoreHistory.saveHistory(historyPatch);
-		});
-
-	}
-
-	*getBase {
-		^global.dictionary;
+		}
 	}
 
 	*postTree {
-		^global.postTree;
+		global.postTree;
+	}
+
+	postTree { arg obj, tabs = 0;
+		if(obj.isNil, { obj = this });
+		
+		if (obj.type == 'store') {
+			"".postln;
+
+			obj.keysValuesDo({ arg key, value;
+				tabs.do({ Char.tab.post });
+				
+				key.post;
+				":".post;
+				
+				this.postTree(value, tabs + 1)
+			});
+
+		} {
+			Char.tab.post;
+			obj.asString.postln;
+		};
+	}
+
+	*getItems { arg storeId;
+		var store = this.getStoreOrGlobal(storeId);
+		^store.getItems;
+	}
+
+	getItems {
+		var returnDict = Dictionary();
+		this.keysValuesDo { arg key, value;
+			if (key.class == Integer) {
+				returnDict[key] = value;
+			}
+		}
+		^returnDict;
 	}
 }
 
