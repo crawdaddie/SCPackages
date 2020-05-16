@@ -111,5 +111,9 @@ a = SequencerCanvas.fromObjects(events);
 )
 
 
+
 Store.objects.values.do(_.postln)
 a.views
+SCNvim
+
+

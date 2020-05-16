@@ -55,7 +55,7 @@ CanvasBlockBase {
 
 		var timestamp, length;
 		length = event.length;
-		timestamp = event.timestamp;
+		timestamp = event.beats;
 
 
 		^Rect(

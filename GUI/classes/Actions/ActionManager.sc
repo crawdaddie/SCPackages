@@ -117,6 +117,7 @@ KeyActionManager {
 		keyDownVar !? {
 			^keyDownVar.value(canvas, char, modifiers, unicode, keycode, key);
 		};
+		// [modifiers, key].postln;
 
 
 		^switch ([modifiers, key])
@@ -143,21 +144,11 @@ KeyActionManager {
 			{ Keys(\optMod, \up) 		} { canvas.moveOrigin(0, -10) } //up
 			{ Keys(\optMod, \down) 	} { canvas.moveOrigin(0, 10) } //down
 
-			{ Keys(\cmdMod, \z) } { Dispatcher((type: 'undo')) } //cmd -z
-			{ [ 1179648, 90 ] } 	{ Dispatcher((type: 'redo')) } //cmd -shift -z
-					
-			{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
-			{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } // cmd-shift-s
-			{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o	
-
 			{ Keys(\noMod, \q) } { canvas.toggleQuantization } // Q
 					
-			{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
-	 		{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
 
 			{ Keys(\noMod, \tab) } { canvas.cycleThroughViews }
 	 		{ [ 0, 16777216 ] } { this.reset; } // esc
-	 		{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
 
 	 		{ [ 2097152, 16777234 ] } { canvas.moveCursorHandler(-1, 0); } //left
 			{ [ 2097152, 16777236 ] } { canvas.moveCursorHandler(1,  0); } //right
@@ -181,22 +172,18 @@ KeyActionManager {
 		var initModKey = [modifiers, key];
 		var result;
 
-		// canvas.selectViewsUnderCursor();
 		keyDownVar = { |canvas, char, modifiers, unicode, keycode, key|
-			// ["shift keydown", canvas, char, modifiers, unicode, keycode, key].postln;
-			[modifiers, key].postln;
 			result = switch ([modifiers, key])
-				{ [ 2228224, 16777234 ] } { "left".postln; canvas.extendSelectionHandler(-1, 0); } //left
-				{ [ 2228224, 16777236 ] } { "right".postln; canvas.extendSelectionHandler(1,  0); } //right
-				{ [ 2228224, 16777235 ] } { "up".postln; canvas.extendSelectionHandler(0, -1); } //up
-				{ [ 2228224, 16777237 ] } { "down".postln; canvas.extendSelectionHandler(0,  1); } //down
+				{ [ 2228224, 16777234 ] } { canvas.extendSelectionHandler(-1, 0); } //left
+				{ [ 2228224, 16777236 ] } { canvas.extendSelectionHandler(1,  0); } //right
+				{ [ 2228224, 16777235 ] } { canvas.extendSelectionHandler(0, -1); } //up
+				{ [ 2228224, 16777237 ] } { canvas.extendSelectionHandler(0,  1); } //down
 			;
 			
 		};
 
 		keyUpVar = { |canvas, char, modifiers, unicode, keycode, key|
 			if (this.shouldRelease([modifiers, key], initModKey)) {
-				"release shift".postln;
 				result.tryEval;
 				this.reset;
 			}
@@ -214,20 +201,36 @@ KeyActionManager {
 		};
 
 
+
 		keyDownVar = { |canvas, char, modifiers, unicode, keycode, key|
 			switch ([modifiers, key])
-				{ [ 3145728, 16777234 ] } { canvas.moveViewsHandler(-1, 0); } //left
-				{ [ 3145728, 16777236 ] } { canvas.moveViewsHandler(1,  0); } //right
-				{ [ 3145728, 16777235 ] } { canvas.moveViewsHandler(0, -1); } //up
-				{ [ 3145728, 16777237 ] } { canvas.moveViewsHandler(0,  1); } //down
-				{ [ 1048576, 65 ] } { canvas.selectAll } // cmd - a
-				{ [ 1048576, 75 ] } { canvas.openTextView; } // cmd - k
+				{ [ 3145728, 16777234 ] } { result = canvas.moveViewsHandler(-1, 0); } //left
+				{ [ 3145728, 16777236 ] } { result = canvas.moveViewsHandler(1,  0); } //right
+				{ [ 3145728, 16777235 ] } { result = canvas.moveViewsHandler(0, -1); } //up
+				{ [ 3145728, 16777237 ] } { result = canvas.moveViewsHandler(0,  1); } //down
+				{ [ 1048576, 65 ] } { canvas.selectAll } 			// cmd-a
+				{ [ 1048576, 75 ] } { canvas.openTextView; } 	// cmd-k
+				{ [ 1048576, 90 ] } { StoreHistory.undo } 		//cmd-z
+				{ [ 1179648, 90 ] } { StoreHistory.redo } 		//cmd-shift -z
+				{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
+	 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
+				{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
+				{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } 	// cmd-shift-s
+				{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o	
 			;
 		};
 
 		keyUpVar = { |canvas, char, modifiers, unicode, keycode, key|
 			if (this.shouldRelease([modifiers, key], initModKey)) {
-				result.tryEval;
+				result !? {
+					Dispatcher((
+						type: 'moveObjects',
+						payload: (
+							updates: result.(),
+							storeId: canvas.id
+						)
+					));
+				};
 				this.reset;
 			}
 		}

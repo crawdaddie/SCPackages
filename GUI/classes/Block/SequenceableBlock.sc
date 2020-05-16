@@ -7,17 +7,22 @@ SequenceableBlock : CanvasBlockBase {
 
 	*new { arg event, zoom = Point(1, 1);
 		^super.new(event, zoom).initView(event);
-	}
+		}
 
 	initView { arg event;
 		id = event.id;
 		label = id.asString;
 
-		Dispatcher.addListener('objectUpdated', { arg payload;
-			if (payload.id == id) {
-				this.objectUpdated(payload)
+		this.postln;
+		Dispatcher.addListener(
+			'objectUpdated',
+			this,
+			{ arg payload, view;
+				if (payload.id == view.id) {
+					view.objectUpdated(payload)
+				}
 			}
-		});
+		);
 	}
 
 	getAction { arg x, y;
@@ -60,10 +65,8 @@ SequenceableBlock : CanvasBlockBase {
 		).front;
 	}
 
-	objectUpdated { arg payload;
-		if (id == payload.id) {
-			this.resetBoundsFromEvent(payload);
-		}
+	objectUpdated { arg payload;	
+		this.resetBoundsFromEvent(payload);
 	}
 
 	renderView { arg origin, parentBounds;
@@ -87,13 +90,11 @@ SequenceableBlock : CanvasBlockBase {
 	}
 
 	getUpdate {
-		// call these variables 'absolute<Name>' because the store takes care of updating the events themselves with
-		// bpm values
-		var absoluteTime = bounds.origin.x / (Theme.horizontalUnit * zoom.x);
-		var absoluteExtension = bounds.origin.y / (Theme.verticalUnit * zoom.y);
-		var absoluteLength = bounds.width / (Theme.horizontalUnit * zoom.x);
+		var beats = bounds.origin.x / (Theme.horizontalUnit * zoom.x);
+		var extension = bounds.origin.y / (Theme.verticalUnit * zoom.y);
+		var lengthInBeats = bounds.width / (Theme.horizontalUnit * zoom.x);
 
-		^(id: id, x: absoluteTime, y: absoluteExtension, length: absoluteLength)
+		^(id: id, x: beats, y: extension, length: lengthInBeats)
 	}
 
 	resizeLeftBy { arg difference;

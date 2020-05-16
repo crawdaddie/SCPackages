@@ -35,6 +35,8 @@
 			if ((i & 3) == 0) { stream << "" };
 			obj.checkCanArchive;
 			if (obj.archiveAsCompileString) {
+				// objects like functions, strings etc
+				// cannot have open functions here
 				stream << obj.asCompileString;
 			}{
 				size = obj.indexedSize;

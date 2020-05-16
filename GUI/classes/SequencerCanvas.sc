@@ -25,15 +25,15 @@ SequencerCanvas : UserView {
 	var <cursorView;
 	var <>selectionBounds;
 	var mouseAction;
-	var id;
+	var <id;
 
 
-	*new { arg argId, argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
+	*new { arg id, argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
 		var parent = argParent ?? Window.new('sequencer', Rect(740, 455, 700, 400))
 			.front;
 		var bounds = argBounds ?? parent.view.bounds;
 	
-		^super.new(parent, bounds).init(argId, subviews ? [], quantX, quantY);
+		^super.new(parent, bounds).init(id, subviews ? [], quantX, quantY);
 	}
 
 	*fromObjects { arg objects;
@@ -44,24 +44,24 @@ SequencerCanvas : UserView {
 	}
 
 	*fromStore { arg store;
-		var id = store.id;
-		var canvas = this.new(id);
+		var canvas = this.new(store.id);
 		var items = store.getItems;
+		
 		canvas.addObjects(items.values);
 		^canvas;
 	}
 
-	fromStore { arg storeDict;
+	fromStore { arg store;
 		var items;
+		
 		this.clear;
-		id = storeDict['id'] !? { arg id; id } ?? nil;
-		items = Store.getItems(id);
-		this.addObjects(items);
+		id = store.id;
+		items = store.getItems;
+		this.addObjects(items.values);
 		^this;
 	}
 
 	addObjects { arg newObjects;
-
 		newObjects.do { |newObject|
 			this.addObject(newObject);
 		};
@@ -71,10 +71,9 @@ SequencerCanvas : UserView {
 	}
 
 	addObject { arg object;
-
 		case
-			{ object.type == 'store' } {
-				var newView = StoreBlock(object, zoom).select();
+			{ object.class == Store } {
+				var newView = object.getView(zoom);
 				views = views.add(newView)
 			}
 			{ object.type == 'sampleEvent' } {
@@ -87,7 +86,8 @@ SequencerCanvas : UserView {
 			}
 			{ object.type == 'timingContext' } {
 				timingContextView = TimingContextView(object);
-			};
+			}
+		;
 
 	}
 
@@ -101,6 +101,7 @@ SequencerCanvas : UserView {
 		var mouseAction;
 
 		id = argId;
+		id.postln;
 		quantize = true;
 		views = argviews;
 		zoom = 1@1;
@@ -171,7 +172,13 @@ SequencerCanvas : UserView {
 			updates = mouseAction.mouseUpAction(x, y);
 
 			updates !? { |updates|
-				Dispatcher((type: 'moveObjects', payload: updates));
+				Dispatcher((
+					type: 'moveObjects',
+					payload: (
+						updates: updates,
+						storeId: id
+					)
+				));
 			};
 			
 			this.refresh;
@@ -193,20 +200,44 @@ SequencerCanvas : UserView {
 		
 		};
 
-		Dispatcher.addListener('objectUpdated', { arg payload;
+		Dispatcher.addListener(
+			'objectUpdated',
+			this,
+			{ arg payload, canvas;
 			// if ((payload.id == id) || (views.collect(_.id).includes(payload.id)), {
 			// });
-			this.refresh;
-		});
+				canvas.refresh;
+			}
+		);
 
-		Dispatcher.addListener('objectAdded', { arg payload;
-			var parentId = id ? 0;
-			if (payload.parentId == parentId, {
-				this.addObject(payload.object)	
-			});
 
-			this.refresh;
-		});
+		Dispatcher.addListener(
+			'objectDeleted',
+			this,
+			{ arg payload;
+				if (payload.storeId == id) {
+					views = views.select({ arg view;
+						var shouldDeleteView = view.id == payload.objectId;
+						if (shouldDeleteView) {
+							Dispatcher.removeListenersForObject(view);
+						};
+						shouldDeleteView.not;
+					});
+				}
+			}
+		);
+
+		Dispatcher.addListener(
+			'objectAdded',
+			this,
+			{ arg payload, canvas;
+				var eventIsForThisCanvas = (payload.storeId.notNil && payload.storeId == canvas.id) || (payload.storeId.isNil && canvas.id.isNil);
+				if (eventIsForThisCanvas) {
+					canvas.addObject(payload.object)	
+				};
+				canvas.refresh;
+			}
+		);
 
 		^this
 	}
@@ -335,8 +366,6 @@ SequencerCanvas : UserView {
 			moveX = newLeft - mostLeft
 		};
 
-		"extend selection handler".postln;
-		
 		cursorView.extendSelectionHandler(moveX, moveY);
 		this.selectViewsUnderCursor;
 

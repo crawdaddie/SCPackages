@@ -106,9 +106,9 @@ Mod : Environment {
 			modpath.load;
 		};
 
-		Dispatcher.addListener('serverBooted', {
+		Dispatcher.addListener('serverBooted', this, { arg payload, module;
 			'serverBooted'.postln;
-			this.load;
+			module.load;
 		});
 
 		^this
