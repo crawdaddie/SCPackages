@@ -45,9 +45,9 @@ SequencerCanvas : UserView {
 
 	*fromStore { arg store;
 		var canvas = this.new(store.id);
-		var items = store.getItems;
+		var items = store.orderedItems;
 		
-		canvas.addObjects(items.values);
+		canvas.addObjects(items);
 		^canvas;
 	}
 
@@ -56,8 +56,8 @@ SequencerCanvas : UserView {
 		
 		this.clear;
 		id = store.id;
-		items = store.getItems;
-		this.addObjects(items.values);
+		items = store.orderedItems;
+		this.addObjects(items);
 		^this;
 	}
 
@@ -71,24 +71,8 @@ SequencerCanvas : UserView {
 	}
 
 	addObject { arg object;
-		case
-			{ object.class == Store } {
-				var newView = object.getView(zoom);
-				views = views.add(newView)
-			}
-			{ object.type == 'sampleEvent' } {
-				var newView = SequenceableSoundfileBlock(object, zoom).select();
-				views = views.add(newView)
-			}
-			{ object.type == 'sequencerEvent' } {
-				var newView = SequenceableBlock(object, zoom).select();
-				views = views.add(newView)
-			}
-			{ object.type == 'timingContext' } {
-				timingContextView = TimingContextView(object);
-			}
-		;
-
+		var newView = object.getEmbedView(zoom);
+		views = views.add(newView);
 	}
 
 	clear {
@@ -101,7 +85,7 @@ SequencerCanvas : UserView {
 		var mouseAction;
 
 		id = argId;
-		id.postln;
+		
 		quantize = true;
 		views = argviews;
 		zoom = 1@1;
@@ -667,7 +651,7 @@ SequencerCanvas : UserView {
 					x: absoluteTime,
 					y: absoluteExtension,
 					items: items,
-					parentId: id
+					storeId: id
 				))
 			);
 		};
@@ -695,5 +679,33 @@ SequencerCanvas : UserView {
 	openTextView {
 		^CmdLineView();
 	}
+
+	editSelection {
+		this.selectedViews.do { arg view;
+			view.tryPerform('edit');
+		}
+	}
+
+	deleteSelection {
+		Dispatcher((
+			type: 'deleteObjects',
+			payload: (
+				storeId: id,
+				toDelete: this.selectedViews.collect(_.id);
+				)
+			)
+		);
+	}
+
+	edit {
+		var object = Store.at(id);
+		object.getModule !? { arg mod;
+			// mod.postln;
+			mod.open;
+		};
+
+		object.tryPerform('getView');
+	}
+
 }
 

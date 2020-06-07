@@ -123,4 +123,11 @@ SequenceableBlock : CanvasBlockBase {
 		};
 		^partition;
 	}
+	
+	edit {
+		var object = Store.at(id);
+		object.getModule !? { arg mod;
+			mod.open;			
+		}
+	}
 }

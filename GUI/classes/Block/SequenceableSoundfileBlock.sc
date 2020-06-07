@@ -58,9 +58,10 @@ SequenceableSoundfileBlock : SequenceableBlock {
 		}
 	}
 
-	edit {
-		// no-op
-	}
+	// edit {
+	// 	// no-op
+	// 	super.edit();
+	// }
 
 	setLeftTo { arg left;
 		super.setLeftTo(left);

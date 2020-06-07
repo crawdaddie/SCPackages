@@ -64,6 +64,10 @@ Mod : Environment {
 		^mod;
 	}
 
+	*newWithinEnv { arg path, env; 
+		^super.new.init(path).loadWithinEnv(env);
+	}
+
 
 	init { arg path;
 
@@ -76,13 +80,16 @@ Mod : Environment {
 
 		this.registerModule;
 
-		if (PathName.new(path).isFolder, { this.loadFromFolder }, {
+		if (PathName.new(path).isFolder) {
+			this.loadFromFolder
+		} {
 			var ext = path.splitext.last;
 			switch (ext,
 				"wav", { this.loadFromSoundfile },
 				"mp3", { this.loadFromSoundfile },
-				{ this.loadFromPath });
-		});
+				{ this.loadFromPath }
+			);
+		};
 
 		^this
 	}
@@ -116,6 +123,12 @@ Mod : Environment {
 
 	loadVirtual { arg extra;
 		^this.make { extra.value() };
+	}
+
+	loadWithinEnv { arg env;
+	 	this.parent_(env);
+	 	this.use { ~path.load };
+	 	^this
 	}
 
 	registerModule {

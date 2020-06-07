@@ -9,9 +9,10 @@ StoreBlock : SequenceableBlock {
 	}
 
 	edit {
-		var path = Store.getPath(id);
-		var canvas = SequencerCanvas.fromStore(id);
-		canvas.parent.name = "store - %".format(path);
+		var canvas;
+		super.edit();
+		canvas = SequencerCanvas.fromStore(Store.at(id));
+		canvas.parent.name = "store - %".format(id);
 		^canvas;
 	}
 }

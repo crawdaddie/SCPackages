@@ -6,6 +6,7 @@ Store : Event {
 
 	// var <type = 'store';
 	var <>id;
+	var <orderedItems;
 	
 	*getId {
 		lastId = lastId + 1;
@@ -26,7 +27,6 @@ Store : Event {
 			defaultTimingCtx.putAll(ctx)
 		);
 	}
-
 
 	getTimingContext {
 		this.at('timingContext') !? { arg ctx;
@@ -49,6 +49,7 @@ Store : Event {
 	*getPath { arg id;
 		^lookups[id];
 	}
+
 	getPath {
 		^lookups[id];
 	}
@@ -73,6 +74,7 @@ Store : Event {
 			store.keysValuesDo { arg id, value;
 				if (id.class == Integer) {
 					maxArchiveId = max(maxArchiveId, id);
+					(path ++ [id]).postln;
 					this.setPath(id, path ++ [id]);
 					if (value.class == Store) {
 						pathTraverse(value, maxArchiveId, path ++ [id])
@@ -81,7 +83,7 @@ Store : Event {
 			};
 			maxArchiveId;
 		};
-		lastId = pathTraverse(global, 0, []);
+		lastId = pathTraverse.value(global, 0, []);
 	}
 
 	*new { arg object;
@@ -93,21 +95,23 @@ Store : Event {
 			this.putAll(object);
 			super.parent_(object.parent);
 		};
+
+		orderedItems = SortedList(8, { arg a, b;
+			a.timestamp < b.timestamp;
+		});
 	}
 
 	put { arg key, value;
 		var lookupPath = Store.getPath(id);
 		super.put(key, value);
+		if (key.class == Integer) {
+			value.proto_(this); // allow object to use data from its parent - eg timingContext
+		};
 		Store.setPath(key, lookupPath ++ [key]);
 	}
 
 	*getStoreOrGlobal { arg storeId;
 		^(storeId !? this.at(storeId) ?? global);
-	}
-
-	*addObject { arg object, storeId;
-		var store = this.getStoreOrGlobal(storeId);
-		^store.addObject(object);
 	}
 
 	*at { arg id;
@@ -197,10 +201,19 @@ Store : Event {
 		// }
 	}
 
+	removeFromOrderedList { arg id;
+		var index = 0;
+		while { orderedItems[index].id != id } { index = index + 1 };
+
+		orderedItems.removeAt(index);
+	} 
+
 	deleteObject { arg objectId;
 		var historyMarker = this.at(objectId);
 		super.put(objectId, nil);
 		lookups[objectId] = nil;
+		this.removeFromOrderedList(objectId);
+
 		Dispatcher((
 			type: 'objectDeleted',
 			payload: (
@@ -219,10 +232,18 @@ Store : Event {
 		diff.keysValuesDo { arg key, newValue;
 			historyMarker[key] = object[key]; // get old state and push to history
 			object[key] = newValue;
+			if ((key == 'beats') || (key == 'absolute')) {
+				orderedItems.sort;
+			}
 		};
 		// history[id] = historyMarker;
 		
 		Dispatcher((type: 'objectUpdated', payload: object));
+	}
+
+	*addObject { arg object, storeId;
+		var store = this.getStoreOrGlobal(storeId);
+		^store.addObject(object);
 	}
 
 	addObject { arg object, history;
@@ -230,6 +251,11 @@ Store : Event {
 		var historyMarker = [nil];
 		object.id = objectId;
 		this.put(objectId, object);
+		object.src !? { arg path;
+			Mod.new(path);
+		};
+		orderedItems.add(object);
+
 
 		Dispatcher((
 			type: 'objectAdded',
@@ -279,23 +305,27 @@ Store : Event {
 		};
 	}
 
-	getView { arg zoom;
+	getEmbedView { arg zoom;
 		^StoreBlock(this, zoom).select();
+	}
+	getView {
+		^SequencerCanvas.fromStore(this);
 	}
 
 	*getItems { arg storeId;
 		var store = this.getStoreOrGlobal(storeId);
-		^store.getItems;
+		^store.orderedItems;
 	}
 
 	getItems {
-		var returnDict = Dictionary();
-		this.keysValuesDo { arg key, value;
-			if (key.class == Integer) {
-				returnDict[key] = value;
-			}
-		}
-		^returnDict;
+		^orderedItems;
 	}
-
+	
+	play {
+		var routine = this.getRoutine;
+		this.getModule !? { arg mod;
+			mod.play(this);
+		};
+		routine.play;
+	}
 }

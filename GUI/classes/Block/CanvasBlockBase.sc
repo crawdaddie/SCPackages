@@ -147,16 +147,12 @@ CanvasBlockBase {
 	}
 
 	resizeLeftBy { arg difference;
-		bounds.set(
-			bounds.left - difference,
-			bounds.top,
-			bounds.width + difference,
-			bounds.height
-		);
+		bounds.width = bounds.width + difference;
+		bounds.left = bounds.left - difference;
 	}
 
 	resizeRightBy { arg difference;
-		bounds.setExtent(initialBounds.width - difference, bounds.height);			
+		bounds.width = bounds.width - difference;			
 	}
 
 	contains { arg x_y;
@@ -179,10 +175,6 @@ CanvasBlockBase {
 		);
 	}
 
-
-	edit {
-		// subclass responsibility
-	}
 
 	keyDownAction { |modifiers, key| 
 		if (this.selected.not, {
