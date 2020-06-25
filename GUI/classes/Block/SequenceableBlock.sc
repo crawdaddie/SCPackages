@@ -7,7 +7,7 @@ SequenceableBlock : CanvasBlockBase {
 
 	*new { arg event, zoom = Point(1, 1);
 		^super.new(event, zoom).initView(event);
-		}
+	}
 
 	initView { arg event;
 		id = event.id;

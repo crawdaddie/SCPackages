@@ -17,7 +17,7 @@ var automationInstance;
 StoreHistory.enable;
 
 Store.global.addTimingContext((
-	bpm: 80
+	bpm: 120,
 ));
 
 Dispatcher.addListener(
@@ -37,7 +37,9 @@ Dispatcher.addListener(
 			);
 			updates.put(id, newState);
 		};
-		Store.patch(updates, store.id);
+		if (updates.size > 0) {
+			Store.patch(updates, store.id);
+		}
 	}
 );
 
@@ -45,8 +47,12 @@ Dispatcher.addListener(
 	'deleteObjects',
 	'system',
 	{ arg payload;
-		var patch = Dictionary.with(*payload.toDelete.collect({ arg id; id -> [nil] }));
-		Store.patch(patch, payload.storeId);
+		Store.patch(
+			Dictionary.with(
+				*payload.toDelete.collect({ arg id; id -> [nil] })
+			),
+			payload.storeId
+		);
 	}
 );
 
@@ -154,6 +160,7 @@ Dispatcher.addListener('open', 'system', {
 
 
 a = SequencerCanvas.fromStore(Store.global);
+k = StorePlayer(Store.global);
 // a.views[0].select;
 
 // a = SequencerCanvas();

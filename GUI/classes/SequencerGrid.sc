@@ -12,7 +12,9 @@ SequencerGrid {
 		subdivisionColor = Color.grey(0.7, 0.5);
 	}
 
-	init {}
+	init {
+	}
+
 
 	drawYGrid { arg origin, bounds, zoom;
 		var gap = SequenceableBlock.yFactor * zoom.y;
@@ -37,9 +39,6 @@ SequencerGrid {
 		// var tickNum = 0;
 		tick = minorGap;
 
-
-
-
 		
 		Pen.strokeColor_(mainGridColor);
 		while ({ xOffset < bounds.width }) {
@@ -60,7 +59,7 @@ SequencerGrid {
 		Pen.stroke;
 	}
 
-	draw { arg quantX, origin, bounds, zoom, subdivisions;
+	renderView { arg quantX, origin, bounds, zoom, subdivisions;
 		this.drawYGrid(origin, bounds, zoom);
 		this.drawXGrid(quantX, origin, bounds, zoom, subdivisions);
 	}

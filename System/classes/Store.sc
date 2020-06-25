@@ -4,7 +4,6 @@ Store : Event {
 	classvar <lookups;
 
 
-	// var <type = 'store';
 	var <>id;
 	var <orderedItems;
 	
@@ -18,13 +17,23 @@ Store : Event {
 
 	*initClass {
 		lookups = Dictionary();
-		global = this.new().addTimingContext;
+		global = this
+			.new()
+			.addTimingContext
+			.addTransportContext;
 	}
 
 	addTimingContext { arg ctx = ();
 		var defaultTimingCtx = (bpm: 60);
 		super.put('timingContext',
 			defaultTimingCtx.putAll(ctx)
+		);
+	}
+
+	addTransportContext { arg ctx = ();
+		var defaultTransportCtx = ();
+		super.put('transportContext',
+			defaultTransportCtx.putAll(ctx)
 		);
 	}
 
@@ -35,6 +44,16 @@ Store : Event {
 			var parent = this.getParent;
 			^parent.getTimingContext 
 		};
+	}
+
+	setLoopPoints { arg loopPoints, storeUpdates;
+		if (loopPoints == [nil] || loopPoints.isNil || loopPoints[0] == loopPoints[1]) {
+			this.transportContext.loopPoints = nil;
+			storeUpdates.transportContext = this.transportContext;
+			^nil;
+		};
+		this.transportContext.loopPoints = loopPoints;
+		storeUpdates.transportContext = this.transportContext;
 	}
 
 	getParent {
@@ -115,10 +134,10 @@ Store : Event {
 	}
 
 	*at { arg id;
-
-		var fullPath = lookups[id];
-		fullPath ?? { ^nil };
+		var fullPath;
 		id ?? { ^global };
+		fullPath = lookups[id];
+		fullPath ?? { ^nil };
 		if (fullPath.size > 1) {
 			var parentId = fullPath[fullPath.size - 2];
 			^Store.at(parentId).at(id);
@@ -175,21 +194,32 @@ Store : Event {
 	*/
 
 	patch { arg patch;
-		patch.keysValuesDo { arg id, subPatch;
-			var target = this.at(id);
+		var storeUpdates = ( storeId: id, timestampUpdates: [] );
+		patch.keysValuesDo { arg objectId, subPatch;
+			var target = this.at(objectId);
 			case 
-				{ id == 'new' } {
-					subPatch.do {
-						arg object;
-						this.addObject(object);
+				{ objectId == 'new' } {
+					subPatch.do { arg object;
+						this.addObject(object, storeUpdates);
 					}
 				}
-				{ target.notNil && subPatch == [nil] } { this.deleteObject(id) }
-				{ target.notNil && target.class == Store } { target.updateObject(nil, subPatch) }
-				{ target.notNil } { this.updateObject(id, subPatch) }
+				{ target.notNil && subPatch == [nil] } { this.deleteObject(objectId, storeUpdates) }
+				{ target.notNil && target.class == Store } { target.updateObject(nil, subPatch, storeUpdates) }
+				{ target.notNil } {
+					var update = this.updateObject(objectId, subPatch, storeUpdates);
+					if (objectId.class == Symbol && update.notNil) {
+						storeUpdates.put(objectId, subPatch)
+					}
+				}
 			;
 		};
 
+		// storeUpdates.postln;
+		Dispatcher((
+			type: 'storeUpdated',
+			payload: storeUpdates,
+			)
+		)
 	}
 
 	*patch { arg patch, storeId, shouldSave = true;
@@ -208,11 +238,13 @@ Store : Event {
 		orderedItems.removeAt(index);
 	} 
 
-	deleteObject { arg objectId;
+	deleteObject { arg objectId, storeUpdates;
 		var historyMarker = this.at(objectId);
+		var oldObject = lookups[objectId];
 		super.put(objectId, nil);
 		lookups[objectId] = nil;
 		this.removeFromOrderedList(objectId);
+		storeUpdates.timestampUpdates = storeUpdates.timestampUpdates.add(oldObject.timestamp); 
 
 		Dispatcher((
 			type: 'objectDeleted',
@@ -224,21 +256,33 @@ Store : Event {
 		);
 	}
 
-	updateObject { arg id, newState;
-		var object = id !? this.at(id) ?? this;
+	updateObject { arg objectId, newState, storeUpdates;
+		var object = objectId !? this.at(objectId) ?? this;
 		var diff = getDiff(object, newState);
 		var historyMarker = Dictionary();
-		
-		diff.keysValuesDo { arg key, newValue;
-			historyMarker[key] = object[key]; // get old state and push to history
-			object[key] = newValue;
-			if ((key == 'beats') || (key == 'absolute')) {
-				orderedItems.sort;
-			}
-		};
-		// history[id] = historyMarker;
-		
-		Dispatcher((type: 'objectUpdated', payload: object));
+
+		if (diff.size == 0) {
+			^nil
+		} {
+			diff.keysValuesDo { arg key, newValue;
+				historyMarker[key] = object[key]; // get old state and push to history
+				if (key == 'loopPoints') {
+					this.setLoopPoints(newValue, storeUpdates);
+				} {
+					object[key] = newValue;
+					if ((key == 'beats') || (key == 'absolute')) {
+						orderedItems.sort;
+						storeUpdates.timestampUpdates = storeUpdates.timestampUpdates.add(object.timestamp); 
+					}
+				}				
+
+			};
+			Dispatcher((
+				type: 'objectUpdated',
+				payload: object.putAll((storeId: id))
+			));
+			^object;
+		}
 	}
 
 	*addObject { arg object, storeId;
@@ -246,7 +290,7 @@ Store : Event {
 		^store.addObject(object);
 	}
 
-	addObject { arg object, history;
+	addObject { arg object, history, storeUpdates;
 		var objectId = Store.getId;
 		var historyMarker = [nil];
 		object.id = objectId;
@@ -255,7 +299,9 @@ Store : Event {
 			Mod.new(path);
 		};
 		orderedItems.add(object);
-
+		storeUpdates !? { arg updates;
+			updates.timestampUpdates = storeUpdates.timestampUpdates.add(object.timestamp); 
+		};
 
 		Dispatcher((
 			type: 'objectAdded',
@@ -317,15 +363,25 @@ Store : Event {
 		^store.orderedItems;
 	}
 
-	getItems {
+	getItems { arg from = 0;
+		// var items = [];
+		// orderedItems
+		// 	.select({ arg item, i;
+		// 		item.timestamp >= from;
+		// 	})
+		// 	.do({ arg orderedItem, i;
+		// 		items.last !? { arg lastItem;
+		// 			if (orderedItem.timestamp == lastItem.timestamp) {
+		// 				lastItem.items = lastItem.items.add(orderedItem);
+		// 				} {
+		// 					items = items.add((timestamp: orderedItem.timestamp, items: [orderedItem]))
+		// 				};
+		// 		} ?? {
+		// 			items = items.add((timestamp: orderedItem.timestamp, items: [orderedItem]))
+		// 		}
+		// 	})
+		// ^items;
 		^orderedItems;
 	}
 	
-	play {
-		var routine = this.getRoutine;
-		this.getModule !? { arg mod;
-			mod.play(this);
-		};
-		routine.play;
-	}
 }

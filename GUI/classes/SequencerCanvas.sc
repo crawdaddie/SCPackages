@@ -22,6 +22,7 @@ SequencerCanvas : UserView {
 	
 	var <timingContextView;
 	var <>grid;
+	var <>transportLines;
 	var <cursorView;
 	var <>selectionBounds;
 	var mouseAction;
@@ -97,6 +98,10 @@ SequencerCanvas : UserView {
 		subdivisions = 1;
 
 		grid = SequencerGrid();
+		transportLines = TransportLines(
+			id,
+			this
+		);
 		cursorView = Cursor((x: 0, y: 0), zoom);
 		
 		this.resize = 5;
@@ -228,7 +233,8 @@ SequencerCanvas : UserView {
 
 	renderView {
 		var parentBounds = this.parent.bounds;
-		grid.draw(quantX, origin, parentBounds, zoom, subdivisions);
+		grid.renderView(quantX, origin, parentBounds, zoom, subdivisions);
+		transportLines.renderView(quantX, origin, parentBounds, zoom, subdivisions);
 		
 		timingContextView !? { |view|
 			view.draw(parentBounds, subdivisions, quantize);
