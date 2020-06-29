@@ -76,44 +76,46 @@ Dispatcher.addListener(
 
 // initialisation
 
-e = (
-	soundfile: soundfile.path,
-	startPos: 0,
-	length: 2,
-	automations: (
-		env: Env.new(
-			[0, 1, 0.3, 0.8, 0],
-			[2,	3, 1, 4], 
-			['exp', 'exp', 'exp', 'lin']
-		)
-	),
-	src: srcDir +/+ "module_1.scd"; 
-).parent_(sampleEvent);
+// e = (
+// 	beats: 7,
+// 	soundfile: soundfile.path,
+// 	startPos: 0,
+// 	length: 2,
+// 	automations: (
+// 		env: Env.new(
+// 			[0, 1, 0.3, 0.8, 0],
+// 			[2,	3, 1, 4], 
+// 			['exp', 'exp', 'exp', 'lin']
+// 		)
+// 	),
+// 	src: srcDir +/+ "module_1.scd"; 
+// );
 
-// events = [e];
-events = [
-	(soundfile: soundfile.path, beats: 0, startPos: 0, length: 2),
- 	(soundfile: soundfile.path, beats: 2, startPos: 0, length: 2),
- 	(soundfile: soundfile.path, beats: 4, startPos: 0, length: 2),
- 	(soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
- 	].collect(_.parent_(sampleEvent));
+// // events = [e];
+// events = [
+// 	e,
+// 	(soundfile: soundfile.path, beats: 0, startPos: 0, length: 2),
+//  	(soundfile: soundfile.path, beats: 2, startPos: 0, length: 2),
+//  	(soundfile: soundfile.path, beats: 4, startPos: 0, length: 2),
+//  	(soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
+//  	].collect(_.parent_(sampleEvent));
 
-events = events.add((beats: 0, channel: 2).parent_(sequencerEvent));
-
-
-events.do { |event, index|
-	Store.addObject(event);
-};
+// events = events.add((beats: 0, channel: 2).parent_(sequencerEvent));
 
 
-subStoreId = Store.addObject(
-	Store((beats: 2, channel: 5, length: 1, src: srcDir +/+ "store_code.scd").parent_(sequencerEvent))
-);
+// events.do { |event, index|
+// 	Store.addObject(event);
+// };
 
-Store.addObject(
-	(soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2).parent_(sampleEvent),
-	subStoreId
-);
+
+// subStoreId = Store.addObject(
+// 	Store((beats: 2, channel: 5, length: 1, src: srcDir +/+ "store_code.scd").parent_(sequencerEvent))
+// );
+
+// Store.addObject(
+// 	(soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2).parent_(sampleEvent),
+// 	subStoreId
+// );
 
 load = { arg path;
 	Store.readFromArchive(path);
@@ -160,7 +162,6 @@ Dispatcher.addListener('open', 'system', {
 
 
 a = SequencerCanvas.fromStore(Store.global);
-k = StorePlayer(Store.global);
 // a.views[0].select;
 
 // a = SequencerCanvas();

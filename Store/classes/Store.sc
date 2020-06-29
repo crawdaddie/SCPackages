@@ -47,12 +47,11 @@ Store : Event {
 	}
 
 	setLoopPoints { arg loopPoints, storeUpdates;
-		if (loopPoints == [nil] || loopPoints.isNil || loopPoints[0] == loopPoints[1]) {
+		if (loopPoints == [nil] || loopPoints.isNil || (loopPoints[0] == loopPoints[1])) {
 			this.transportContext.loopPoints = nil;
-			storeUpdates.transportContext = this.transportContext;
-			^nil;
+		} {
+			this.transportContext.loopPoints = loopPoints.sort;
 		};
-		this.transportContext.loopPoints = loopPoints;
 		storeUpdates.transportContext = this.transportContext;
 	}
 
@@ -363,25 +362,12 @@ Store : Event {
 		^store.orderedItems;
 	}
 
-	getItems { arg from = 0;
-		// var items = [];
-		// orderedItems
-		// 	.select({ arg item, i;
-		// 		item.timestamp >= from;
-		// 	})
-		// 	.do({ arg orderedItem, i;
-		// 		items.last !? { arg lastItem;
-		// 			if (orderedItem.timestamp == lastItem.timestamp) {
-		// 				lastItem.items = lastItem.items.add(orderedItem);
-		// 				} {
-		// 					items = items.add((timestamp: orderedItem.timestamp, items: [orderedItem]))
-		// 				};
-		// 		} ?? {
-		// 			items = items.add((timestamp: orderedItem.timestamp, items: [orderedItem]))
-		// 		}
-		// 	})
-		// ^items;
+	getItems {
 		^orderedItems;
+	}
+
+	play { arg start = 0, quant;
+		^StorePlayer(this).play(start, quant);
 	}
 	
 }

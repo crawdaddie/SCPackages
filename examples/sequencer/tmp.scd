@@ -73,25 +73,53 @@ k.currentPosition;
 (
 g = Store.global;
 g.patch((
-	transportContext: (loopPoints: [nil]),
+	transportContext: (loopPoints: [4, 8]),
 ));
 g.postTree;
+g.play;
 )
 
-
-
+k.currentPosition
 
 l = (
 	transportContext: (loopPoints: nil),
 	timingContext: (bpm: 60)
 );
 
-
-
+g[1006].play;
+thisThread.stackSize
 l;
+Thread
 
+Store.lookups[1008];
+
+($\t + "ksd").postln
+"\t\tdasd".postln;
+
+Environment.stack;
+(
+{
+	{
+		thisThread.parent.postln;
+	}.fork;
+	thisThread.parent.postln
+}.fork;
+)
+
+
+k.routine.clock.isRunning
 g.postTree;
 
+k.currentPosition;
+
+k.play;
+
+g = Store.global;
+g.patch((transportContext: (loopPoints: [2, 8])));
+
+k.play;
+
+k.currentPosition;
 
 (
 g = Store.global;
@@ -105,12 +133,14 @@ g.patch((
 // 	transportContext: (loopPoints: nil),
 // 	timingContext: (bpm: 60)
 // ));
-g.postTree;
+// g.postTree;
 )
 
 k.play;
 
+k.currentPosition;
 
+g.postTree;
 (
 g = Store.global;
 

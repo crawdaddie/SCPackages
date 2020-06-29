@@ -5,14 +5,14 @@ StorePlayer {
 	var position;
 	var nextPosition;
 	var bpm;
-	var <lastLogicalTime;
+	var <lastLoopOffset;
 	
 	*new { arg store;
 		^super.newCopyArgs(store).init();
 	}
 
 	init {
-		lastLogicalTime = 0;
+		lastLoopOffset = 0;
 		Dispatcher.addListener(
 			'storeUpdated',
 			this,
@@ -27,7 +27,7 @@ StorePlayer {
 	}
 
 	currentPosition {
-		^routine.clock.beats - lastLogicalTime;
+		^routine.clock.beats - lastLoopOffset;
 	}
 
 	shouldInterruptRoutine { arg payload;
@@ -53,19 +53,28 @@ StorePlayer {
 		var currentBeats, stopPosition;
 		position = this.currentPosition;
 		routine.stop;
+		routine = nil;
 
 		Dispatcher((
 			type: 'storeNotPlaying',
-			payload: (storeId: store.id, player: this, stopPosition: this.currentPosition)
+			payload: (
+				storeId: store.id,
+				player: this,
+				stopPosition: this.currentPosition
+			)
 		));
 
 	}
 
-	play { arg start = 0;
-		var timingContext = store.getTimingContext;
-		var transportContext = store.transportContext;
-		var loopPoints = store.transportContext.loopPoints !? _.sort ?? nil;
+	play { arg start = 0, quant;
+		var timingContext, transportContext, loopPoints;
+		routine !? {
+			^routine;
+		};
 
+		timingContext = store.getTimingContext;
+		transportContext = store.transportContext;
+		loopPoints = store.transportContext.loopPoints;
 		
 		routine = this.getRoutine(
 			start,
@@ -76,26 +85,28 @@ StorePlayer {
 			mod.play(this);
 		};
 		
-		lastLogicalTime = start;
+		lastLoopOffset = start;
 		routine.play(
 			TempoClock(timingContext.bpm / 60, start),
+			quant,
 		);
 
 		Dispatcher((
 			type: 'storePlaying',
-			payload: (storeId: store.id, player: this, startPosition: start)
+			payload: (
+				storeId: store.id,
+				player: this,
+				startPosition: start
+			)
 		));
-
+		^routine;
 	}
 
 	getNextEventGroup { arg events, start = 0, strictly = true, loopPoints;
 		var timestamp, futureEvents;
 
 		futureEvents = events.select({ arg event;
-			// var isBeforeLoopEnd = loopPoints !? {
-			// 	event.timestamp < loopPoints[1];
-			// } ?? true;
-			((event.timestamp > start) || (strictly.not && event.timestamp == start))
+			(event.timestamp > start) || (strictly.not && event.timestamp == start)
 		});
 
 		if (futureEvents.size == 0) {
@@ -109,13 +120,17 @@ StorePlayer {
 	}
 
 	postBeats {
-		postf("beats: %, pos: %\n", thisThread.beats, position);
+		postf("pos: %\n", position);
 	}
 
 	playEvents { arg events;
-		// this.postBeats;
-		events.do({ arg ev; ev.postln });
-		"".postln;
+		store.getModule !? { arg module;
+			^module.playInStore(store, events);
+		};
+		
+		^events.collect({ arg ev;
+			ev.play;
+		});
 	}
 
 	waitAndPlay { arg pos, nextPos, events;
@@ -164,7 +179,6 @@ StorePlayer {
 		var nextEvents;
 		this.waitAndPlay(inval, loopEnd);
 				
-		lastLogicalTime = thisThread.clock.beats - loopStart;
 		
 		nextEvents = this.getNextEventGroup(
 			store.getItems,
@@ -172,6 +186,7 @@ StorePlayer {
 			strictly: false
 		);
 			
+		lastLoopOffset = thisThread.clock.beats - loopStart;
 		this.waitAndPlay(
 			loopStart,
 			nextEvents.timestamp,
@@ -182,7 +197,6 @@ StorePlayer {
 	}
 
 	getRoutine { arg start = 0, loopPoints;
-		loopPoints.postln;
 		^Routine({ arg inval;
 			var firstEvents = this.getNextEventGroup(
 				store.getItems,
@@ -196,7 +210,7 @@ StorePlayer {
 				loopPoints,
 			);
 
-			inf.do {
+			loop {
 				inval = this.tick(
 					inval,
 					loopPoints: loopPoints,

@@ -4,7 +4,6 @@ TransportLines {
 	var id;
 	var loopPoints;
 	var playCursor;
-	var pollCursorRoutine;
 
 	*new { arg id, canvas;
 		^super.new.init(id, canvas)
@@ -16,6 +15,7 @@ TransportLines {
 	}
 
 	init { arg id, canvas;
+		var pollCursorRoutine;
 		id = id;
 		loopPoints = Store.at(id).transportContext.loopPoints;
 
@@ -24,8 +24,7 @@ TransportLines {
 			this,
 			{ arg payload, view;
 				var loopPoints = payload.transportContext !? _.loopPoints ?? nil;
-
-				if (payload.storeId == id && loopPoints.notNil) {
+				if ((payload.storeId == id) && loopPoints.notNil) {
 					view.setLoopPoints(loopPoints);
 				}
 			}
