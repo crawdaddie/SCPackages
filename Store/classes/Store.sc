@@ -103,13 +103,10 @@ Store : Event {
 
 	*resetPaths {
 		var pathTraverse = { arg store, maxArchiveId, path;
-			[store, maxArchiveId, path].postln;
 			store.keysValuesDo { arg id, value;
 				if (id.class == Integer) {
-					var newPath;
-					[path, id].postln;
+					var newPath = path ++ [id];
 					maxArchiveId = max(maxArchiveId, id);
-					newPath = path ++ [id];
 					this.setPath(id, newPath);
 					if (value.class == Store) {
 						pathTraverse.value(value, maxArchiveId, newPath)

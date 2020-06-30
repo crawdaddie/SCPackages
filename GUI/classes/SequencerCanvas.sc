@@ -28,6 +28,8 @@ SequencerCanvas : UserView {
 	var mouseAction;
 	var <id;
 
+	var <>timingOffset = 0;
+
 
 	*new { arg id, argParent, argBounds, subviews, quantX, quantY/*, shouldQuantizeX = true, shouldQuantizeY = true*/;
 		var parent = argParent ?? Window.new('sequencer', Rect(740, 455, 700, 400))
@@ -86,6 +88,7 @@ SequencerCanvas : UserView {
 		var mouseAction;
 
 		id = argId;
+		timingOffset = Store.at(id).getOffset;
 		
 		quantize = true;
 		views = argviews;
@@ -193,8 +196,10 @@ SequencerCanvas : UserView {
 			'objectUpdated',
 			this,
 			{ arg payload, canvas;
-			// if ((payload.id == id) || (views.collect(_.id).includes(payload.id)), {
-			// });
+				if (payload.storeId == id) {
+					var store = Store.at(id);
+					timingOffset = store.getOffset;
+				};
 				canvas.refresh;
 			}
 		);
@@ -233,13 +238,25 @@ SequencerCanvas : UserView {
 
 	renderView {
 		var parentBounds = this.parent.bounds;
-		// var timingOffset = Store.at(id).getOffset;
-		// timingOffset.postln;
-		var timingOffset = 0;
+
 		
-		grid.renderView(quantX, origin, parentBounds, zoom, subdivisions);
+		grid.renderView(
+			quantX,
+			origin,
+			timingOffset,
+			parentBounds,
+			zoom,
+			subdivisions
+		);
 		
-		transportLines.renderView(quantX, origin, parentBounds, zoom, subdivisions);
+		transportLines.renderView(
+			quantX,
+			origin,
+			timingOffset,
+			parentBounds,
+			zoom,
+			subdivisions
+		);
 		
 		timingContextView !? { |view|
 			view.draw(parentBounds, subdivisions, quantize);

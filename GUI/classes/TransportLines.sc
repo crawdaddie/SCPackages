@@ -83,9 +83,11 @@ TransportLines {
 		}
 	}
 
-	renderView { arg quantX, origin, bounds, zoom, subdivisions;
+	renderView { arg quantX, origin, timingOffset, bounds, zoom, subdivisions;
 		var gap = quantX * zoom.x;
-		this.drawLoopPoints(gap, origin.x, bounds);
-		this.drawPlayCursor(gap, origin.x, bounds);
+		var timingOffsetInPixels = timingOffset * gap;
+		var xOffset = origin.x - timingOffsetInPixels;
+		this.drawLoopPoints(gap, xOffset, bounds);
+		this.drawPlayCursor(gap, xOffset, bounds);
 	}
 }

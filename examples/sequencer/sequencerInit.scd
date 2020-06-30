@@ -83,6 +83,7 @@ var system = (
 
 
 Dispatcher.connectObject(system);
+// Dispatcher.debug_(true);
 StoreHistory.enable;
 
 system.use {

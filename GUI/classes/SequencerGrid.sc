@@ -28,13 +28,14 @@ SequencerGrid {
 		}
 	}
 
-	drawXGrid { arg quantX, origin, bounds, zoom, subdivisions;
+	drawXGrid { arg quantX, origin, timingOffset, bounds, zoom, subdivisions;
 		var gap = quantX * zoom.x;
-		var initXOffset = origin.x + (0 - origin.x).roundUp(gap);
+		var timingOffsetPixels = timingOffset * gap;
+		var initXOffset = origin.x + (0 - origin.x).roundUp(gap) - timingOffsetPixels;
 		var xOffset = initXOffset;
 		
 		var minorGap = gap / subdivisions;
-		var initSubOffset = origin.x + (0 - origin.x).roundUp(minorGap); 
+		var initSubOffset = origin.x + (0 - origin.x).roundUp(minorGap) - timingOffsetPixels; 
 		var subOffset = initSubOffset;
 		// var tickNum = 0;
 		tick = minorGap;
@@ -59,8 +60,8 @@ SequencerGrid {
 		Pen.stroke;
 	}
 
-	renderView { arg quantX, origin, bounds, zoom, subdivisions;
+	renderView { arg quantX, origin, timingOffset, bounds, zoom, subdivisions;
 		this.drawYGrid(origin, bounds, zoom);
-		this.drawXGrid(quantX, origin, bounds, zoom, subdivisions);
+		this.drawXGrid(quantX, origin, timingOffset, bounds, zoom, subdivisions);
 	}
 }
