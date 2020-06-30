@@ -84,11 +84,8 @@ so for example
 ~testFunc3 = M { arg a = 1, b = 2;
 	~number * [a, b];
 };
-```
-  
+```  
 here testFunc1, testFunc2 and testFunc3 all work exactly the same  
-
-
 you can put modules you want to access globally in a folder and set that folder  
 as Import's default module path in your 'startup.scd' file:
 Import.defaultModulePath = "/path/to/my/modules";
