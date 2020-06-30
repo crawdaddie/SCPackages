@@ -560,11 +560,11 @@ SequencerCanvas : UserView {
 						cursorView.moveTo(newOrigin.x + cursorOffset.x, newOrigin.y + cursorOffset.y);
 					},
 					mouseUpAction: { arg object, x, y;
-						var selectedViewsByChannel = selectedViews
+						var selectedViewsByrow = selectedViews
 							.groupBy({ | view | view.bounds.top.asInteger })
 							.collect(_.sort({ |a, b| a.bounds.left < b.bounds.left }));
 
-						var unselectedViewsByChannel =  unselectedViews
+						var unselectedViewsByrow =  unselectedViews
 							.groupBy({ | view | view.bounds.top.asInteger })
 							.collect(_.sort({ |a, b| a.bounds.left < b.bounds.left }));
 
@@ -577,8 +577,8 @@ SequencerCanvas : UserView {
 							view.getUpdate;
 						};
 
-						unselectedViewsByChannel.keysValuesDo { | channel, group |
-							var selectedViewsGroup = selectedViewsByChannel[channel];
+						unselectedViewsByrow.keysValuesDo { | row, group |
+							var selectedViewsGroup = selectedViewsByrow[row];
 
 						}
 

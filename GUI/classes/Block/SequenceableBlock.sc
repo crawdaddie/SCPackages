@@ -39,7 +39,7 @@ SequenceableBlock : CanvasBlockBase {
 			
 			},
 			mouseUpAction: { arg x, y;
-				// clean up and return update
+				// clean up and return updat
 			}
 		);
 	}
@@ -111,14 +111,14 @@ SequenceableBlock : CanvasBlockBase {
 	}
 
 
-	*partitionByChannel { arg views;
+	*partitionByrow { arg views;
 		var partition = ();
 		views.do { | view |
-			var chan = view.bounds.top.asInteger;
-			partition[chan] !? { | set |
+			var row = view.bounds.top.asInteger;
+			partition[row] !? { | set |
 				set.add(view)
 				} ?? {
-					partition[chan] = Set[view]
+					partition[row] = Set[view]
 				}
 		};
 		^partition;

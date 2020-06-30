@@ -17,12 +17,12 @@ Waveform {
 		task = Task {
 			chunks.do { |index|
 				var maxVal, minVal;
-				var channelData;
+				var rowData;
 				var startFrame = index * chunkSize;
-				channelData = rawArray[startFrame .. (startFrame + chunkSize - 1)];
-				maxVal = channelData[0];
-				minVal = channelData[0];
-				channelData.do { |data, index|
+				rowData = rawArray[startFrame .. (startFrame + chunkSize - 1)];
+				maxVal = rowData[0];
+				minVal = rowData[0];
+				rowData.do { |data, index|
 					maxVal = max(maxVal, data);
 					minVal = min(minVal, data);
 				};
@@ -58,7 +58,7 @@ WaveformCache {
 		cache = Dictionary();
 		this.createWaveform(zoom);
 
-		rawArray = FloatArray.newClear(soundfile.numFrames * soundfile.numChannels);
+		rawArray = FloatArray.newClear(soundfile.numFrames * soundfile.numrows);
 		Routine({
 			soundfile.readData(rawArray);
 			this.computeWaveforms(rawArray);

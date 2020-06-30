@@ -4,10 +4,17 @@
 	length: 2,
 ) 
 
+4.postln;
 
 g = Store.global;
+g.getPath.size
+g.getOffset
 
+Store.at(1007).getOffset;
+Store.at(1007)
+Store.lookups.put(1007, [1006, 1007]);
 
+Store.at(1006).getOffset
 q.keysValuesDo { arg key, value;
 	if (value.class == Function) {
 		value.value(q, 1).postln;		
@@ -65,25 +72,38 @@ r.play;
 )
 
 l = Store.at(1007)
-
-
+l.src
+l.play;
 
 l.postTree;
+l.getModule;
 
+l.getModule.play;
 
 m = Mod.new(l.src)
 
-l.proto.postTree
+roto.postTree
 l.src
-l.getModule
+
+
+l.play = { arg ev;
+	ev.postln;
+}
+Store.postTree;
+
+
+Store.at(1006)
+
+
+l.play
+
+l.parent.parent.parent.parent
 
 
 
 
 
-
-
-
+Store.postTree;
 
 k.currentPosition;
 
@@ -219,7 +239,7 @@ g = Store.global;
 j = [
 	g[1001],
 	g[1002],
-	g[1002].putAll((channel: 3)),
+	g[1002].putAll((row: 3)),
 	g[1003],
 	g[1004]
 ];

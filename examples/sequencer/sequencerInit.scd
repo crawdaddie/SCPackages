@@ -1,7 +1,8 @@
 (
 var system = (
+	projectDir: "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/",
+	srcDir: "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/src/",
 	projectFile: "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest.scproj",
-	
 	saveDir: thisProcess.nowExecutingPath !? _.dirname +/+ "saves" ?? "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/",
 	
 	moveObjects: { arg ev, payload;
@@ -78,6 +79,8 @@ var system = (
 		);
 	}
 );
+
+
 
 Dispatcher.connectObject(system);
 StoreHistory.enable;

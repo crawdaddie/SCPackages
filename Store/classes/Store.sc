@@ -57,7 +57,12 @@ Store : Event {
 	}
 
 	getOffset {
-		^0;
+		var path = this.getPath;
+		if (path.isNil) {
+			^0
+		} {
+			^this.getParent.getOffset + this.timestamp ? 0;
+		}
 	}
 
 	getLoopPoints {
@@ -98,13 +103,16 @@ Store : Event {
 
 	*resetPaths {
 		var pathTraverse = { arg store, maxArchiveId, path;
+			[store, maxArchiveId, path].postln;
 			store.keysValuesDo { arg id, value;
 				if (id.class == Integer) {
+					var newPath;
+					[path, id].postln;
 					maxArchiveId = max(maxArchiveId, id);
-					(path ++ [id]).postln;
-					this.setPath(id, path ++ [id]);
+					newPath = path ++ [id];
+					this.setPath(id, newPath);
 					if (value.class == Store) {
-						pathTraverse(value, maxArchiveId, path ++ [id])
+						pathTraverse.value(value, maxArchiveId, newPath)
 					}
 				}
 			};
@@ -374,6 +382,8 @@ Store : Event {
 	getItems {
 		^orderedItems;
 	}
+
+
 
 	*play {
 		^global.play;
