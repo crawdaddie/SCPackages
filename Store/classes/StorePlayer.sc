@@ -33,7 +33,7 @@ StoreRoutine {
 
 	playEvents { arg events;
 		store.getModule !? { arg module;
-			^module.playInStore(store, events);
+			^module.play(store, events);
 		};
 		
 		^events.collect({ arg ev;

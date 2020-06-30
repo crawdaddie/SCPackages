@@ -60,7 +60,7 @@ CanvasBlockBase {
 
 		^Rect(
 			timestamp * xFactor * zoom.x,
-			event.channel * yFactor * zoom.y,
+			event.row * yFactor * zoom.y,
 			length * xFactor * zoom.x,
 			yFactor * zoom.y
 		);

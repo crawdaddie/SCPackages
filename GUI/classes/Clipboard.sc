@@ -20,16 +20,16 @@ Clipboard {
 		// the earliest item, so let's say items would be a set of timestamps
 		// [0.2, 0.4, 0.5, 0.7] this would return [0, 0.2, 0.3, 0.5]
 		var earliestTimestamp = items[0].timestamp;
-		var lowestChannel = items[0].channel;
+		var lowestRow = items[0].row;
 		items.do { |item|
 			earliestTimestamp = min(earliestTimestamp, item.timestamp);
-			lowestChannel = min(lowestChannel, item.channel);
+			lowestRow = min(lowestRow, item.row);
 		};
 		
 		^items.collect { |item|
 			var newItem = item.deepCopy;
 			newItem.timestamp = item.timestamp - earliestTimestamp;
-			newItem.channel = item.channel - lowestChannel;
+			newItem.row = item.row - lowestRow;
 			newItem;
 		}
 	}

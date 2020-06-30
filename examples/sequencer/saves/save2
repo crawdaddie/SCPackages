@@ -1,5 +1,0 @@
-var o,p,n=nil;
-o=[Store.prNew,Array.prNew(32),Event.prNew,Array.prNew(4),Store.prNew,Array.prNew(32),Event.prNew,Array.prNew(12),Event.prNew,Array.prNew(12)];
-p=[0,[array:o[1],size:2,type:'store',id:nil],1,[n,n,n,n,n,n,'timingContext',o[2],n,n,n,n,n,n,n,n,n,n,n,n,1003,o[4],n,n,n,n,n,n,n,n,n,n],2,[array:o[3],size:1,proto:nil,parent:nil,know:true],3,['bpm',60,n,n],4,[array:o[5],size:2,type:'store',id:1003],5,[n,n,n,n,n,n,n,n,n,n,n,n,1001,o[6],n,n,n,n,n,n,n,n,1002,o[8],n,n,n,n,n,n,n,n],6,[array:o[7],size:4,proto:nil,parent:nil,know:true],7,['a',1,'timestamp',1,n,n,'id',1001,n,n,'b',2],8,[array:o[9],size:4,proto:nil,parent:nil,know:true],9,['a',1,'timestamp',0,n,n,'id',1002,n,n,'b',2]
-];
-prUnarchive(o,p);

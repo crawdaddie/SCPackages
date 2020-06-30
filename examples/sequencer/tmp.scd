@@ -7,125 +7,77 @@
 
 g = Store.global;
 
-e = g[1002, 1003];
-e
-e.proto
 
-{
+q.keysValuesDo { arg key, value;
+	if (value.class == Function) {
+		value.value(q, 1).postln;		
+	}
+};
 
-	{"yielded".postln}.yield;
-}.fork;
+1.dumpFullInterface
 
+q.respondsTo('keysValuesDo')
 
-k.play(1.5);
+q = { arg ignoreLoop;
 
-
-
-
-j = Store.at(1006)
+}
 
 
-
-
-j.postTree;
-
-j
-
-k.play;
-
-k.routine.beats;
-SimpleNumber
-
-
-(
-c = nil;
-
-{
-	var a, b;
-	#a, b = nil;
-	a.postln;
-	b.postln;
-
-}.value();
-)
-a
-b
-
-k.play;
-
-k.stop;
-SimpleNumber
-
-g = Store.global;
+q.value(ignoreLoop2: false);
 
 
 
-g.postTree;
-.wait
-k.routine.clock.beats;
-
-k.lastLogicalTime;
 
 
-k.currentPosition;
+g = Store.global
+Object.dumpInterface
 
 
-(
-g = Store.global;
-g.patch((
-	transportContext: (loopPoints: [4, 8]),
-));
-g.postTree;
-g.play;
-)
 
-k.currentPosition
+q.perform('open', 1)
 
-l = (
-	transportContext: (loopPoints: nil),
-	timingContext: (bpm: 60)
-);
+a.keysValuesDo { arg a, b;
+	[a, b.class].postln;
+};
 
-g[1006].play;
-thisThread.stackSize
-l;
-Thread
-
-Store.lookups[1008];
-
-($\t + "ksd").postln
-"\t\tdasd".postln;
-
-Environment.stack;
-(
-{
-	{
-		thisThread.parent.postln;
-	}.fork;
-	thisThread.parent.postln
-}.fork;
-)
+a.proto_(b)
 
 
-k.routine.clock.isRunning
-g.postTree;
-
-k.currentPosition;
-
-k.play;
+a.keys.includes('c')
 
 g = Store.global;
 
 g.patch((transportContext: (loopPoints: [2, 8])));
 
+4.postln;
+j = Store.at(1007);
 
-Store()
+j.postTree;
+
+[0, 1] - 1;
+
+j.transportContext
 
 (
 g = Store.global;
 r = StoreRoutine(g, 1, ignoreLoop: true);
 r.play;
 )
+
+l = Store.at(1007)
+
+
+
+l.postTree;
+
+
+m = Mod.new(l.src)
+
+l.proto.postTree
+l.src
+l.getModule
+
+
 
 
 
@@ -161,6 +113,11 @@ g.play;
 k.play;
 
 g = Store.at()
+
+g.play;
+
+
+
 
 
 g.postTree;

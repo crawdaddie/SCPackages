@@ -375,10 +375,6 @@ Store : Event {
 		^orderedItems;
 	}
 
-	play { arg start = 0, quant;
-		// ^StorePlayer(this).play(start, quant);
-	}
-
 	*play {
 		^global.play;
 	}

@@ -13,7 +13,7 @@ var system = (
 			var id = update.id;
 			var newState = (
 				beats: update.x,
-				channel: update.y,
+				row: update.y,
 				length: update.length
 			);
 			updates.put(id, newState);
@@ -35,7 +35,7 @@ var system = (
 	pasteObjects: { arg ev, payload;
 		var newItems = payload.items.collect({ arg item;
 			item.timestamp = payload.x + item.timestamp;
-			item.channel = payload.y + item.channel;
+			item.row = payload.y + item.row;
 			item;
 		});
 
