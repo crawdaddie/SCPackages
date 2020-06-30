@@ -16,16 +16,18 @@ var automationInstance;
 
 StoreHistory.enable;
 
-Store.global.addTimingContext((
-	bpm: 120,
-));
+Dispatcher.debug = true;
+
+// Store.global.addTimingContext((
+// 	bpm: 120,
+// ));
 
 Dispatcher.addListener(
 	'moveObjects',
 	'system',
 	{ arg payload;
 		var updates = Dictionary();
-		var store = payload['storeId'] !? Store.at(payload.storeId) ?? Store.global;
+		var store = Store.at(payload.storeId);
 		var timingContext = store.getTimingContext;
 	
 		payload.updates.do { |update|
@@ -72,7 +74,6 @@ Dispatcher.addListener(
 		}
 	}
 );
-
 
 // initialisation
 
@@ -154,19 +155,21 @@ Dispatcher.addListener('open', 'system', {
   );
 });
 
+
+
+
+// a = SequencerCanvas();
+// load.value(projectFile);
+Store.readFromArchive(projectFile);
+a = SequencerCanvas.fromStore(Store.global);
+a.parent.name = "sequencer - %".format(projectFile.basename);
+
+Store.postTree;
 // s.waitForBoot {
 // 	"booting".postln;
 // 	Dispatcher((type: 'serverBooted'));
 // 	s.makeGui;
 // };
-
-
-a = SequencerCanvas.fromStore(Store.global);
-// a.views[0].select;
-
-// a = SequencerCanvas();
-// load.value(projectFile);
-Store.postTree;
 )
 
 

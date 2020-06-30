@@ -2,7 +2,7 @@ SequencerGrid {
 	classvar mainGridColor;
 	classvar subdivisionColor;
 	var <tick;
-	
+
 	*new {
 		^super.new.init()
 	}

@@ -1,9 +1,11 @@
 Dispatcher {
 
 	classvar <listeners;
+	classvar <>debug;
 
 	*initClass {
 		listeners = Dictionary();
+		debug = false;
 	}
 
 	*addListener { arg type, object, listener;
@@ -25,6 +27,10 @@ Dispatcher {
 	*new { arg event;
 		var type = event.type;
 		var typeListeners = listeners.at(type) ?? Dictionary();
+
+		if (debug) {
+			event.postln;
+		};
 
 		typeListeners.keysValuesDo { arg listeningObject, listener;
 			listener.value(event.payload, listeningObject);

@@ -117,7 +117,6 @@ KeyActionManager {
 		keyDownVar !? {
 			^keyDownVar.value(canvas, char, modifiers, unicode, keycode, key);
 		};
-		// [modifiers, key].postln;
 
 
 		^switch ([modifiers, key])
@@ -154,6 +153,7 @@ KeyActionManager {
 			{ [ 2097152, 16777236 ] } { canvas.moveCursorHandler(1,  0); } //right
 			{ [ 2097152, 16777235 ] } { canvas.moveCursorHandler(0, -1); } //up
 			{ [ 2097152, 16777237 ] } { canvas.moveCursorHandler(0,  1); } //down
+			{ [ 0, 32 ]} { canvas.playStore; }
 		;
 	}
 
@@ -201,7 +201,6 @@ KeyActionManager {
 		};
 
 		keyDownVar = { |canvas, char, modifiers, unicode, keycode, key|
-			// [modifiers, key].postln;
 			switch ([modifiers, key])
 				{ [ 3145728, 16777234 ] } { result = canvas.moveViewsHandler(-1, 0); } //left
 				{ [ 3145728, 16777236 ] } { result = canvas.moveViewsHandler(1,  0); } //right
@@ -223,6 +222,7 @@ KeyActionManager {
 
 				{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
 				{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) }
+
 
 			;
 		};

@@ -3,9 +3,10 @@ Store : Event {
 	classvar lastId = 1000;
 	classvar <lookups;
 
-
 	var <>id;
 	var <orderedItems;
+
+	var <player;
 	
 	*getId {
 		lastId = lastId + 1;
@@ -53,6 +54,14 @@ Store : Event {
 			this.transportContext.loopPoints = loopPoints.sort;
 		};
 		storeUpdates.transportContext = this.transportContext;
+	}
+
+	getOffset {
+		^0;
+	}
+
+	getLoopPoints {
+		^this.transportContext.loopPoints;
 	}
 
 	getParent {
@@ -367,7 +376,11 @@ Store : Event {
 	}
 
 	play { arg start = 0, quant;
-		^StorePlayer(this).play(start, quant);
+		// ^StorePlayer(this).play(start, quant);
+	}
+
+	*play {
+		^global.play;
 	}
 	
 }

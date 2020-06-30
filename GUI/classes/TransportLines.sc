@@ -1,7 +1,7 @@
 TransportLines {
 	classvar loopPointColor;
 	classvar playCursorColor;
-	var id;
+	var <id;
 	var loopPoints;
 	var playCursor;
 
@@ -14,10 +14,10 @@ TransportLines {
 		playCursorColor = Color.grey(0.5, 1);
 	}
 
-	init { arg id, canvas;
+	init { arg argid, canvas;
 		var pollCursorRoutine;
-		id = id;
-		loopPoints = Store.at(id).transportContext.loopPoints;
+		id = argid;
+		loopPoints = Store.at(id).getLoopPoints;
 
 		Dispatcher.addListener(
 			'storeUpdated',
@@ -85,8 +85,7 @@ TransportLines {
 
 	renderView { arg quantX, origin, bounds, zoom, subdivisions;
 		var gap = quantX * zoom.x;
-		var xOffset = origin.x + (0 - origin.x).roundUp(gap);
-		this.drawLoopPoints(gap, xOffset, bounds);
-		this.drawPlayCursor(gap, xOffset, bounds);
+		this.drawLoopPoints(gap, origin.x, bounds);
+		this.drawPlayCursor(gap, origin.x, bounds);
 	}
 }

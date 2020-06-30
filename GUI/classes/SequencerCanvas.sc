@@ -233,7 +233,12 @@ SequencerCanvas : UserView {
 
 	renderView {
 		var parentBounds = this.parent.bounds;
+		// var timingOffset = Store.at(id).getOffset;
+		// timingOffset.postln;
+		var timingOffset = 0;
+		
 		grid.renderView(quantX, origin, parentBounds, zoom, subdivisions);
+		
 		transportLines.renderView(quantX, origin, parentBounds, zoom, subdivisions);
 		
 		timingContextView !? { |view|
@@ -711,6 +716,13 @@ SequencerCanvas : UserView {
 		};
 
 		object.tryPerform('getView');
+	}
+
+	playStore {
+		var startPos = cursorView.x / (Theme.horizontalUnit * zoom.x);
+		var store = Store.at(id);
+		// store.play(startPos);
+		Dispatcher((type: 'playStore', payload: (storeId: id, startPos: startPos)))
 	}
 
 }

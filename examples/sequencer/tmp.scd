@@ -115,9 +115,23 @@ k.currentPosition;
 k.play;
 
 g = Store.global;
+
 g.patch((transportContext: (loopPoints: [2, 8])));
 
-k.play;
+
+Store()
+
+(
+g = Store.global;
+r = StoreRoutine(g, 1, ignoreLoop: true);
+r.play;
+)
+
+
+
+
+
+
 
 k.currentPosition;
 
@@ -136,7 +150,20 @@ g.patch((
 // g.postTree;
 )
 
+g[1007].playInStore(1, 2);
+g[1007].getModule
+
+g[1007]..playInStore(1, 2)
+
+g = Store.global;
+g.play;
+
 k.play;
+
+g = Store.at()
+
+
+g.postTree;
 
 k.currentPosition;
 
