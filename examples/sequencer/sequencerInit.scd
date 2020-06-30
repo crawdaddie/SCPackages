@@ -77,6 +77,23 @@ var system = (
 			},
 			path: ~saveDir
 		);
+	},
+
+	playStore: { arg ev, payload;
+		ev.use {
+			var offset = Store.at(payload.storeId).getOffset;
+			var startPos = payload.startPos + offset;
+			~player !? {
+				~player.stop;
+				~player = nil;
+			} ?? {
+				~player = StoreRoutine(
+					Store.global,
+					startPos
+				);
+				~player.play;
+			}
+		}
 	}
 );
 

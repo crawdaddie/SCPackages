@@ -380,7 +380,13 @@ Store : Event {
 		^orderedItems;
 	}
 
+	play { arg startPos;
+		^StoreRoutine(
+			this,
+			startPos ? 0
+		).play;
 
+	}
 
 	*play {
 		^global.play;
