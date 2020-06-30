@@ -233,6 +233,14 @@ SequencerCanvas : UserView {
 			}
 		);
 
+		this.onClose = { arg view;
+			views.do { arg view;
+				Dispatcher.removeListenersForObject(view);
+			};
+			Dispatcher.removeListenersForObject(grid);
+			Dispatcher.removeListenersForObject(transportLines);
+		};
+
 		^this
 	}
 

@@ -1,5 +1,5 @@
 StoreRoutine {
-	var store;
+	var <store;
 	var ignoreLoop;
 	var start;
 	var <position, <nextPosition, <lastLoopOffset;
@@ -18,6 +18,25 @@ StoreRoutine {
 		^routine.clock.beats - lastLoopOffset;
 	}
 
+	shouldInterruptRoutine { arg payload;
+		var timestampUpdatesBeforeNextEvents;
+
+		routine ?? {
+			^false
+		};
+		
+		timestampUpdatesBeforeNextEvents = payload
+			.timestampUpdates
+			.select({ arg ts; (ts > this.currentPosition) && (ts <= nextPosition)});
+
+		^(
+			(payload.timingContext.notNil) || /* bpm has changed */
+			(timestampUpdatesBeforeNextEvents.size > 0) ||  /*something has moved 
+				or been deleted in between current position and next position */
+			(payload.transportContext.notNil) /* loop points have changed */
+		)
+	}
+
 	play {
 		Dispatcher((
 			type: 'playerStarted',
@@ -26,7 +45,34 @@ StoreRoutine {
 				startPosition: start
 			)
 		));
+
+		Dispatcher.addListener(
+			'storeUpdated',
+			this,
+			{ arg payload, player;
+			if (
+				payload.storeId == player.store.id && player.shouldInterruptRoutine(payload)
+			) {
+				player.resetRoutine;
+			}
+		})
+
 		^routine.play;
+	}
+
+	stopRoutine {
+		Dispatcher.removeListener(
+			'storeUpdated',
+			this,
+		);
+		routine.stop;
+		routine = nil;
+	}
+
+	resetRoutine {
+		position = this.currentPosition;
+		routine.stop;
+		routine = this.getRoutine(position);
 	}
 
 	stop {
@@ -37,8 +83,7 @@ StoreRoutine {
 				stopPosition: this.currentPosition
 			)
 		));
-		routine.stop;
-		routine = nil;
+		this.stopRoutine;
 	}
 
 	getNextEventGroup { arg events, start = 0, strictly = true, loopPoints;
@@ -67,6 +112,7 @@ StoreRoutine {
 			^module.play(store, events);
 		};
 		
+		events.postln;
 		^events.collect({ arg ev;
 			ev.play;
 		});
@@ -145,12 +191,10 @@ StoreRoutine {
 				strictly: false,
 			);
 
-			this.postBeats;
 			inval = this.tick(
 				start,
 				firstEvents,
 			);
-			this.postBeats;
 
 			loop {
 				this.postBeats;
@@ -160,113 +204,113 @@ StoreRoutine {
 	}
 }
 
-StorePlayer {
-	var <store;
-	var loopPoints;
-	var <routine;
-	var position;
-	var nextPosition;
-	var bpm;
-	var <lastLoopOffset;
+// StorePlayer {
+// 	var <store;
+// 	var loopPoints;
+// 	var <routine;
+// 	var position;
+// 	var nextPosition;
+// 	var bpm;
+// 	var <lastLoopOffset;
 	
-	*new { arg store;
-		^super.newCopyArgs(store).init();
-	}
+// 	*new { arg store;
+// 		^super.newCopyArgs(store).init();
+// 	}
 
-	*play { arg store, startPos;
-		^super.newCopyArgs(store).init().play(startPos);
+// 	*play { arg store, startPos;
+// 		^super.newCopyArgs(store).init().play(startPos);
 
-	}
+// 	}
 
-	setStore { arg argstore;
-		store = argstore;
-	}
+// 	setStore { arg argstore;
+// 		store = argstore;
+// 	}
 
-	init {
-		lastLoopOffset = 0;
-		Dispatcher.addListener(
-			'storeUpdated',
-			this,
-			{ arg payload, player;
-			if (
-				payload.storeId == player.store.id && player.shouldInterruptRoutine(payload)
-			) {
-				player.stop;
-				player.play(position);
-			}
-		})
-	}
+// 	init {
+// 		lastLoopOffset = 0;
+// 		Dispatcher.addListener(
+// 			'storeUpdated',
+// 			this,
+// 			{ arg payload, player;
+// 			if (
+// 				payload.storeId == player.store.id && player.shouldInterruptRoutine(payload)
+// 			) {
+// 				player.stop;
+// 				player.play(position);
+// 			}
+// 		})
+// 	}
 
-	currentPosition {
-		^routine.clock.beats - lastLoopOffset;
-	}
+// 	currentPosition {
+// 		^routine.clock.beats - lastLoopOffset;
+// 	}
 
-	shouldInterruptRoutine { arg payload;
-		var timestampUpdatesBeforeNextEvents;
+// 	shouldInterruptRoutine { arg payload;
+// 		var timestampUpdatesBeforeNextEvents;
 
-		routine ?? {
-			^false
-		};
+// 		routine ?? {
+// 			^false
+// 		};
 		
-		timestampUpdatesBeforeNextEvents = payload
-			.timestampUpdates
-			.select({ arg ts; (ts > this.currentPosition) && (ts <= nextPosition)});
+// 		timestampUpdatesBeforeNextEvents = payload
+// 			.timestampUpdates
+// 			.select({ arg ts; (ts > this.currentPosition) && (ts <= nextPosition)});
 
-		^(
-			(payload.timingContext.notNil) || /* bpm has changed */
-			(timestampUpdatesBeforeNextEvents.size > 0) || /* something has moved 
-				or been deleted in between current position and next position */
-			(payload.transportContext.notNil) /* loop points have changed */
-		)
-	}
+// 		^(
+// 			(payload.timingContext.notNil) || /* bpm has changed */
+// 			(timestampUpdatesBeforeNextEvents.size > 0) ||  something has moved 
+// 				or been deleted in between current position and next position 
+// 			(payload.transportContext.notNil) /* loop points have changed */
+// 		)
+// 	}
 
-	stop {
-		var currentBeats, stopPosition;
-		position = this.currentPosition;
-		routine.stop;
-		routine = nil;
+// 	stop {
+// 		var currentBeats, stopPosition;
+// 		position = this.currentPosition;
+// 		routine.stop;
+// 		routine = nil;
 
-		Dispatcher((
-			type: 'storeNotPlaying',
-			payload: (
-				storeId: store.id,
-				player: this,
-				stopPosition: this.currentPosition
-			)
-		));
+// 		Dispatcher((
+// 			type: 'storeNotPlaying',
+// 			payload: (
+// 				storeId: store.id,
+// 				player: this,
+// 				stopPosition: this.currentPosition
+// 			)
+// 		));
 
-	}
+// 	}
 
-	play { arg start, quant;
-		var timingContext, transportContext, loopPoints;
-		routine !? {
-			routine.postln;
-			^routine;
-		};
+// 	play { arg start, quant;
+// 		var timingContext, transportContext, loopPoints;
+// 		routine !? {
+// 			routine.postln;
+// 			^routine;
+// 		};
 
-		timingContext = store.getTimingContext;
-		transportContext = store.transportContext;
-		loopPoints = store.transportContext.loopPoints;
+// 		timingContext = store.getTimingContext;
+// 		transportContext = store.transportContext;
+// 		loopPoints = store.transportContext.loopPoints;
 		
-		routine = StoreRoutine(store, start);
+// 		routine = StoreRoutine(store, start);
 
-		// store.getModule !? { arg mod;
-		// 	mod.play(this);
-		// };
+// 		// store.getModule !? { arg mod;
+// 		// 	mod.play(this);
+// 		// };
 		
-		lastLoopOffset = start;
-		routine.play(
-			TempoClock(timingContext.bpm / 60, start),
-			quant,
-		);
+// 		lastLoopOffset = start;
+// 		routine.play(
+// 			TempoClock(timingContext.bpm / 60, start),
+// 			quant,
+// 		);
 
-		Dispatcher((
-			type: 'storePlaying',
-			payload: (
-				storeId: store.id,
-				player: this,
-				startPosition: start
-			)
-		));
-	}
-}
+// 		Dispatcher((
+// 			type: 'storePlaying',
+// 			payload: (
+// 				storeId: store.id,
+// 				player: this,
+// 				startPosition: start
+// 			)
+// 		));
+// 	}
+// }

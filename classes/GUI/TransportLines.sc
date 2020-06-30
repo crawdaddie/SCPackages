@@ -23,35 +23,35 @@ TransportLines {
 			'storeUpdated',
 			this,
 			{ arg payload, view;
-				var loopPoints = payload.transportContext !? Store.at(id).getLoopPoints;
+				var loopPoints = Store.at(id).getLoopPoints;
 				view.setLoopPoints(loopPoints);
 			}
 		);
 
-		Dispatcher.addListener(
-			'playerStarted',
-			this,
-			{ arg payload, view;
-				playCursor = payload.startPosition;
-				pollCursorRoutine = Routine({
-					inf.do {
-						playCursor = payload.player.currentPosition;
-						canvas.refresh;
-						0.1.wait;
-					}
-				})
-				.play(AppClock)
-			}
-		);
+		// Dispatcher.addListener(
+		// 	'playerStarted',
+		// 	this,
+		// 	{ arg payload, view;
+		// 		playCursor = payload.startPosition;
+		// 		pollCursorRoutine = Routine({
+		// 			inf.do {
+		// 				playCursor = payload.player.currentPosition;
+		// 				canvas.refresh;
+		// 				0.1.wait;
+		// 			}
+		// 		})
+		// 		.play(AppClock)
+		// 	}
+		// );
 
-		Dispatcher.addListener(
-			'playerStopped',
-			this,
-			{ arg payload, view;
-				playCursor = payload.stopPosition;
-				pollCursorRoutine.stop;
-			}
-		)
+		// Dispatcher.addListener(
+		// 	'playerStopped',
+		// 	this,
+		// 	{ arg payload, view;
+		// 		playCursor = payload.stopPosition;
+		// 		pollCursorRoutine.stop;
+		// 	}
+		// )
 	}
 
 	setLoopPoints { arg setLoopPoints;
