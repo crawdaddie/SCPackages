@@ -36,4 +36,18 @@ Dispatcher {
 			listener.value(event.payload, listeningObject);
 		};
 	}
+
+	*connectObject { arg object;
+		object.keysValuesDo({ arg key, listener;
+			if (listener.class == Function) {
+				Dispatcher.addListener(
+					key,
+					object,
+					{ arg payload;
+						listener.value(object, payload);
+					},
+				)
+			}
+		});
+	}
 }
