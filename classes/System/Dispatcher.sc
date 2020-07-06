@@ -38,16 +38,18 @@ Dispatcher {
 	}
 
 	*connectObject { arg object;
-		object.keysValuesDo({ arg key, listener;
-			if (listener.class == Function) {
-				Dispatcher.addListener(
-					key,
-					object,
-					{ arg payload;
-						listener.value(object, payload);
-					},
-				)
-			}
-		});
+		if (object.respondsTo('keysValuesDo')) {
+			^object.keysValuesDo({ arg key, listener;
+				if (listener.class == Function) {
+					Dispatcher.addListener(
+						key,
+						object,
+						{ arg payload;
+							listener.value(object, payload);
+						},
+					)
+				}
+			});
+		}
 	}
 }

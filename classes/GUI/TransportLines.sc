@@ -28,30 +28,30 @@ TransportLines {
 			}
 		);
 
-		// Dispatcher.addListener(
-		// 	'playerStarted',
-		// 	this,
-		// 	{ arg payload, view;
-		// 		playCursor = payload.startPosition;
-		// 		pollCursorRoutine = Routine({
-		// 			inf.do {
-		// 				playCursor = payload.player.currentPosition;
-		// 				canvas.refresh;
-		// 				0.1.wait;
-		// 			}
-		// 		})
-		// 		.play(AppClock)
-		// 	}
-		// );
+		Dispatcher.addListener(
+			'playerStarted',
+			this,
+			{ arg payload, view;
+				playCursor = payload.startPosition;
+				pollCursorRoutine = Routine({
+					inf.do {
+						playCursor = payload.player.currentPosition;
+						canvas.refresh;
+						0.1.wait;
+					}
+				})
+				.play(AppClock)
+			}
+		);
 
-		// Dispatcher.addListener(
-		// 	'playerStopped',
-		// 	this,
-		// 	{ arg payload, view;
-		// 		playCursor = payload.stopPosition;
-		// 		pollCursorRoutine.stop;
-		// 	}
-		// )
+		Dispatcher.addListener(
+			'playerStopped',
+			this,
+			{ arg payload, view;
+				playCursor = payload.stopPosition;
+				pollCursorRoutine.stop;
+			}
+		)
 	}
 
 	setLoopPoints { arg setLoopPoints;

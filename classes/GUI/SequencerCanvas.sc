@@ -745,8 +745,6 @@ SequencerCanvas : UserView {
 
 	playStore {
 		var startPos = cursorView.x / (Theme.horizontalUnit * zoom.x);
-		var store = Store.at(id);
-		// store.play(startPos);
 		Dispatcher((type: 'playStore', payload: (storeId: id, startPos: startPos)))
 	}
 

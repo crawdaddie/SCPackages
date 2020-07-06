@@ -96,10 +96,16 @@ Mod : Environment {
 
 	loadFromFolder { arg path;
 		^this.make {
-			(~path +/+ "*.scd").pathMatch.do({ arg fullPath;
-				var mod = super.new(fullPath);
-				currentEnvironment.put(fullPath.basename.splitext[0].asSymbol, mod);
-			});
+			var indexPath = ~path +/+ "index.scd";
+			if (indexPath.pathMatch.size == 1) {
+				var mod = super.new(indexPath);
+				currentEnvironment.put(~path.basename.splitext[0].asSymbol, mod);
+			} {
+				(~path +/+ "*.scd").pathMatch.do({ arg fullPath;
+					var mod = super.new(fullPath);
+					currentEnvironment.put(fullPath.basename.splitext[0].asSymbol, mod);
+				});
+			}
 		};
 	}
 

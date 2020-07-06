@@ -33,7 +33,7 @@ q = { arg ignoreLoop;
 q.value(ignoreLoop2: false);
 
 
-
+Store.patch
 
 
 g = Store.global
@@ -94,18 +94,93 @@ Store.postTree;
 
 Store.at(1006)
 
-
+Store.keysValuesDo
 l.play
-
+TextView().front;
+(
+w = Window.new.front;
+a = TextField(w, Rect(10, 10, 150, 20));
+a.string = "hi there";
+a.action = {arg field; field.value.postln; };
+)
+Dialog.openPanel();
+File
 l.parent.parent.parent.parent
 
+Store.methods.collect(_.name)
+u = 'system'.import;
+u.postln;
+Class
+Object
+k = Store.dumpInterface
+
+k = File.readAllString(
+
+File.use("/Users/adamjuraszek/PROJECTS/supercollider/packages/classes/Project/recentProjects", "w", { |f|
+	f.write("write value");
+});
+
+Project();
+Project.recentProjects;
+k.split($\n)
+
+File
+Set
+String
+k =[1,2,3,1,4];
+
+Dialog.savePanel({ arg path;
+	path.basename.postln;
+});
+
+k = k.as(OrderedIdentitySet)
+
+k.asArray.join("\n")
 
 
+k = [0] ++ k;
+
+
+k
+
+
+k.prepend(0)
+
+j = Set(*[1,2,3,4])
+k = [0] ++ k;
+.add
+
+k = "/Users/adamjuraszek/PROJECTS/supercollider/_modules/system/index.scd"
+k.dirname.dirname
+
+Project.recentProjects;
+
+k.basename
 
 
 Store.postTree;
 
 k.currentPosition;
+Store.global.getLoopPoints
+
+Store.at().getLoopPoints
+
+k = "/Users/adamjuraszek/PROJECTS/supercollider/_modules/system/index.scd";
+
+p = "/Users/adamjuraszek/PROJECTS/supercollider/_modules/system"; 
+
+
+(p +/+ "indexx.scd").pathMatch
+.includes((p +/+ "index.scd"));
+
+
+p +/+ "index.scd"
+
+Store.at(1001).inspect;
+
+
+system/index.scd
+
 
 (
 g = Store.global;
@@ -113,15 +188,12 @@ g.patch((
 	transportContext: (loopPoints: [4, 8]),
 ));
 
-
-// "".postln;
-// g.patch((
-// 	transportContext: (loopPoints: nil),
-// 	timingContext: (bpm: 60)
-// ));
-// g.postTree;
 )
 
+~sys.player.currentPosition;
+
+
+Store.postTree;
 g[1007].playInStore(1, 2);
 g[1007].getModule
 
@@ -162,6 +234,17 @@ g.patch((
 		beats: 4.0
 	)
 ))
+
+
+Project("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest.scproj");
+Project.recentProjects
+asArray.join("\n")
+
+k = [1,2];
+Set[*([1] ++ k)]
+
+
+Set[1,2,3]
 
 thisThread.seconds;
 thisThread.seconds;
@@ -294,7 +377,9 @@ Prand([a, b, c], inf).trace.play;
 
 b = (note: [0, 3, 7]);
 
+Project();
 
+Project.recentProjects;
 
 j[0].proto
 
@@ -349,6 +434,8 @@ j[0].timestamp
 j[1]
 
 
+Project();
+S
 Task
 
 .elapsedTime

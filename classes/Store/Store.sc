@@ -381,7 +381,7 @@ Store : Event {
 	}
 
 	play { arg startPos;
-		^StoreRoutine(
+		^StorePlayer(
 			this,
 			startPos ? 0
 		).play;
