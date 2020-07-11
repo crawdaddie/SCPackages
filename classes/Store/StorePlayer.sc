@@ -48,13 +48,6 @@ StorePlayer {
 				player.resetRoutine;
 			}
 		});
-		Dispatcher((
-			type: 'playerStarted',
-			payload: (
-				player: this,
-				startPosition: start
-			)
-		));
 		^routine.play;
 	}
 
@@ -70,13 +63,6 @@ StorePlayer {
 
 	stop {
 		this.stopRoutine;
-		Dispatcher((
-			type: 'playerStopped',
-			payload: (
-				player: this,
-				stopPosition: this.currentPosition
-			)
-		));
 		Dispatcher.removeListener(
 			'storeUpdated',
 			this,

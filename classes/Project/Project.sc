@@ -4,25 +4,42 @@ Project {
 	classvar emptyProjectDir;
 	classvar <>defaultProjectsDir = "/Users/adamjuraszek/PROJECTS/supercollider/projects";
 
-	var <projectFile, <projectDir, <srcDir, <saveDir, <dataDir;
-	var <canvas;
-	var <player;
+	classvar <projectFile, <projectDir, <srcDir, <saveDir, <dataDir;
+	classvar <canvas;
+	classvar <player;
 
 	*initClass {
 		recentProjectsFilePath = Project.filenameSymbol.asString.dirname +/+ "recentProjects";
 		recentProjects = File
 			.readAllString(recentProjectsFilePath)
 			.split($\n)
-			.as(Set);
+			.select({ arg p; p != ""});
+		
 
 		emptyProjectDir = Project.filenameSymbol.asString.dirname +/+ "emptyProject";
 	}
+
+	*setRecents { arg path;
+		recentProjects = [path] ++ recentProjects.select({ arg p; p != path });		
+
+		File.use(
+			recentProjectsFilePath,
+			"w",
+			{ |f|
+				f.write(recentProjects.asArray.join("\n"));
+			}
+		);
+	}
 		
 	*new { arg projectFile;
-		^super.new.init(projectFile)
+		^this.initProject(projectFile)
 	}
 
-	init { arg projectFile;
+	*openLatest {
+		this.new(recentProjects[0]);
+	}
+
+	*initProject { arg projectFile;
 		this.connectToDispatch();
 		StoreHistory.enable;	
 		
@@ -33,7 +50,7 @@ Project {
 		};
 	}
 
-	load { arg path;
+	*load { arg path;
 		path !? {
 			Store.readFromArchive(path);
 		};
@@ -46,7 +63,7 @@ Project {
 		Store.postTree;
 	}
 
-	setPaths { arg path;
+	*setPaths { arg path;
 		projectFile = path;
 		saveDir = projectFile.dirname;
 		projectDir = saveDir.dirname;
@@ -54,7 +71,7 @@ Project {
 		dataDir = projectDir +/+ "data";
 	}
 
-	connectToDispatch {
+	*connectToDispatch {
 		[
 			'moveObjects',
 			'deleteObjects',
@@ -73,14 +90,7 @@ Project {
 		};
 	}
 
-	setRecents { arg path;
-		recentProjects = ([path] ++ recentProjects).as(Set);		
-		File.use(recentProjectsFilePath, "w", { |f|
-			f.write(recentProjects.asArray.join("\n"));
-		});
-	}
-
-	initFromProjectFile { arg path;
+	*initFromProjectFile { arg path;
 		
 		if (path.pathMatch.size != 1) {
 			^Error("project file % does not exist".format(path)).throw;
@@ -90,7 +100,7 @@ Project {
 		this.setRecents(path);
 	}
 
-	initNewProject {
+	*initNewProject {
 		Dialog.savePanel({ arg path;
 			var name = path.basename;
 			"cp -R '%' '%'".format(emptyProjectDir, path).systemCmd;
@@ -102,7 +112,7 @@ Project {
 		);
 	}
 
-	moveObjects { arg payload;
+	*moveObjects { arg payload;
 		var updates = Dictionary();
 		var store = Store.at(payload.storeId);
 		var timingContext = store.getTimingContext;
@@ -121,7 +131,7 @@ Project {
 		}
 	}
 
-	deleteObjects { arg payload;
+	*deleteObjects { arg payload;
 		Store.patch(
 			Dictionary.with(
 				*payload.toDelete.collect({ arg id; id -> [nil] })
@@ -130,7 +140,7 @@ Project {
 		);
 	}
 
-	pasteObjects { arg payload;
+	*pasteObjects { arg payload;
 		var newItems = payload.items.collect({ arg item;
 			item.timestamp = payload.x + item.timestamp;
 			item.row = payload.y + item.row;
@@ -141,8 +151,8 @@ Project {
 			Store.addObject(item, payload.storeId)
 		}
 	}
-
-	save { arg payload;
+	
+	*save { arg payload;
 		if (payload.newFile || projectFile.isNil) {
 			Dialog.savePanel(
 				{ |path|
@@ -159,8 +169,8 @@ Project {
 			saveDir = projectFile.dirname;
 		};
 	}
-
-	open { arg payload;
+	
+	*open { arg payload;
 		Dialog.openPanel(
 			{ |path|
 				this.setPaths(path);
@@ -169,12 +179,19 @@ Project {
 			path: saveDir
 		);
 	}
-	
-	playStore { arg payload;
+
+	*playStore { arg payload;
 		var offset = Store.at(payload.storeId).getOffset;
 		var startPos = payload.startPos + offset;
 		player !? {
 			player.stop;
+			Dispatcher((
+				type: 'playerStopped',
+				payload: (
+					player: player,
+					stopPosition: player.currentPosition
+				)
+			));
 			player = nil;
 		} ?? {
 			player = StorePlayer(
@@ -182,6 +199,13 @@ Project {
 				startPos
 			);
 			player.play;
+			Dispatcher((
+				type: 'playerStarted',
+				payload: (
+					player: player,
+					startPosition: startPos
+				)
+			));
 		}
 	}
 }

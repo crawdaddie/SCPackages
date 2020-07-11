@@ -82,12 +82,19 @@ Routine({
 
 
 ~buffer = nil;
+
 ~open = #{ arg ev;
 };
+
 ~load = { arg ev;
 	ev.use {
 		"loading buffer %".format(~path).postln;
 		// ~soundfile.openRead;
 		~buffer = Buffer.read(Server.local, ~path);
 	}
-}
+};
+
+Server.local.doWhenBooted({
+	currentEnvironment.load;
+});
+

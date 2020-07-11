@@ -118,13 +118,6 @@ Mod : Environment {
 		this.make {
 			modpath.load;
 		};
-
-		Dispatcher.addListener('serverBooted', this, { arg payload, module;
-			'serverBooted'.postln;
-			module.load;
-		});
-
-		^this
 	}
 
 	loadVirtual { arg extra;
