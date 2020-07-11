@@ -40,14 +40,22 @@ Project {
 	}
 
 	*initProject { arg projectFile;
-		this.connectToDispatch();
-		StoreHistory.enable;	
 		
 		projectFile !? {
 			this.initFromProjectFile(projectFile);
 		} ?? {
 			this.initNewProject()
 		};
+		StoreHistory.enable;	
+		Dispatcher.connectObject(
+			this,
+			'moveObjects',
+			'deleteObjects',
+			'pasteObjects',
+			'save',
+			'open',
+			'playStore',
+		);
 	}
 
 	*load { arg path;
@@ -69,25 +77,6 @@ Project {
 		projectDir = saveDir.dirname;
 		srcDir = projectDir +/+ "src";
 		dataDir = projectDir +/+ "data";
-	}
-
-	*connectToDispatch {
-		[
-			'moveObjects',
-			'deleteObjects',
-			'pasteObjects',
-			'save',
-			'open',
-			'playStore',
-		].do { arg methodName;
-			Dispatcher.addListener(
-				methodName,
-				this,
-				{ arg payload;
-					this.perform(methodName, payload);
-				}
-			);
-		};
 	}
 
 	*initFromProjectFile { arg path;

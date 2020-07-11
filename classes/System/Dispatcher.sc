@@ -37,19 +37,16 @@ Dispatcher {
 		};
 	}
 
-	*connectObject { arg object;
-		if (object.respondsTo('keysValuesDo')) {
-			^object.keysValuesDo({ arg key, listener;
-				if (listener.class == Function) {
-					Dispatcher.addListener(
-						key,
-						object,
-						{ arg payload;
-							listener.value(object, payload);
-						},
-					)
+	*connectObject { arg object ...methods;
+		methods.do { arg method;
+			this.addListener(
+				method,
+				object, 
+				{ arg payload;
+					object.perform(method, payload);
 				}
-			});
+			)
+
 		}
 	}
 }
