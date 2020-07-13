@@ -102,9 +102,6 @@ SynthDef(\stereo_player, { arg
 	(
 		type: 'sampleEvent',
 		soundfile: nil,
-		getSoundfileMod: { arg ev;
-			Mod.all.at(ev.soundfile);
-		},
 		startPos: 0,
 		getEmbedView: { arg ev, zoom;
 			SequenceableSoundfileBlock(ev, zoom);
@@ -122,7 +119,7 @@ SynthDef(\stereo_player, { arg
 		decay: 0.05,
 		instrument: 'stereo_player',
 		play: {
-			var soundfileMod = currentEnvironment.getSoundfileMod;
+			var soundfileMod = ~soundfile.asSoundfileMod;
 			(
 				instrument: ~instrument,
 				atk: ~atk,

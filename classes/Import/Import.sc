@@ -199,3 +199,9 @@ ModObject {
 }
 
 O : ModObject {}
+
++ String {
+	asSoundfileMod {
+		^Mod.all.at(this.asSymbol);
+	}
+}
