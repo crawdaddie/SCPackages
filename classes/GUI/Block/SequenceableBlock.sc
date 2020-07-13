@@ -12,17 +12,7 @@ SequenceableBlock : CanvasBlockBase {
 	initView { arg event;
 		id = event.id;
 		label = id.asString;
-
-		this.postln;
-		Dispatcher.addListener(
-			'objectUpdated',
-			this,
-			{ arg payload, view;
-				if (payload.id == view.id) {
-					view.objectUpdated(payload)
-				}
-			}
-		);
+		Dispatcher.connectObject(this, 'objectUpdated');
 	}
 
 	getAction { arg x, y;
@@ -65,8 +55,10 @@ SequenceableBlock : CanvasBlockBase {
 		).front;
 	}
 
-	objectUpdated { arg payload;	
-		this.resetBoundsFromEvent(payload);
+	objectUpdated { arg payload;
+		if (payload.id == id) {
+			this.resetBoundsFromEvent(payload);
+		}
 	}
 
 	renderView { arg origin, parentBounds;
@@ -128,6 +120,7 @@ SequenceableBlock : CanvasBlockBase {
 		var object = Store.at(id);
 		object.getModule !? { arg mod;
 			mod.open;			
-		}
+		};
+		object.getView;
 	}
 }

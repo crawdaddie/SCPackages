@@ -118,7 +118,6 @@ KeyActionManager {
 			^keyDownVar.value(canvas, char, modifiers, unicode, keycode, key);
 		};
 
-
 		^switch ([modifiers, key])
 			{ [ 131072, 16777248 ] } {
 				this.shiftActionManager(canvas, char, modifiers, unicode, keycode, key);
@@ -200,6 +199,7 @@ KeyActionManager {
 			canvas.toggleSelectViewsUnderCursor();
 		};
 
+
 		keyDownVar = { |canvas, char, modifiers, unicode, keycode, key|
 			switch ([modifiers, key])
 				{ [ 3145728, 16777234 ] } { result = canvas.moveViewsHandler(-1, 0); } //left
@@ -222,8 +222,7 @@ KeyActionManager {
 
 				{ [ 1179648, 61 ] }	{ canvas.zoomBy(1.05, 1.05) }
 				{ [ 1179648, 45 ] }	{ canvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) }
-
-
+				{ [ 1048576, 66 ] } { Server.local.boot }
 			;
 		};
 

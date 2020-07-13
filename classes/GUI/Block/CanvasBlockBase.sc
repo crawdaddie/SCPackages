@@ -53,14 +53,14 @@ CanvasBlockBase {
 
 	getRectFromEvent { arg event;
 
-		var timestamp, length;
+		var timestamp, length, row;
 		length = event.length;
 		timestamp = event.beats;
-
+		row = event.row;
 
 		^Rect(
 			timestamp * xFactor * zoom.x,
-			event.row * yFactor * zoom.y,
+			row * yFactor * zoom.y,
 			length * xFactor * zoom.x,
 			yFactor * zoom.y
 		);
@@ -175,12 +175,10 @@ CanvasBlockBase {
 		);
 	}
 
-
 	keyDownAction { |modifiers, key| 
 		if (this.selected.not, {
 			^nil;
 		});
 		^nil
 	}
-
 }

@@ -46,7 +46,6 @@ Dispatcher {
 					object.perform(method, payload);
 				}
 			)
-
 		}
 	}
 }

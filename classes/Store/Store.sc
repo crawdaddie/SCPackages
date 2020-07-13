@@ -42,7 +42,7 @@ Store : Event {
 		this.at('timingContext') !? { arg ctx;
 			^ctx
 		} ?? {
-			var parent = this.getParent;
+			var parent = this.getParentStore;
 			^parent.getTimingContext 
 		};
 	}
@@ -61,7 +61,7 @@ Store : Event {
 		if (path.isNil) {
 			^0
 		} {
-			^this.getParent.getOffset + this.timestamp ? 0;
+			^this.getParentStore.getOffset + this.timestamp ? 0;
 		}
 	}
 
@@ -69,7 +69,7 @@ Store : Event {
 		^this.transportContext.loopPoints;
 	}
 
-	getParent {
+	getParentStore {
 		var path = this.getPath;
 		if (path.size > 1) {
 			^Store.at(path[ path.size - 2 ]);
@@ -98,8 +98,27 @@ Store : Event {
 
 	*readFromArchive { arg path;
 		global = path.load;
+		global.init();
 		this.resetPaths;
+
 	}
+
+	*pathTraverse { arg cb;
+		var traverseStore = { arg store, path;
+			store.keysValuesDo { arg id, value;
+				if (id.class == Integer) {
+					var newPath = path ++ [id];
+					if (value.class == StoreEvent) {
+						cb.value(key: id, value: value, store: store, path: path);
+					};
+					if (value.class == Store) {
+						traverseStore(value, newPath);
+					}
+				}
+			}
+		};
+		pathTraverse(global, []);
+	} 
 
 	*resetPaths {
 		var pathTraverse = { arg store, maxArchiveId, path;
@@ -108,8 +127,14 @@ Store : Event {
 					var newPath = path ++ [id];
 					maxArchiveId = max(maxArchiveId, id);
 					this.setPath(id, newPath);
+				
 					if (value.class == Store) {
 						pathTraverse.value(value, maxArchiveId, newPath)
+					};
+
+					if (value.class == StoreEvent) {
+						value.parent;
+						store.orderedItems.add(value);
 					}
 				}
 			};
@@ -227,7 +252,6 @@ Store : Event {
 			;
 		};
 
-		// storeUpdates.postln;
 		Dispatcher((
 			type: 'storeUpdated',
 			payload: storeUpdates,
@@ -282,13 +306,12 @@ Store : Event {
 				if (key == 'loopPoints') {
 					this.setLoopPoints(newValue, storeUpdates);
 				} {
-					object[key] = newValue;
+					object.setAt(key, newValue); // use StoreEvent::setAt so we can defer sending objectUpdated with all updates together
 					if ((key == 'beats') || (key == 'absolute')) {
 						orderedItems.sort;
 						storeUpdates.timestampUpdates = storeUpdates.timestampUpdates.add(object.timestamp); 
 					}
-				}				
-
+				}
 			};
 			Dispatcher((
 				type: 'objectUpdated',
@@ -307,7 +330,12 @@ Store : Event {
 		var objectId = Store.getId;
 		var historyMarker = [nil];
 		object.id = objectId;
-		this.put(objectId, object);
+		this.put(
+			objectId,
+			StoreEvent(
+				object
+			) // cast event as a store event so we can take care of metadata
+		);
 		object.src !? { arg path;
 			Mod.new(path);
 		};
@@ -391,5 +419,90 @@ Store : Event {
 	*play {
 		^global.play;
 	}
+}
+
+S {
+	*new { arg id;
+		^Store.at(id);
+	}
+}
+
+StoreEvent : Event {
+	var <>parentMetadata;
+
+	*new { arg event;
+		var md = if (event.parent.notNil && event.parent.md.notNil) {
+			event.parent.md
+		};
+		^super.new.init(event, md);
+	}
 	
+	init { arg event, md;
+		md !? {
+			parentMetadata = md;
+			parent = Mod.new(parentMetadata.path).at(parentMetadata.memberKey);
+		};
+		^this.putAll(event)
+	}
+
+
+	parent {
+		parentMetadata !? {
+			parent = this.getParentFromMetadata(parentMetadata);
+			^parent;
+		} ?? {
+			^super.parent;
+		};
+	}
+
+	getParentFromMetadata { arg md;
+		^Mod.new(md.path).at(md.memberKey);
+	}
+
+	parent_ { arg parentEvent;
+		if (parentEvent.isNil) {
+			^this
+		};
+
+		parentEvent.md !? {
+			parentMetadata = parentEvent.md;
+		};
+
+		parent = parentEvent;
+	}
+
+	getParentStore {
+		var path = this.getPath;
+		if (path.size > 1) {
+			^Store.at(path[ path.size - 2 ]);
+		} {
+			^Store.global
+		};
+	}
+
+	getPath {
+		^Store.lookups[this[\id]];	
+	}
+
+	put { |key, value|
+		var path = this.getPath;
+		var storeId = if (path.size > 1) {
+			path[path.size - 2]
+		};
+		super.put(key, value);
+		Dispatcher((
+			type: 'objectUpdated',
+			payload: (storeId: storeId).putAll(this)
+		));
+	}
+
+	setAt { |key, value|
+		super.put(key, value);
+	}
+}
+
++ Event {
+	asStoreEvent {
+		^StoreEvent(this);
+	}
 }

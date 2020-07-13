@@ -4,6 +4,8 @@ TransportLines {
 	var <id;
 	var loopPoints;
 	var playCursor;
+	var canvas;
+	var pollCursorRoutine;
 
 	*new { arg id, canvas;
 		^super.new.init(id, canvas)
@@ -14,44 +16,38 @@ TransportLines {
 		playCursorColor = Color.grey(0.5, 1);
 	}
 
-	init { arg argid, canvas;
-		var pollCursorRoutine;
+	storeUpdated { arg payload;
+		var loopPoints = Store.at(id).getLoopPoints;
+		this.setLoopPoints(loopPoints);
+	}
+
+	playerStarted { arg payload;
+		playCursor = payload.startPosition;
+		pollCursorRoutine = Routine({
+			inf.do {
+				playCursor = payload.player.currentPosition;
+				canvas.refresh;
+				0.1.wait;
+			}
+		})
+		.play(AppClock)
+	}
+
+	playerStopped { arg payload;
+		playCursor = payload.stopPosition;
+		pollCursorRoutine.stop;
+	}
+
+	init { arg argid, argcanvas;
 		id = argid;
+		canvas = argcanvas;
+
 		loopPoints = Store.at(id).getLoopPoints;
-
-		Dispatcher.addListener(
+		Dispatcher.connectObject(this,
 			'storeUpdated',
-			this,
-			{ arg payload, view;
-				var loopPoints = Store.at(id).getLoopPoints;
-				view.setLoopPoints(loopPoints);
-			}
-		);
-
-		Dispatcher.addListener(
 			'playerStarted',
-			this,
-			{ arg payload, view;
-				playCursor = payload.startPosition;
-				pollCursorRoutine = Routine({
-					inf.do {
-						playCursor = payload.player.currentPosition;
-						canvas.refresh;
-						0.1.wait;
-					}
-				})
-				.play(AppClock)
-			}
+			'playerStopped'
 		);
-
-		Dispatcher.addListener(
-			'playerStopped',
-			this,
-			{ arg payload, view;
-				playCursor = payload.stopPosition;
-				pollCursorRoutine.stop;
-			}
-		)
 	}
 
 	setLoopPoints { arg setLoopPoints;

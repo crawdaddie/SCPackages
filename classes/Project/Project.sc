@@ -142,6 +142,7 @@ Project {
 	}
 	
 	*save { arg payload;
+		payload.postln;
 		if (payload.newFile || projectFile.isNil) {
 			Dialog.savePanel(
 				{ |path|

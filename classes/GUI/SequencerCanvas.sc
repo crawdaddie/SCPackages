@@ -74,8 +74,7 @@ SequencerCanvas : UserView {
 	}
 
 	addObject { arg object;
-		var newView = object.getEmbedView(zoom);
-		views = views.add(newView);
+		views = views.add(object.getEmbedView(zoom););
 	}
 
 	clear {
@@ -192,45 +191,11 @@ SequencerCanvas : UserView {
 		
 		};
 
-		Dispatcher.addListener(
+		Dispatcher.connectObject(
+			this,
 			'objectUpdated',
-			this,
-			{ arg payload, canvas;
-				if (payload.storeId == id) {
-					var store = Store.at(id);
-					timingOffset = store.getOffset;
-				};
-				canvas.refresh;
-			}
-		);
-
-
-		Dispatcher.addListener(
 			'objectDeleted',
-			this,
-			{ arg payload;
-				if (payload.storeId == id) {
-					views = views.select({ arg view;
-						var shouldDeleteView = view.id == payload.objectId;
-						if (shouldDeleteView) {
-							Dispatcher.removeListenersForObject(view);
-						};
-						shouldDeleteView.not;
-					});
-				}
-			}
-		);
-
-		Dispatcher.addListener(
 			'objectAdded',
-			this,
-			{ arg payload, canvas;
-				var eventIsForThisCanvas = (payload.storeId.notNil && payload.storeId == canvas.id) || (payload.storeId.isNil && canvas.id.isNil);
-				if (eventIsForThisCanvas) {
-					canvas.addObject(payload.object)	
-				};
-				canvas.refresh;
-			}
 		);
 
 		this.onClose = { arg view;
@@ -242,6 +207,34 @@ SequencerCanvas : UserView {
 		};
 
 		^this
+	}
+
+	// connected to Dispatcher signals
+	objectAdded { arg payload, canvas;
+		if (payload.storeId == id) {
+			canvas.addObject(payload.object)	
+		};
+		canvas.refresh;
+	}
+
+	objectDeleted { arg payload;
+		if (payload.storeId == id) {
+			views = views.select({ arg view;
+				var shouldDeleteView = view.id == payload.objectId;
+				if (shouldDeleteView) {
+					Dispatcher.removeListenersForObject(view);
+				};
+				shouldDeleteView.not;
+			});
+		}
+	}
+
+	objectUpdated { arg payload;
+		if (payload.storeId == id) {
+			var store = Store.at(id);
+			timingOffset = store.getOffset;
+		};
+		this.refresh;
 	}
 
 	renderView {

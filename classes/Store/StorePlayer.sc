@@ -48,6 +48,13 @@ StorePlayer {
 				player.resetRoutine;
 			}
 		});
+		Dispatcher((
+			type: 'playerStarted',
+			payload: (
+				player: this,
+				startPosition: start
+			)
+		));
 		^routine.play;
 	}
 

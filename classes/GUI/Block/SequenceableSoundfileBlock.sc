@@ -14,15 +14,16 @@ SequenceableSoundfileBlock : SequenceableBlock {
 
 	renderView { arg origin, parentBounds;
 		super.renderView(origin, parentBounds);
-		
 		this.renderWaveform(origin);
 	}
 
 	objectUpdated { arg payload;
 		super.objectUpdated(payload);
-		payload.startPos !? { |startPos|
-			startPos = startPos;
-		};
+		if (payload.id == id) {
+			payload.startPos !? { |argstartPos|
+				startPos = argstartPos;
+			};
+		}
 	}
 
 	zoomBy { arg zoomX = 1, zoomY = 1;
@@ -45,15 +46,19 @@ SequenceableSoundfileBlock : SequenceableBlock {
 		Pen.strokeColor = waveformColor;
 		
 		if (waveform.size > 0) {
-			var middle = (renderBounds.leftTop + renderBounds.leftBottom) / 2;
-			min(renderBounds.width, waveform.size).do { arg index;
-				var data = waveform[index];
-				var max = middle + Point(0, data[0] * height / 2);
-				var min = middle + Point(0, data[1] * height / 2);
+			var middlePoint = (renderBounds.leftTop + renderBounds.leftBottom) / 2;
+			var waveformSize = waveform.size;
+			var framesToRender = ((1 - startPos) * waveformSize).floor.asInteger;
+			var firstFrame = (startPos * waveformSize).floor.asInteger;
+
+			min(renderBounds.width, framesToRender).do { arg index;
+				var data = waveform[index + firstFrame];
+				var max = middlePoint + Point(0, data[0] * height / 2);
+				var min = middlePoint + Point(0, data[1] * height / 2);
 
 				Pen.line(max, min);
 				Pen.fillStroke;
-				middle.x = middle.x + 1;
+				middlePoint.x = middlePoint.x + 1;
 			}
 		}
 	}

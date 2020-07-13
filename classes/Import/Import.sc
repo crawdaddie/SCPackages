@@ -115,7 +115,7 @@ Mod : Environment {
 
 	loadFromSoundfile {
 		var modpath = Mod.filenameSymbol.asString.dirname +/+ "soundfileMod.scd";
-		this.make {
+			this.make {
 			modpath.load;
 		};
 	}
@@ -140,7 +140,6 @@ Mod : Environment {
 	}
 
 	*reload_on_save { arg path;
-
 		var lookupPath = path.splitext[0];
 
 		all.at(lookupPath.asSymbol) !? { arg module;
@@ -148,7 +147,12 @@ Mod : Environment {
 			"reloading on save: %".format(lookupPath.split($/).last).postln;
 			fork {
 				module.reload;
-				module.emit('reloaded')
+				Dispatcher((
+					type: 'moduleReload', 
+					payload: (
+						path: path
+					)
+				));
 			}
 		}
 	}
