@@ -140,11 +140,8 @@ Mod : Environment {
 	}
 
 	*reload_on_save { arg path;
-		var lookupPath = path.splitext[0];
-
-		all.at(lookupPath.asSymbol) !? { arg module;
-			module.postln;
-			"reloading on save: %".format(lookupPath.split($/).last).postln;
+		all.at(path.asSymbol) !? { arg module;
+			"reloading on save: %".format(module).postln;
 			fork {
 				module.reload;
 				Dispatcher((
@@ -153,7 +150,7 @@ Mod : Environment {
 						path: path
 					)
 				));
-			}
+			}	
 		}
 	}
 

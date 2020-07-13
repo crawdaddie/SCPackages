@@ -22,6 +22,16 @@ Store : Event {
 			.new()
 			.addTimingContext
 			.addTransportContext;
+
+		Class.initClassTree(Dispatcher);
+		Dispatcher.addListener('moduleReload', this, { arg payload;
+			Store.lookups.keysValuesDo { arg key, value;
+				var object = Store.at(key);
+				if (object.class == StoreEvent) {
+					object.reset;
+				};
+			}
+		})
 	}
 
 	addTimingContext { arg ctx = ();
@@ -103,7 +113,7 @@ Store : Event {
 
 	}
 
-	*pathTraverse { arg cb;
+	pathTraverse { arg cb;
 		var traverseStore = { arg store, path;
 			store.keysValuesDo { arg id, value;
 				if (id.class == Integer) {
@@ -117,8 +127,9 @@ Store : Event {
 				}
 			}
 		};
-		pathTraverse(global, []);
-	} 
+		pathTraverse(this, []);
+	}
+
 
 	*resetPaths {
 		var pathTraverse = { arg store, maxArchiveId, path;
@@ -133,7 +144,7 @@ Store : Event {
 					};
 
 					if (value.class == StoreEvent) {
-						value.parent;
+						value.reset;
 						store.orderedItems.add(value);
 					}
 				}
@@ -438,13 +449,14 @@ StoreEvent : Event {
 	}
 	
 	init { arg event, md;
-		md !? {
-			parentMetadata = md;
-			parent = Mod.new(parentMetadata.path).at(parentMetadata.memberKey);
-		};
+		parentMetadata = md;
+		this.reset;
 		^this.putAll(event)
 	}
 
+	reset {
+		this.parent;
+	}
 
 	parent {
 		parentMetadata !? {
