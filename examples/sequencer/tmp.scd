@@ -1,444 +1,472 @@
-(
-	startPos: 0.2,
-	beats: 6.5,
-	length: 2,
-) 
+u = 'updateTestEvent'.importFrom('src/baseEvents');
 
-4.postln;
+u
 
-g = Store.global;
-g.getPath.size
-g.getOffset
+Mod.all.at('/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/src/baseEvents.SCD')
 
-Store.at(1007).getOffset;
-Store.at(1007)
-Store.lookups.put(1007, [1006, 1007]);
+Mod.all.at('/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/src/baseEvents.scd').updateTestEvent
 
-Store.at(1006).getOffset
-q.keysValuesDo { arg key, value;
-	if (value.class == Function) {
-		value.value(q, 1).postln;		
-	}
+
+Mod.all.keysValuesDo { arg key, val;
+	key.postln
 };
 
-1.dumpFullInterface
+S(1005)
 
-q.respondsTo('keysValuesDo')
-
-q = { arg ignoreLoop;
-
-}
-
-
-q.value(ignoreLoop2: false);
-
-
-Store.patch
-
-
-g = Store.global
-Object.dumpInterface
+S(1002).row
 
 
 
-q.perform('open', 1)
 
-a.keysValuesDo { arg a, b;
-	[a, b.class].postln;
+compileString
+o = StoreEvent((a: 1), l.md)
+
+
+o = 
+
+k = S(1002).getView
+
+
+k
+o.
+
+
+o.dummyKey
+
+o.parent
+
+
+storeOn
+o = S(1002)
+
+k = o.copy
+
+
+asCompileStri
+
+a = { 10.do { 10.postln } };
+a.asCompileString.postcs;
+a.postcs;
+
+
+l = 'sampleEvent'.importFrom('src/baseEvents');
+
+k = StoreEvent((a: 1), l)
+
+k.asCompileString
+
+k.parent
+
+k.asCompileString
+
+
+ng
+
+o.parent
+
+k.archiveAsCompileString
+k.checkCanArchive;
+Object
+
+k = { arg a;
+a.postln
 };
 
-a.proto_(b)
+o.asCompileString
+4
+
+k.archiveAsCompileString
+k.asCompileString;
+
+o.parent
+o.parent
+o.dummyKey
+
+o.parent
+
+Array
+
+l = Mod.all.at(o.parentMetadata.path)[o.parentMetadata.memberKey]
+
+S(1002).parent
+
+S(1002)['dummyKey']
 
 
-a.keys.includes('c')
-
-g = Store.global;
-
-g.patch((transportContext: (loopPoints: [2, 8])));
-
-4.postln;
-j = Store.at(1007);
-
-j.postTree;
-
-[0, 1] - 1;
-
-j.transportContext
-
-(
-g = Store.global;
-r = StoreRoutine(g, 1, ignoreLoop: true);
-r.play;
-)
-
-l = Store.at(1007)
-l.src
-l.play;
-
-l.postTree;
-l.getModule;
-
-l.getModule.play;
-
-m = Mod.new(l.src)
-
-roto.postTree
-l.src
-
-
-l.play = { arg ev;
-	ev.postln;
-}
 Store.postTree;
 
 
-Store.at(1006)
+l
+o.class
 
-Store.keysValuesDo
-l.play
-TextView().front;
+
+Store.postTree;
+
+Event
+
+
+EnvirGui(S(1002))
+
+o = 
+S(1002).getView
+
+S
+o
+
+
+
+
+
+o.parentMetadata
+
+
+Dispatcher.addListener(
+	'save',
+	'system',
+	{ arg payload;
+		if ((payload.newFile || projectFile.isNil), {
+			Dialog.savePanel({ arg path;
+				projectFile = path;
+				"saving to %".format(projectFile).postln;
+				Store.archive(projectFile);
+				a.parent.name = "sequencer - %".format(projectFile.basename);
+				saveDir = projectFile.dirname;
+				},
+				path: saveDir
+			);
+		}, {
+			"saving to %".format(projectFile).postln;
+			Store.archive(projectFile);
+			saveDir = projectFile.dirname;
+		});
+	}
+);
+
+
+
+~sf = 'sampleEvent'.importFrom('src/baseEvents');
+~seqE = 'sequencerEvent'.importFrom('src/baseEvents');
+
+k = Store.readFromrchive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest2.scproj");
+
+
+k = "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest2.scproj".load;
+
+Mod.new(S(1002).parentMetadata.path)[S(1002).parentMetadata.memberKey]['getEmbedView'].value(S(1002), 1)
+.getEmbedView.postcs;
+
+Dispatcher.listeners['moduleReload']
+
+
+
+Mod.all['/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/src/baseEvents.scd'].sampleEvent.dummyKey;
+
+
 (
-w = Window.new.front;
-a = TextField(w, Rect(10, 10, 150, 20));
-a.string = "hi there";
-a.action = {arg field; field.value.postln; };
+t = { arg value, events;
+	if (value.class == Mod) {
+		value.keysValuesDo { arg key, value;
+			t.(value);
+		}
+	} {
+		try {
+			if (value.md) {
+				value.postln;	
+			}
+		}
+	};
+	// if (value.tryPerform('md').notNil) {
+	// 	value.postln;
+	// }
+};
+
+Mod.all.keysValuesDo { arg key, value;
+	t.(value);
+}
 )
-Dialog.openPanel();
-File
-l.parent.parent.parent.parent
+x
 
-Store.methods.collect(_.name)
-u = 'system'.import;
-u.postln;
-Class
-Object
-k = Store.dumpInterface
-
-k = File.readAllString(
-
-File.use("/Users/adamjuraszek/PROJECTS/supercollider/packages/classes/Project/recentProjects", "w", { |f|
-	f.write("write value");
-});
-
-Project();
-Project.recentProjects;
-k.split($\n)
-
-File
-Set
-String
-k =[1,2,3,1,4];
-
-Dialog.savePanel({ arg path;
-	path.basename.postln;
-});
-
-k = k.as(OrderedIdentitySet)
-
-k.asArray.join("\n")
+Store.global.orderedItems[0]
 
 
-k = [0] ++ k;
+S().push;
+
+
+S().push;
+4
+Store.push;
+
+Store()
+S.push
+
+
+~items[0].type;
+
+
+~items[0].beats = 1;
+~items[0].row = 3;
+
+
+'src/baseEvents'.asModule.open;
+~items[0].timestamp
+put('beats', 1)
+
+~items[0].getEmbedView;
+
+
+~items[0].beats = 1;
+
+~items[0].put('beats', 1)
+
+~items[2]
+~items[2].beats = 1;
+
+Store.global.use {
+	// ~transportContext.loopPoints = [2, 8];
+	// currentEnvironment.class.postln;
+	currentEnvironment.getItems()
+};
+
+Store.global.push;
+Environment
+
+~items = Store.global.getItems()
+
+
+Store.global.patch((
+	1005: (
+		beats: 2
+	))
+);
+
+
+S.push;
+
+~i = ~items[0];=
+
+a  (a: 1)
+
+
+
+Store.at(1001).beats = 2;
+
+S().pop;
+
+
+
+~i.put('beats', 0)
+
+~i.beats = 2;
+
+
+~i.getPath
+
+~i.beats = 1;
+
+
+
+
+
+Store.postTree;
+
+~items
+
+
+~i = ~items[0]
+
+
+~i.beats = 1;
+
+~i.put('beats', 1)
+
+~i.put('length', 2)
+
+
+~i.beats = 1;
+Store.postTree;
+~i = ~items[0]
+
+
+~i.put('beats', 1)
+~i.beats = 2;
+
+Dictionary
+
+
+
+k = ~items[0];
+currentEnvironment[1005].row = 3;
+.beats = 2;
+
+
+k.beats = 2;
+
+Store.at(1005).length
+
 
 
 k
 
+Envor
 
-k.prepend(0)
+Environment
 
-j = Set(*[1,2,3,4])
-k = [0] ++ k;
-.add
-
-k = "/Users/adamjuraszek/PROJECTS/supercollider/_modules/system/index.scd"
-k.dirname.dirname
-
-Project.recentProjects;
-
-k.basename
+Store.patch((timingContext: (bpm: 165)))
 
 
-Store.postTree;
+S(1002).dummyKey
 
-k.currentPosition;
-Store.global.getLoopPoints
+k.parent.name = "1001"
+k = S(1002).getView
+k.viewForParam('id').visible_(false)
+k.editKeys
 
-Store.at().getLoopPoints
-
-k = "/Users/adamjuraszek/PROJECTS/supercollider/_modules/system/index.scd";
-
-p = "/Users/adamjuraszek/PROJECTS/supercollider/_modules/system"; 
-
-
-(p +/+ "indexx.scd").pathMatch
-.includes((p +/+ "index.scd"));
+Store.lookups.keysValuesDo { arg key, value;
+	key.postln
+};
 
 
-p +/+ "index.scd"
+Dispatcher.listeners
 
-Store.at(1001).inspect;
-
-
-system/index.scd
-
-
-(
-g = Store.global;
-g.patch((
-	transportContext: (loopPoints: [4, 8]),
-));
-
-)
-
-~sys.player.currentPosition;
-
-
-Store.postTree;
-g[1007].playInStore(1, 2);
-g[1007].getModule
-
-g[1007]..playInStore(1, 2)
-
-g = Store.global;
-g.play;
-
-k.play;
-
-g = Store.at()
-
-g.play;
+Dispatcher.addListener('moduleReload', 'system', { arg payload;
+	"module reload".postln;
+	payload.postln;
+});
 
 
 
 
 
-g.postTree;
+S.push;
 
-k.currentPosition;
 
-g.postTree;
-(
-g = Store.global;
+~i = Store.at(1005)
 
-// k.play;
-)
-.yield
+
+~i.beats
+
+~i.beats = 1;
+
+
+
+4
+
+
+~i = ~items[0]
+
+
+
+~i.beats = 1;
+
+~i.put('beats', 1)
+
+
+
+
+
+~i = ~items[0];
+
+
+~i.beats = 1;
+
+~i.put('beats', 1)
+
+
+
+
+
+
+k = (a: 1).putAll()
+
+k = ().putAll()
+
+Store.global.orderedItems[2
+
+Dispatcher.listeners
+
+S(1002).dummyKey
+
+k.at(1002)
+
+S(1002).parent
+S(1002).getEmbedView
+
+Store.pathTraverse { arg key, value, store, path;		
+
+
+Store.pathTraverse({ arg key, value, store, path;
+
+	store.put(key, StoreEvent(value, value.parent.md));
+});
+
+S(1002).postln;
+
+
+Dispatcher.listeners['objectUpdated']
+
+S(1007).parent_(~sf);
+S(1006).parent_(~seqE)
+
+S(1005).parent_(~seqE)
+
+S(1005)
+
+S(1002).parent
+
+Store.archive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest2.scproj")
+
 
 Object
 
-g.transportContext
+m = 'src/baseEvents'.import;
 
-g.postTree;
-g.patch((
-	1004: (
-		beats: 4.0
-	)
-))
+m.sampleEvent.md.path
 
 
-Project("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest.scproj");
-Project.recentProjects
-asArray.join("\n")
+m.updateTestEvent.md.notNil
 
-k = [1,2];
-Set[*([1] ++ k)]
+Store.patch((
+	transportContext: (loopPoints: [4, 8])
+	))
 
-
-Set[1,2,3]
-
-thisThread.seconds;
-thisThread.seconds;
+j = (a: 1, b: 2);
 
 
-g.postTree;
-g.timingContext 
-
-g.postTree;
-
-g.timingContext
-g.loopPoints
-
-g.postTree;
-g.patch((loopPoints: [2, 8]));
-
-g.setLoopPoints([2, 8])
 
 
-j = Store.at(nil)
 
 
-j.postTree;
+~i = ~items[0]
 
-Store.at(0)
 
+~i.know
+
+S.push;
+~i.beats = 4;
+
+
+~i.beats
+
+~i.use {
+	~beats = 1;
+}
+
+Store.at(1001).beats_(3)
+
+j.put('b', 1)
+
+Event
+
+j.b = 2;
+Store.at(1001).know_(true)
+
+
+
+Store.at(1001).beats = 2;
 j
+j.parent = u
 
 
+a 
 
-
-j[2]
-
-
-
-g.getItems
-
-j
-
-(
-
-
-var getFirstEvents = { arg futureEvents;
-	var firstTimestamp = futureEvents[0].timestamp;
-	var firstEvents = futureEvents.select({ arg item;
-		item.timestamp == firstTimestamp;
-	});
-	(timestamp: firstTimestamp, events: firstEvents);
-};
-
-var getNextEvents = { arg array, time;
-	var futureEvents = array
-		.select({ arg item;
-			item.timestamp > time;
-		});
-	if (futureEvents.size != 0) {
-		getFirstEvents.(futureEvents);
-	} {
-		nil;
-	}
-};
-
-var playEventGroup = { arg eventGroup;
-	eventGroup.events.do { arg ev;
-		ev.postln;
-	};
-	"".postln;
-};
-
-
-g = Store.global;
-
-
-
-j = [
-	g[1001],
-	g[1002],
-	g[1002].putAll((row: 3)),
-	g[1003],
-	g[1004]
-];
-
-
-
-r = Routine({ arg inval;
-	var prevTime;
-	var delta;
-	var nextEvents = getFirstEvents.(j);
-	playEventGroup.(nextEvents);
-	prevTime = nextEvents.timestamp;
-
-	inf.do {
-		nextEvents = getNextEvents.(j, prevTime);
-		if (nextEvents.notNil) {
-			delta = nextEvents.timestamp - prevTime;
-			r.beats.postln;
-			delta.wait;
-			playEventGroup.(nextEvents);
-			prevTime = nextEvents.timestamp;
-		} {
-			nil.yield
-		};
-	}
-});
-r.play;
-)
-
-r.stop;
-r.resume;
-
-
-Task
-
-k = [1,2,3];
-l = k.select({ arg i; i > 1})
-
-if (l.size != 0) { l } { nil };
-
-
-
-(
-a = (
-    pattern: Pbind(\note, Pgeom(1, 1.1, { 20.rand }), \dur, 0.05),
-    embedInStream: { |event, inevent| event[\pattern].embedInStream(inevent) }
-);
-b = (note: [2, 5]);
-c = (freq: 402, dur: 0.3);
-Prand([a, b, c], inf).trace.play;
-)
-
-b = (note: [0, 3, 7]);
-
-Project();
-
-Project.recentProjects;
-
-j[0].proto
-
-(
-r = Routine { arg inval;
-    loop {
-        // thisThread refers to the routine.
-        postf("beats: % seconds: % time: % \n",
-            thisThread.beats, thisThread.seconds, Main.elapsedTime
-        );
-        1.0.yield;
-
-    }
-}.play;
-)
-
-r.stop;
-r.beats;
-r.seconds;
-r.clock;
-
-j = [
-	(note: [0, 3, 7])
-]
-
-j = Store.global.getItems[2]
-
-
-j.timestamp
-
-
-
-
-8/6 * 1.5
-
-b.play;
-
-k = Dictionary[];
-Store.global.getTimingContext;
-k.size
-
-k.play;
-k.routine.clock.beats;
-
-
-
-k.routine.state;
-k.routine.isPlaying
-
-j[0].timestamp
-
-j[1]
-
-
-Project();
-S
-Task
-
-.elapsedTime
-
-
-.wait;
+j.buffer

@@ -1,0 +1,21 @@
+var o,p,n=nil;
+o=[ProjectEvent.prNew,Array.prNew(32),{ arg ev;
+			Mod.all.at(ev.soundfile);
+		},{ arg ev, zoom;
+			SequenceableSoundfileBlock(ev, zoom);
+		},{
+			var soundfileMod = currentEnvironment.getSoundfileMod;
+			(
+				instrument: ~instrument,
+				atk: ~atk,
+				decay: ~decay,
+				sustain: ~length,
+				startPos: ~startPos,
+				buffer: soundfileMod.buffer
+			).play;
+		},{ arg ev;
+			// open a soundfile editor from here
+		}];
+p=[0,[array:o[1],size:9,proto:nil,parent:nil,know:true,path:nil,member:nil],1,['startPos',0,'getSoundfileMod',o[2],'instrument','stereo_player','getEmbedView',o[3],'atk',0.05,'play',o[4],'decay',0.05,n,n,n,n,n,n,n,n,n,n,n,n,'type','sampleEvent','getView',o[5],n,n]
+];
+prUnarchive(o,p);

@@ -81,7 +81,7 @@ Mod : Environment {
 		this.registerModule;
 
 		if (PathName.new(path).isFolder) {
-			this.loadFromFolder
+			this.loadFromFolder(path)
 		} {
 			var ext = path.splitext.last;
 			switch (ext,
@@ -102,7 +102,9 @@ Mod : Environment {
 				currentEnvironment.put(~path.basename.splitext[0].asSymbol, mod);
 			} {
 				(~path +/+ "*.scd").pathMatch.do({ arg fullPath;
-					var mod = super.new(fullPath);
+					var mod = Mod(fullPath);
+					fullPath.postln;
+					mod.postln;
 					currentEnvironment.put(fullPath.basename.splitext[0].asSymbol, mod);
 				});
 			}

@@ -52,7 +52,6 @@ CanvasBlockBase {
 	}
 
 	getRectFromEvent { arg event;
-
 		var timestamp, length, row;
 		length = event.length;
 		timestamp = event.beats;

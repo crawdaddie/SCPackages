@@ -4,7 +4,7 @@ Store : Event {
 	classvar <lookups;
 
 	var <>id;
-	var <orderedItems;
+	var <>orderedItems;
 
 	var <player;
 	
@@ -326,7 +326,7 @@ Store : Event {
 			};
 			Dispatcher((
 				type: 'objectUpdated',
-				payload: object.putAll((storeId: id))
+				payload: object.copy.put('storeId', id, false)
 			));
 			^object;
 		}
@@ -419,22 +419,45 @@ Store : Event {
 		^orderedItems;
 	}
 
+	apply { arg fn;
+		this.orderedItems.do { arg item;
+			item.putAll(fn.value(item))
+		}
+	}
+
+
 	play { arg startPos;
 		^StorePlayer(
 			this,
 			startPos ? 0
 		).play;
-
 	}
 
 	*play {
 		^global.play;
+	}
+
+	push {
+		this['items'] = this.orderedItems;
+		super.push();
+	}
+
+	pop {
+		this['items'] = nil;
+		 super.pop();
 	}
 }
 
 S {
 	*new { arg id;
 		^Store.at(id);
+	}
+	*push { arg id;
+		var env = (
+			'items': Store.at(id).orderedItems,
+			's': Store.at(id),
+		);
+		^env.push;
 	}
 }
 
@@ -451,11 +474,16 @@ StoreEvent : Event {
 	init { arg event, md;
 		parentMetadata = md;
 		this.reset;
+		know = true;
 		^this.putAll(event)
 	}
 
 	reset {
 		this.parent;
+	}
+
+	getParentFromMetadata { arg md;
+		^Mod.new(md.path).at(md.memberKey);
 	}
 
 	parent {
@@ -465,10 +493,6 @@ StoreEvent : Event {
 		} ?? {
 			^super.parent;
 		};
-	}
-
-	getParentFromMetadata { arg md;
-		^Mod.new(md.path).at(md.memberKey);
 	}
 
 	parent_ { arg parentEvent;
@@ -497,19 +521,32 @@ StoreEvent : Event {
 	}
 
 	put { |key, value|
-		var path = this.getPath;
-		var storeId = if (path.size > 1) {
+		var path, storeId;
+
+		path = this.getPath;
+		storeId = if (path.size > 1) {
 			path[path.size - 2]
 		};
-		super.put(key, value);
-		Dispatcher((
-			type: 'objectUpdated',
-			payload: (storeId: storeId).putAll(this)
-		));
+
+		Store.at(storeId).patch(Dictionary.with(*[
+			this.id -> Dictionary.with(*[
+				key -> value
+				])
+			])
+		);
+		^super.put(key, value);
 	}
 
 	setAt { |key, value|
-		super.put(key, value);
+		^super.put(key, value);
+	}
+}
+
+
+TestEvent : Event {
+	put { |key, val|
+		["test event put", key, val].postln;
+		^super.put(key, val);
 	}
 }
 

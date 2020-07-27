@@ -7,6 +7,7 @@ Project {
 	classvar <projectFile, <projectDir, <srcDir, <saveDir, <dataDir;
 	classvar <canvas;
 	classvar <player;
+	classvar <assetView;
 
 	*initClass {
 		recentProjectsFilePath = Project.filenameSymbol.asString.dirname +/+ "recentProjects";
@@ -59,6 +60,7 @@ Project {
 	}
 
 	*load { arg path;
+		(srcDir +/+ "synths.scd").load;
 		path !? {
 			Store.readFromArchive(path);
 		};
@@ -68,6 +70,10 @@ Project {
 		};
 
 		path !? { canvas.parent.name = "sequencer - %".format(path.basename) };
+
+
+		assetView = AssetView();
+
 		Store.postTree;
 	}
 
@@ -197,5 +203,56 @@ Project {
 				)
 			));
 		}
+	}
+
+	*initAssetView {
+		var srcModule, itemCallback, traverse;
+		var srcView;
+		var sfView;
+		var synthDefView;
+
+		assetView = TreeView();
+		assetView.canSort_(true);
+		assetView.columns_(["name", "path"]);
+
+		// 
+		srcView = assetView.addItem(["src"]);
+		srcModule = Mod.new(srcDir);
+		
+		itemCallback = { arg item;
+			try {
+				item.md !? { arg md;
+					srcView.addChild([md.memberKey, md.path]);
+				}
+			} { arg e;
+				e.postln;
+			}
+		};
+
+		traverse = { arg mod;
+			mod.keysValuesDo { arg key, item;
+				if (item.class == Mod) {
+					traverse.value(item);
+				} {
+					itemCallback.value(item);
+				}
+			}
+		};
+
+		traverse.value(srcModule);
+
+		sfView = assetView.addItem(["soundfiles"]);
+
+		(dataDir ++ "/*").pathMatch.do { arg path;
+			sfView.addChild([path.basename, path]);
+		};
+
+		synthDefView = assetView.addItem(["synthdefs"]);
+
+		SynthDescLib.global.synthDescs.values.select(_.find("system_").notNil).do { arg synthDesc;
+			synthDefView.addChild([synthDesc.name]);
+		};
+
+		assetView.front;
 	}
 }

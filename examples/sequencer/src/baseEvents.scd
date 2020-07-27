@@ -55,6 +55,7 @@
 				.putSpec(\row, ControlSpec(0, 128, \lin, 1, 0));
 
 			view.viewForParam('id').visible_(false);
+			view.parent.name = ev.id;
 			view;
 		},
 		row: 0,
@@ -132,7 +133,6 @@ SynthDef(\stereo_player, { arg
 	),
 	~sequencerEvent
 );
-// .asProjectEvent;
 
 ~automationEvent = ~inheritEvents.value(
 	(
@@ -141,13 +141,6 @@ SynthDef(\stereo_player, { arg
 	),
 	~timingEvent
 );
-
-
-~updateTestEvent = (
-	type: 'updateTestEvent',
-	buffer: 2,
-);
-
 
 
 
