@@ -24,17 +24,24 @@ Dispatcher {
 		}
 	}
 
-	*new { arg event;
-		var type = event.type;
+	*new { arg type, payload, eventSource;
 		var typeListeners = listeners.at(type) ?? Dictionary();
+		
+		{
+			eventSource !? {
+				typeListeners = typeListeners.select { arg item;
+					item != eventSource; // do not want to recursively trigger oneself
+				}
+			};
 
-		if (debug) {
-			event.postln;
-		};
+			if (debug) {
+				payload.postln;
+			};
 
-		typeListeners.keysValuesDo { arg listeningObject, listener;
-			listener.value(event.payload, listeningObject);
-		};
+			typeListeners.keysValuesDo { arg listeningObject, listener;
+				listener.value(payload, listeningObject);
+			};
+		}.fork(AppClock)
 	}
 
 	*connectObject { arg object ...methods;

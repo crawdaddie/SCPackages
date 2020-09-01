@@ -48,13 +48,13 @@ StorePlayer {
 				player.resetRoutine;
 			}
 		});
-		Dispatcher((
+		Dispatcher(
 			type: 'playerStarted',
 			payload: (
 				player: this,
 				startPosition: start
 			)
-		));
+		);
 		^routine.play;
 	}
 

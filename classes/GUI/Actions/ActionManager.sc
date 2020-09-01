@@ -213,10 +213,10 @@ KeyActionManager {
 				{ [ 1179648, 91 ] } { canvas.subdivisions_(canvas.subdivisions - 1) } // cmd-shift-[
 	 			{ [ 1179648, 93 ] } { canvas.subdivisions_(canvas.subdivisions + 1) } // cmd-shift-]
 				
-				{ Keys(\cmdMod, \s) } { Dispatcher((type: 'save', payload: (newFile: false))) } // cmd-s
-				{ [ 1179648, 83 ] } 	{ Dispatcher((type: 'save', payload: (newFile: true))) } 	// cmd-shift-s
+				{ Keys(\cmdMod, \s) } { Dispatcher(type: 'save', payload: (newFile: false)) } // cmd-s
+				{ [ 1179648, 83 ] } 	{ Dispatcher(type: 'save', payload: (newFile: true)) } 	// cmd-shift-s
 				
-				{ Keys(\cmdMod, \o) } { Dispatcher((type: 'open')) } // cmd-o
+				{ Keys(\cmdMod, \o) } { Dispatcher(type: 'open') } // cmd-o
 				{ [ 1048576, 69 ] } { canvas.editSelection } // cmd-e - edit
 				{ [ 1048576, 16777219 ] } { canvas.deleteSelection } // cmd-backspace
 
@@ -229,13 +229,13 @@ KeyActionManager {
 		keyUpVar = { |canvas, char, modifiers, unicode, keycode, key|
 			if (this.shouldRelease([modifiers, key], initModKey)) {
 				result !? {
-					Dispatcher((
+					Dispatcher(
 						type: 'moveObjects',
 						payload: (
 							updates: result.(),
 							storeId: canvas.id
 						)
-					));
+					);
 				};
 				this.reset;
 			}

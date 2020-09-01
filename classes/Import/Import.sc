@@ -146,12 +146,12 @@ Mod : Environment {
 			"reloading on save: %".format(module).postln;
 			fork {
 				module.reload;
-				Dispatcher((
+				Dispatcher(
 					type: 'moduleReload', 
 					payload: (
 						path: path
 					)
-				));
+				);
 			}	
 		}
 	}

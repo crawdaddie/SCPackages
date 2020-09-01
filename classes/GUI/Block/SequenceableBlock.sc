@@ -40,13 +40,13 @@ SequenceableBlock : CanvasBlockBase {
 			MenuAction("paste (cmd-v)", {
 				var absoluteTime = x / (Theme.horizontalUnit * zoom.x);
 				var absoluteExtension = y / (Theme.verticalUnit * zoom.y);
-				Dispatcher((
+				Dispatcher(
 					type: 'pasteObjects',
 					payload: (
 						x: absoluteTime,
 						y: absoluteExtension,
 						items: Clipboard.normalizedItems
-					))
+					)
 				);
 				Clipboard.clear;
 			}),

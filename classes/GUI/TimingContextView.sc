@@ -18,7 +18,7 @@ TimingContextView {
 	}
 
 	setBPM { arg newBPM;
-		Dispatcher((type: 'setBPM', payload: (id: id, bpm: newBPM)));
+		Dispatcher(type: 'setBPM', payload: (id: id, bpm: newBPM));
 		bpm = newBPM;
 	}
 }

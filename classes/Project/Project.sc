@@ -181,13 +181,13 @@ Project {
 		var startPos = payload.startPos + offset;
 		player !? {
 			player.stop;
-			Dispatcher((
+			Dispatcher(
 				type: 'playerStopped',
 				payload: (
 					player: player,
 					stopPosition: player.currentPosition
 				)
-			));
+			);
 			player = nil;
 		} ?? {
 			player = StorePlayer(
@@ -195,13 +195,13 @@ Project {
 				startPos
 			);
 			player.play;
-			Dispatcher((
+			Dispatcher(
 				type: 'playerStarted',
 				payload: (
 					player: player,
 					startPosition: startPos
 				)
-			));
+			);
 		}
 	}
 

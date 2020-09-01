@@ -163,13 +163,13 @@ SequencerCanvas : UserView {
 			updates = mouseAction.mouseUpAction(x, y);
 
 			updates !? { |updates|
-				Dispatcher((
+				Dispatcher(
 					type: 'moveObjects',
 					payload: (
 						updates: updates,
 						storeId: id
 					)
-				));
+				);
 			};
 			
 			this.refresh;
@@ -674,14 +674,14 @@ SequencerCanvas : UserView {
 		var absoluteTime = newCursorPosition.x / (Theme.horizontalUnit * zoom.x);
 		var absoluteExtension = newCursorPosition.y / (Theme.verticalUnit * zoom.y);
 		items !? {
-			Dispatcher((
+			Dispatcher(
 				type: 'pasteObjects',
 				payload: (
 					x: absoluteTime,
 					y: absoluteExtension,
 					items: items,
 					storeId: id
-				))
+				)
 			);
 		};
 		// Clipboard.clear;
@@ -716,13 +716,12 @@ SequencerCanvas : UserView {
 	}
 
 	deleteSelection {
-		Dispatcher((
+		Dispatcher(
 			type: 'deleteObjects',
 			payload: (
 				storeId: id,
 				toDelete: this.selectedViews.collect(_.id);
 				)
-			)
 		);
 	}
 
@@ -738,7 +737,7 @@ SequencerCanvas : UserView {
 
 	playStore {
 		var startPos = cursorView.x / (Theme.horizontalUnit * zoom.x);
-		Dispatcher((type: 'playStore', payload: (storeId: id, startPos: startPos)))
+		Dispatcher(type: 'playStore', payload: (storeId: id, startPos: startPos))
 	}
 
 }
