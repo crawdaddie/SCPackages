@@ -1,4 +1,4 @@
-Project {
+	Project {
 	classvar <recentProjects;
 	classvar recentProjectsFilePath;
 	classvar emptyProjectDir;
@@ -99,9 +99,10 @@ Project {
 		Dialog.savePanel({ arg path;
 			var name = path.basename;
 			"cp -R '%' '%'".format(emptyProjectDir, path).systemCmd;
-			this.setPaths((path +/+ "data/%.scproj".format(name)));
+			this.setPaths((path +/+ "saves/%.scproj".format(name)));
 			this.load();
 			this.setRecents(projectFile);
+			this.save();
 		},
 		path: defaultProjectsDir
 		);
@@ -110,9 +111,9 @@ Project {
 	*moveObjects { arg payload;
 		var updates = Dictionary();
 		var store = Store.at(payload.storeId);
-		var timingContext = store.getTimingContext;
+		var timingContext = store.timingContext;
 	
-		payload.updates.do { |update|
+		updates = payload.updates.do { |update|
 			var id = update.id;
 			var newState = (
 				beats: update.x,
@@ -148,8 +149,7 @@ Project {
 	}
 	
 	*save { arg payload;
-		payload.postln;
-		if (payload.newFile || projectFile.isNil) {
+		if (projectFile.isNil) {
 			Dialog.savePanel(
 				{ |path|
 					"saving to %".format(projectFile).postln;

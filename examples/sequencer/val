@@ -1,0 +1,5 @@
+var o,p,n=nil;
+o=[Value.prNew,Array.prNew(32),Event.prNew,Array.prNew(8),""];
+p=[0,[array:o[1],size:1,proto:nil,parent:nil,know:true,metadata:o[2]],1,[n,n,n,n,'a',1,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n],2,[array:o[3],size:2,proto:nil,parent:nil,know:true],3,[n,n,'path',o[4],n,n,'memberKey','mod']
+];
+prUnarchive(o,p);

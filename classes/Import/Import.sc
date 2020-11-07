@@ -147,7 +147,7 @@ Mod : Environment {
 			fork {
 				module.reload;
 				Dispatcher((
-					type: 'moduleReload', 
+					type: Topics.moduleReload, 
 					payload: (
 						path: path
 					)

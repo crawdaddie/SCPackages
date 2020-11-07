@@ -1,7 +1,16 @@
-Store : Event {
+// PathManager {
+// 	*getId {
+// 		lastId = lastId + 1;
+// 		^lastId;
+// 	}
+// }
+
+Store : RxEvent {
 	classvar global;
-	classvar lastId = 1000;
+	classvar lastId;
 	classvar <lookups;
+
+	classvar defaultContexts;
 
 	var <>id;
 	var <>orderedItems;
@@ -17,141 +26,22 @@ Store : Event {
 	*global_ { arg obj; global = obj; }
 
 	*initClass {
-		lookups = Dictionary();
-		global = this
-			.new()
-			.addTimingContext
-			.addTransportContext;
-
 		Class.initClassTree(Dispatcher);
-		Dispatcher.addListener('moduleReload', this, { arg payload;
-			Store.lookups.keysValuesDo { arg key, value;
-				var object = Store.at(key);
-				if (object.class == StoreEvent) {
-					object.reset;
-				};
-			}
-		})
-	}
+		Class.initClassTree(Topics);
 
-	addTimingContext { arg ctx = ();
-		var defaultTimingCtx = (bpm: 60);
-		super.put('timingContext',
-			defaultTimingCtx.putAll(ctx)
+		defaultContexts = (
+			timingContext: (bpm: 60),
+			transportContext: (),
 		);
-	}
 
-	addTransportContext { arg ctx = ();
-		var defaultTransportCtx = ();
-		super.put('transportContext',
-			defaultTransportCtx.putAll(ctx)
-		);
-	}
+		lookups = Dictionary();
+		lastId = 1000;
+		global = this
+			.new((
+				timingContext: defaultContexts.timingContext,
+				transportContext: defaultContexts.transportContext,
+			))
 
-	getTimingContext {
-		this.at('timingContext') !? { arg ctx;
-			^ctx
-		} ?? {
-			var parent = this.getParentStore;
-			^parent.getTimingContext 
-		};
-	}
-
-	setLoopPoints { arg loopPoints, storeUpdates;
-		if (loopPoints == [nil] || loopPoints.isNil || (loopPoints[0] == loopPoints[1])) {
-			this.transportContext.loopPoints = nil;
-		} {
-			this.transportContext.loopPoints = loopPoints.sort;
-		};
-		storeUpdates.transportContext = this.transportContext;
-	}
-
-	getOffset {
-		var path = this.getPath;
-		if (path.isNil) {
-			^0
-		} {
-			^this.getParentStore.getOffset + this.timestamp ? 0;
-		}
-	}
-
-	getLoopPoints {
-		^this.transportContext.loopPoints;
-	}
-
-	getParentStore {
-		var path = this.getPath;
-		if (path.size > 1) {
-			^Store.at(path[ path.size - 2 ]);
-		} {
-			^global
-		};
-	}
-
-	*getPath { arg id;
-		^lookups[id];
-	}
-
-	getPath {
-		^lookups[id];
-	}
-
-	*setPath { arg id, path;
-		if (id.class == Integer) {
-			lookups[id] = path;
-		}
-	}
-
-	*archive { arg path;
-		global.writeMinifiedTextArchive(path);
-	}
-
-	*readFromArchive { arg path;
-		global = path.load;
-		global.init();
-		this.resetPaths;
-
-	}
-
-	pathTraverse { arg cb;
-		var traverseStore = { arg store, path;
-			store.keysValuesDo { arg id, value;
-				if (id.class == Integer) {
-					var newPath = path ++ [id];
-					if (value.class == StoreEvent) {
-						cb.value(key: id, value: value, store: store, path: path);
-					};
-					if (value.class == Store) {
-						traverseStore(value, newPath);
-					}
-				}
-			}
-		};
-		pathTraverse(this, []);
-	}
-
-
-	*resetPaths {
-		var pathTraverse = { arg store, maxArchiveId, path;
-			store.keysValuesDo { arg id, value;
-				if (id.class == Integer) {
-					var newPath = path ++ [id];
-					maxArchiveId = max(maxArchiveId, id);
-					this.setPath(id, newPath);
-				
-					if (value.class == Store) {
-						pathTraverse.value(value, maxArchiveId, newPath)
-					};
-
-					if (value.class == StoreEvent) {
-						value.reset;
-						store.orderedItems.add(value);
-					}
-				}
-			};
-			maxArchiveId;
-		};
-		lastId = pathTraverse.value(global, 0, []);
 	}
 
 	*new { arg object;
@@ -263,20 +153,15 @@ Store : Event {
 			;
 		};
 
-		Dispatcher((
-			type: 'storeUpdated',
-			payload: storeUpdates,
-			)
+		this.dispatch(
+			Topics.storeUpdated,
+			storeUpdates,
 		)
 	}
 
 	*patch { arg patch, storeId, shouldSave = true;
 		var store = storeId !? this.at(storeId) ?? global;
 		store.patch(patch);
-		// var history = store.patch(patch);
-		// if (shouldSave) {
-		// 	StoreHistory.saveHistory(history);
-		// }
 	}
 
 	removeFromOrderedList { arg id;
@@ -294,12 +179,11 @@ Store : Event {
 		this.removeFromOrderedList(objectId);
 		storeUpdates.timestampUpdates = storeUpdates.timestampUpdates.add(oldObject.timestamp); 
 
-		Dispatcher((
-			type: 'objectDeleted',
-			payload: (
+		this.dispatch(
+			Topics.objectDeleted,
+			(
 				storeId: id,
 				objectId: objectId
-				)
 			)
 		);
 	}
@@ -339,73 +223,38 @@ Store : Event {
 
 	addObject { arg object, history, storeUpdates;
 		var objectId = Store.getId;
-		var historyMarker = [nil];
+		var module;
+
 		object.id = objectId;
+
 		this.put(
 			objectId,
-			StoreEvent(
-				object
-			) // cast event as a store event so we can take care of metadata
+			RxEvent(object)
 		);
-		object.src !? { arg path;
+
+		module = object.src !? { arg path;
 			Mod.new(path);
 		};
-		orderedItems.add(object);
-		storeUpdates !? { arg updates;
-			updates.timestampUpdates = storeUpdates.timestampUpdates.add(object.timestamp); 
-		};
 
-		Dispatcher((
-			type: 'objectAdded',
-			payload: (
+		orderedItems.add(object);
+
+
+		this.dispatch(
+			Topics.objectAdded,
+			(
 				storeId: id,
 				object: object
-				)
 			)
-		);
+		)
+
 		^objectId;
 	}
 
-	*postTree {
-		"global:".post;
-		global.postTree(nil, 1);
-	}
-
-	postTree { arg obj, tabs = 0;
-		if(obj.isNil, { obj = this });
-		
-		if (obj.class == Store) {
-			"".postln;
-
-			obj.keysValuesDo({ arg key, value;
-				if (key.class == Symbol) {
-					tabs.do({ Char.tab.post });
-					
-					key.post;
-					": ".post;
-					value.postln;
-				}
-			});
-
-			obj.keysValuesDo({ arg key, value;
-				if (key.class == Integer) {
-					tabs.do({ Char.tab.post });
-					
-					key.asString.post;
-					":".post;
-					
-					this.postTree(value, tabs + 1)
-				}
-			});
-
-		} {
-			obj.postTree(tabs);
-		};
-	}
 
 	getEmbedView { arg zoom;
 		^StoreBlock(this, zoom).select();
 	}
+
 	getView {
 		^SequencerCanvas.fromStore(this);
 	}
@@ -444,8 +293,20 @@ Store : Event {
 
 	pop {
 		this['items'] = nil;
-		 super.pop();
+		super.pop();
 	}
+
+	/*
+	 * path utilities
+	 * ./extPathUtilities.sc
+	 * 
+	 * printing + formatting functionality: 
+	 * ./extPrintStore.sc
+	 * 
+	 * context utilities (transport, timing, loop points etc.)
+	 * ./extContextUtilities.sc
+	 *
+	 */
 }
 
 S {
@@ -458,100 +319,5 @@ S {
 			's': Store.at(id),
 		);
 		^env.push;
-	}
-}
-
-StoreEvent : Event {
-	var <>parentMetadata;
-
-	*new { arg event;
-		var md = if (event.parent.notNil && event.parent.md.notNil) {
-			event.parent.md
-		};
-		^super.new.init(event, md);
-	}
-	
-	init { arg event, md;
-		parentMetadata = md;
-		this.reset;
-		know = true;
-		^this.putAll(event)
-	}
-
-	reset {
-		this.parent;
-	}
-
-	getParentFromMetadata { arg md;
-		^Mod.new(md.path).at(md.memberKey);
-	}
-
-	parent {
-		parentMetadata !? {
-			parent = this.getParentFromMetadata(parentMetadata);
-			^parent;
-		} ?? {
-			^super.parent;
-		};
-	}
-
-	parent_ { arg parentEvent;
-		if (parentEvent.isNil) {
-			^this
-		};
-
-		parentEvent.md !? {
-			parentMetadata = parentEvent.md;
-		};
-
-		parent = parentEvent;
-	}
-
-	getParentStore {
-		var path = this.getPath;
-		if (path.size > 1) {
-			^Store.at(path[ path.size - 2 ]);
-		} {
-			^Store.global
-		};
-	}
-
-	getPath {
-		^Store.lookups[this[\id]];	
-	}
-
-	put { |key, value|
-		var path, storeId;
-
-		path = this.getPath;
-		storeId = if (path.size > 1) {
-			path[path.size - 2]
-		};
-
-		Store.at(storeId).patch(Dictionary.with(*[
-			this.id -> Dictionary.with(*[
-				key -> value
-				])
-			])
-		);
-		^super.put(key, value);
-	}
-
-	setAt { |key, value|
-		^super.put(key, value);
-	}
-}
-
-
-TestEvent : Event {
-	put { |key, val|
-		["test event put", key, val].postln;
-		^super.put(key, val);
-	}
-}
-
-+ Event {
-	asStoreEvent {
-		^StoreEvent(this);
 	}
 }

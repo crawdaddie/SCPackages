@@ -1,472 +1,246 @@
-u = 'updateTestEvent'.importFrom('src/baseEvents');
-
-u
-
-Mod.all.at('/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/src/baseEvents.SCD')
-
-Mod.all.at('/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/src/baseEvents.scd').updateTestEvent
-
-
-Mod.all.keysValuesDo { arg key, val;
-	key.postln
-};
-
-S(1005)
-
-S(1002).row
-
-
-
-
-compileString
-o = StoreEvent((a: 1), l.md)
-
-
-o = 
-
-k = S(1002).getView
-
-
-k
-o.
-
-
-o.dummyKey
-
-o.parent
-
-
-storeOn
-o = S(1002)
-
-k = o.copy
-
-
-asCompileStri
-
-a = { 10.do { 10.postln } };
-a.asCompileString.postcs;
-a.postcs;
-
-
-l = 'sampleEvent'.importFrom('src/baseEvents');
-
-k = StoreEvent((a: 1), l)
-
-k.asCompileString
-
-k.parent
-
-k.asCompileString
-
-
-ng
-
-o.parent
-
-k.archiveAsCompileString
-k.checkCanArchive;
-Object
-
-k = { arg a;
-a.postln
-};
-
-o.asCompileString
-4
-
-k.archiveAsCompileString
-k.asCompileString;
-
-o.parent
-o.parent
-o.dummyKey
-
-o.parent
-
-Array
-
-l = Mod.all.at(o.parentMetadata.path)[o.parentMetadata.memberKey]
-
-S(1002).parent
-
-S(1002)['dummyKey']
-
-
-Store.postTree;
-
-
-l
-o.class
-
-
-Store.postTree;
-
-Event
-
-
-EnvirGui(S(1002))
-
-o = 
-S(1002).getView
-
-S
-o
-
-
-
-
-
-o.parentMetadata
-
-
-Dispatcher.addListener(
-	'save',
-	'system',
-	{ arg payload;
-		if ((payload.newFile || projectFile.isNil), {
-			Dialog.savePanel({ arg path;
-				projectFile = path;
-				"saving to %".format(projectFile).postln;
-				Store.archive(projectFile);
-				a.parent.name = "sequencer - %".format(projectFile.basename);
-				saveDir = projectFile.dirname;
-				},
-				path: saveDir
-			);
-		}, {
-			"saving to %".format(projectFile).postln;
-			Store.archive(projectFile);
-			saveDir = projectFile.dirname;
-		});
-	}
+a = (
+	a: Val((a: 1))
 );
 
 
 
-~sf = 'sampleEvent'.importFrom('src/baseEvents');
-~seqE = 'sequencerEvent'.importFrom('src/baseEvents');
+a = Value((a: 1).parent_((metadata: (path: "", memberKey: 'mod'))))
 
-k = Store.readFromrchive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest2.scproj");
+a.metadata
+a.know
 
+a.metadata
 
-k = "/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest2.scproj".load;
+a.a = 2;
 
-Mod.new(S(1002).parentMetadata.path)[S(1002).parentMetadata.memberKey]['getEmbedView'].value(S(1002), 1)
-.getEmbedView.postcs;
-
-Dispatcher.listeners['moduleReload']
+a.
 
 
 
-Mod.all['/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/src/baseEvents.scd'].sampleEvent.dummyKey;
+Store.global.addObject((timestamp: 0))
+Store.postTree;
+
+
+Project.new;
+
+
+Store.global;
+
+function
+User
+
+e = (
+	a: Value((id: 1001, a: 1))
+);
+
+e.push;
+
+~a
+
+~a.a = 2;
+
+
+e.a.a = 3;
+	
+~a.a = 2;
+
+a.b = 3;
+(
+Dispatcher.addListener('objectUpdated', 'system', { arg payload;
+	"listener".postln;
+	payload.postln;
+});
+a = V((
+	id: 1001,
+	b: 1,
+	row: 0,
+	beats: 1,
+	length: 1
+));
+);
 
 
 (
-t = { arg value, events;
-	if (value.class == Mod) {
-		value.keysValuesDo { arg key, value;
-			t.(value);
-		}
-	} {
-		try {
-			if (value.md) {
-				value.postln;	
-			}
-		}
-	};
-	// if (value.tryPerform('md').notNil) {
-	// 	value.postln;
-	// }
+var identifier;
+var selected;
+var mouseAction;
+a = V((
+	id: 1001,
+	b: 1,
+	row: 0,
+	beats: 1,
+	length: 1
+));
+
+identifier = { arg p;
+	p.id == a.id;
 };
 
-Mod.all.keysValuesDo { arg key, value;
-	t.(value);
-}
+u = UserView();
+
+v = RxBlock(a);
+
+
+Dispatcher.addListener('objectUpdated', u, { arg payload, u;
+	if (identifier.value(payload)) {
+		u.refresh;
+	}
+});
+
+u.drawFunc = { 
+	v.renderView;
+};
+
+u.mouseDownAction = { arg view, x, y;
+	mouseAction = RxMouseAction([v].select(_.contains(x@y)), x, y);
+};
+
+u.mouseMoveAction = { arg view, x, y;
+	mouseAction.mouseMoveAction(x, y);
+	u.refresh;
+};
+
+u.mouseUpAction = { arg view, x, y;
+	mouseAction.mouseUpAction(x, y);
+	mouseAction = nil;
+};
+
+u.front;
 )
-x
-
-Store.global.orderedItems[0]
 
 
-S().push;
+Point(0, 1) - Point(2, 1)
 
+u.canReceiveDrag
 
-S().push;
-4
-Store.push;
-
-Store()
-S.push
-
-
-~items[0].type;
-
-
-~items[0].beats = 1;
-~items[0].row = 3;
-
-
-'src/baseEvents'.asModule.open;
-~items[0].timestamp
-put('beats', 1)
-
-~items[0].getEmbedView;
-
-
-~items[0].beats = 1;
-
-~items[0].put('beats', 1)
-
-~items[2]
-~items[2].beats = 1;
-
-Store.global.use {
-	// ~transportContext.loopPoints = [2, 8];
-	// currentEnvironment.class.postln;
-	currentEnvironment.getItems()
-};
-
-Store.global.push;
-Environment
-
-~items = Store.global.getItems()
-
-
-Store.global.patch((
-	1005: (
-		beats: 2
-	))
+Dispatcher(
+	type: 'objectUpdated',
+	payload: (
+		id: 1001,
+		beats: 10.0.rand,
+		row: 10.rand,
+		length: rrand(2, 5),
+	)
 );
 
 
-S.push;
+v
 
-~i = ~items[0];=
-
-a  (a: 1)
-
+a
+v.width
 
 
-Store.at(1001).beats = 2;
-
-S().pop;
+v.x
 
 
 
-~i.put('beats', 0)
+v.x
 
-~i.beats = 2;
+u.refresh;
 
+v.listen;
 
-~i.getPath
-
-~i.beats = 1;
-
+u.drawFunc = {
+	v.renderView;
+};
+u.front;
+)
 
 
 
 
-Store.postTree;
-
-~items
 
 
-~i = ~items[0]
-
-
-~i.beats = 1;
-
-~i.put('beats', 1)
-
-~i.put('length', 2)
-
-
-~i.beats = 1;
-Store.postTree;
-~i = ~items[0]
-
-
-~i.put('beats', 1)
-~i.beats = 2;
-
-Dictionary
+a.writeMinifiedTextArchive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/val")
+a
 
 
 
-k = ~items[0];
-currentEnvironment[1005].row = 3;
-.beats = 2;
-
-
-k.beats = 2;
-
-Store.at(1005).length
-
-
-
-k
-
-Envor
-
-Environment
-
-Store.patch((timingContext: (bpm: 165)))
-
-
-S(1002).dummyKey
-
-k.parent.name = "1001"
-k = S(1002).getView
-k.viewForParam('id').visible_(false)
-k.editKeys
-
-Store.lookups.keysValuesDo { arg key, value;
-	key.postln
+h = { arg a;
+	a.postln;
+	a + 2;
 };
 
 
-Dispatcher.listeners
 
-Dispatcher.addListener('moduleReload', 'system', { arg payload;
-	"module reload".postln;
-	payload.postln;
-});
 
+k = (a: 1, b: 2);
+l = (b: 2, c: 2);
+h.valueWithEnvir(k);
 
+try {
+	h.valueWithEnvir(l);
+};
 
 
+a
 
-S.push;
+Dispatcher('objce')
 
 
-~i = Store.at(1005)
 
+a.putAll((c: 2))
 
-~i.beats
+a = ();
 
-~i.beats = 1;
+a.size
 
 
+a[1002] = (a: 1)
 
-4
+a.b = 3;
 
 
-~i = ~items[0]
+V(()).push;
 
 
 
-~i.beats = 1;
 
-~i.put('beats', 1)
 
 
+a.push;
 
 
 
-~i = ~items[0];
+currentEnvironment.put('h', 2)
+~b = 2;
+~c = 3;
+~h = 5;
 
+a.put(1002, V((a: 1)))
 
-~i.beats = 1;
 
-~i.put('beats', 1)
+a[1002]
 
 
 
+currentEnvironment
 
 
+(
+var soundfile = 'data/oxygen'.import;
+var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
+var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
+var events = [
+	(soundfile: soundfile.path, beats: 0, startPos: 0, length: 2),
+ 	(soundfile: soundfile.path, beats: 2, startPos: 0, length: 2),
+ 	(soundfile: soundfile.path, beats: 4, startPos: 0, length: 2),
+ 	(soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
+ 	].collect(_.parent_(sampleEvent));
 
-k = (a: 1).putAll()
+events = events.add((beats: 0, row: 2).parent_(sequencerEvent));
 
-k = ().putAll()
 
-Store.global.orderedItems[2
+events.do { |event, index|
+	Store.addObject(event);
+};
 
-Dispatcher.listeners
 
-S(1002).dummyKey
+)
 
-k.at(1002)
 
-S(1002).parent
-S(1002).getEmbedView
 
-Store.pathTraverse { arg key, value, store, path;		
 
 
-Store.pathTraverse({ arg key, value, store, path;
 
-	store.put(key, StoreEvent(value, value.parent.md));
-});
-
-S(1002).postln;
-
-
-Dispatcher.listeners['objectUpdated']
-
-S(1007).parent_(~sf);
-S(1006).parent_(~seqE)
-
-S(1005).parent_(~seqE)
-
-S(1005)
-
-S(1002).parent
-
-Store.archive("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest2.scproj")
-
-
-Object
-
-m = 'src/baseEvents'.import;
-
-m.sampleEvent.md.path
-
-
-m.updateTestEvent.md.notNil
-
-Store.patch((
-	transportContext: (loopPoints: [4, 8])
-	))
-
-j = (a: 1, b: 2);
-
-
-
-
-
-
-~i = ~items[0]
-
-
-~i.know
-
-S.push;
-~i.beats = 4;
-
-
-~i.beats
-
-~i.use {
-	~beats = 1;
-}
-
-Store.at(1001).beats_(3)
-
-j.put('b', 1)
-
-Event
-
-j.b = 2;
-Store.at(1001).know_(true)
-
-
-
-Store.at(1001).beats = 2;
-j
-j.parent = u
-
-
-a 
-
-j.buffer
+Dictionary
