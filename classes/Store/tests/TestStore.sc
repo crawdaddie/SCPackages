@@ -30,6 +30,7 @@ TestStore : UnitTest {
   	);
   }
 
+
   test_storeInit {
     this.assert(store[1001] == RxEvent((beats: 0, param: 1, id: 1001)));
   }
@@ -50,8 +51,27 @@ TestStore : UnitTest {
   }
 
   test_storeGetItems {
-    store.addObject((beats: 0, param: 2));
-    store.addObject((beats: 2, param: 2));
-    this.assert(store.getItems() == []);
+    var events = [
+      ( soundfile: "path/s01.wav", beats: 0, startPos: 0, length: 2 ),
+      ( soundfile: "path/s02.wav", beats: 2, startPos: 0, length: 2 ),
+      ( soundfile: "path/s02.wav", beats: 2, startPos: 0.2, length: 2 ),
+      ( soundfile: "path/s04.wav", beats: 4, startPos: 0, length: 2 ),
+    ];
+
+    events.do { |event, index|
+      Store.global.addObject(event);
+    };
+
+    this.assert(store.getItems() == (
+      0: [
+        ( 'startPos': 0, 'beats': 0, 'length': 2, 'soundfile': "path/s01.wav", 'id': 1002 ),
+        ( 'beats': 0, 'param': 1, 'id': 1001 )
+      ],
+      2: [
+        ( 'startPos': 0, 'beats': 2, 'length': 2, 'soundfile': "path/s02.wav", 'id': 1003 ),
+        ( 'startPos': 0.2, 'beats': 2, 'length': 2, 'soundfile': "path/s02.wav", 'id': 1004 ),
+      ],
+      4: [ ( 'startPos': 0, 'beats': 4, 'length': 2, 'soundfile': "path/s04.wav", 'id': 1005 ) ] )
+    );
   }
 }

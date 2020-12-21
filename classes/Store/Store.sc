@@ -118,8 +118,7 @@ Store : RxEvent {
 			if (key.class == Integer) {
 				var beats = value.beats;
 				if (beats.notNil && beats >= timestamp) {
-					var registeredItems = items[beats];
-					items[beats] = registeredItems ++ [value]; 
+					items[beats] = items[beats] ++ [value]; 
 				}
 			}
 		}

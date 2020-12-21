@@ -314,17 +314,17 @@ var soundfile = 'data/oxygen'.import;
 var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
 var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
 var events = [
-	(soundfile: soundfile.path, beats: 0, startPos: 0, length: 2),
- 	(soundfile: soundfile.path, beats: 2, startPos: 0, length: 2),
- 	(soundfile: soundfile.path, beats: 4, startPos: 0, length: 2),
- 	(soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
- 	].collect(_.parent_(sampleEvent));
+	( soundfile: soundfile.path, beats: 0, startPos: 0, length: 2 ),
+ 	( soundfile: soundfile.path, beats: 2, startPos: 0, length: 2 ),
+ 	( soundfile: soundfile.path, beats: 4, startPos: 0, length: 2 ),
+ 	( soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
+].collect(_.parent_(sampleEvent));
 
 events = events.add((beats: 0, row: 2).parent_(sequencerEvent));
 
 
 events.do { |event, index|
-	Store.addObject(event);
+	Store.global.addObject(event);
 };
 
 
@@ -332,12 +332,17 @@ events.do { |event, index|
 
 
 
-Store.global;
+
+
+
+Store.postTree;
 
 
 
 Dispatcher.debug = true;
 
+
+4
 
 
 
