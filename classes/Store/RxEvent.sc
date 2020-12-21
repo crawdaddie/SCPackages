@@ -75,10 +75,7 @@ RxEvent : Event {
 		if (dispatch && originalValue != value) {
 			this.dispatch(
 				type: Topics.objectUpdated,
-				payload: Dictionary.with(*[
-					'id' -> this.at('id'),
-					key -> value
-				])
+				payload: (id: this.id).put(key, value),
 			)
 		};
 		^this;
@@ -99,9 +96,13 @@ RxEvent : Event {
 		if (updates.size > 0 && dispatch) {
 			this.dispatch(
 				type: Topics.objectUpdated,
-				payload: updates.putAll((id: this.at('id')))
+				payload: updates.putAll((id: this.id))
 			)
 		}
+	}
+
+	id {
+		^this['id']
 	}
 }
 

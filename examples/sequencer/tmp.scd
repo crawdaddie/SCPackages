@@ -14,12 +14,104 @@ a.metadata
 a.a = 2;
 
 a.
+Dispatcher.debug(false);
+
+Dispatcher.listeners['*']
+
+Dispatcher('new', (a: 1, b: 2))
+
+Dispatcher.debug()
+
+(
+)
+
+g = Store.global;
+g.addObject((beats: 1.0.rand, param: 2));
+g.getItems
 
 
+g.values.select { arg item;
+	var id = item['id'];
+	id.notNil && id.class == Integer
+};
+
+
+j = g.pairsDo { arg key, item;
+	[key, item].postln;
+	true;
+};
+
+
+
+nil.class
+g.values
+g
+
+g[1001].param = 3
+
+g
+
+
+g[1001] = nil
+D
+
+
+Dispatcher.debug()
+g = Store.global;
+g.addObject((beats: 1, b: 2))
+
+g.put(1001, nil)	
+
+g.values
+
+
+Dictionary
+
+(
+j = g.select({ arg value, key;
+	[key, value].postln;
+	true;
+});
+)
+
+
+
+'*'
+
+
+g.pairsDo { arg key, value;
+	[key, value].postln;
+};
+
+
+g.select
+
+
+
+
+g
+
+[].push(1)
+g
+
+
+[ objectUpdated,
+( 'transportContext': (  ), 'timingContext': ( 'bpm': 60 ) ), ( 'timingContext': ( 'bpm': 60 ), 1001: ( 'a': 1, 'b': 2, 'id': 1001 ), 'transportContext': (  ) ) ]
+
+TestStore.run;
+
+g
+
+
+(a: 1, b: 2) == (b: 2, a: 1)
+
+
+[['a', (a: 1, b: 2)], ['b', (a: 1, b: 2)]] == [['a', (a: 1, b: 2)], ['b', (a: 1, b: 2)]]
+
+nil ++ [1]
 
 Store.global.addObject((timestamp: 0))
 Store.postTree;
-
 
 Project.new;
 
@@ -38,7 +130,7 @@ e.push;
 ~a
 
 ~a.a = 2;
-
+	
 
 e.a.a = 3;
 	
@@ -215,7 +307,7 @@ a[1002]
 
 
 currentEnvironment
-
+Project.new;
 
 (
 var soundfile = 'data/oxygen'.import;
@@ -237,6 +329,20 @@ events.do { |event, index|
 
 
 )
+
+
+
+Store.global;
+
+
+
+Dispatcher.debug = true;
+
+
+
+
+
+
 
 
 

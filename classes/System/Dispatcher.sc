@@ -1,14 +1,16 @@
 Dispatcher {
 
 	classvar <listeners;
-	classvar <>debug;
-
+	classvar matchAnyListeners;
+	classvar <dispatching;
+	
 	*initClass {
 		listeners = Dictionary();
-		debug = false;
+		dispatching = false;
 	}
 
 	*addListener { arg type, object, listener;
+
 		listeners.at(type) !? _.put(object, listener) ?? {
 			listeners.put(type, Dictionary.with(object -> listener));
 		}
@@ -25,8 +27,13 @@ Dispatcher {
 	}
 
 	*new { arg type, payload, eventSource;
+
 		var typeListeners = listeners.at(type) ?? Dictionary();
-		
+		listeners.at('*') !? { arg anyMatchers;
+			typeListeners = typeListeners.putAll(anyMatchers);	
+		};
+
+		// dispatching = true;
 		{
 			eventSource !? {
 				typeListeners = typeListeners.select { arg item;
@@ -34,14 +41,23 @@ Dispatcher {
 				}
 			};
 
-			if (debug) {
-				payload.postln;
-			};
-
 			typeListeners.keysValuesDo { arg listeningObject, listener;
-				listener.value(payload, listeningObject);
+				listener.value(payload, listeningObject, type);
 			};
+			// dispatching = false;
 		}.fork(AppClock)
+	}
+
+	*debug { arg debugValue = true;
+		if (debugValue, {
+			this.addListener('*', this, { arg payload, listeningObject, type;
+				[ type, payload, listeningObject ].postln;
+			});
+
+		}, {
+			this.removeListenersForObject(this);
+		});
+
 	}
 
 	*connectObject { arg object ...methods;
