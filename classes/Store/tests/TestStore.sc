@@ -62,7 +62,7 @@ TestStore : UnitTest {
       Store.global.addObject(event);
     };
 
-    this.assert(store.getItems() == (
+    this.assert(store.items == (
       0: [
         ( 'startPos': 0, 'beats': 0, 'length': 2, 'soundfile': "path/s01.wav", 'id': 1002 ),
         ( 'beats': 0, 'param': 1, 'id': 1001 )

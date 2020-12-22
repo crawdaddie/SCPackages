@@ -112,7 +112,7 @@ Store : RxEvent {
 		^super.put(key, value, dispatch);
 	}
 
-	getItems { arg timestamp = 0;
+	items { arg timestamp = 0;
 		var items = ();
 		this.pairsDo { arg key, value;
 			if (key.class == Integer) {

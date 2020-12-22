@@ -327,12 +327,13 @@ events.do { |event, index|
 	Store.global.addObject(event);
 };
 
-
 )
 
+Dictionary
 
+Store.global.getItems().size;
 
-
+TestStore.run;
 
 
 Store.postTree;
