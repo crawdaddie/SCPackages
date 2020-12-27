@@ -85,7 +85,9 @@ Store : RxEvent {
 		var objectId = pathManager.getId();
 		var rxObject = this.getRxEvent(object, objectId);
 
+
 		this.put(objectId, rxObject, false);
+
 		this.dispatch(
 			Topics.objectAdded,
 			(
@@ -95,6 +97,19 @@ Store : RxEvent {
 		);
 
 		pathManager.setChildPath(objectId, this.id);
+
+		if (rxObject['row'].notNil) {
+			this.resolveOverlaps(rxObject);
+		};
+	}
+
+	resolveOverlaps { arg object;
+		var rowItems = this.rowItems(object['row']);
+		rowItems.do { arg timestampWithItem;
+			var timestamp, items;
+			#timestamp, items = timestampWithItem;
+
+		}
 	}
 
 	put { arg key, value, dispatch = true;
@@ -112,19 +127,74 @@ Store : RxEvent {
 		^super.put(key, value, dispatch);
 	}
 
+	rowItems { arg row;
+		var items = this.items;
+		var rowItems = [];
+		if (row.isNil) {
+			^items;
+		};
+
+		items.do({ arg timestampWithItems;
+			var timestamp, items, timestampRowItems;
+			#timestamp, items = timestampWithItems;
+			timestampRowItems = items.select({ arg item; item.row == row });
+
+			if (timestampRowItems.size > 0) {
+				rowItems = rowItems.add([ timestamp, timestampRowItems ])
+			}
+		});
+
+		^rowItems;
+	}
+
 	items { arg timestamp = 0;
-		var items = ();
-		this.pairsDo { arg key, value;
+		^Items(this).groupByTimestamp((start: timestamp));
+	}
+}
+
+Items {
+	var <items;
+	*new { arg store;
+		^super.new.init(store);
+	}
+
+	init { arg store;
+		
+		store.pairsDo { arg key, value;
 			if (key.class == Integer) {
 				var beats = value.beats;
-				if (beats.notNil && beats >= timestamp) {
-					items[beats] = items[beats] ++ [value]; 
+				if (beats.notNil) {
+					items = items.add(value);
 				}
 			}
 		}
-
-		^items;
 	}
+
+	filterByOptions { arg item, options;
+		if (item.beats.isNil || item.row.isNil) {
+			^false;
+		};
+
+		^(
+			( options.start !? (item.beats >= options.start) ?? true )
+			// && ( options.end !? (item.beats <= options.end) ?? true )
+			// && ( options.rows !? (options.rows.includes(item.row)) ?? true )
+		)
+	}
+
+	groupByTimestamp { arg options;
+		var itemsDict = ();
+
+		items.do { arg item;
+			var beats = item.beats;
+			if (this.filterByOptions(item, options)) {
+				itemsDict[beats] = itemsDict[beats] ++ [item];
+			};
+		};
+
+		^itemsDict.asSortedArray;
+	}
+
 }
 
 S {
