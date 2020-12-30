@@ -127,28 +127,13 @@ Store : RxEvent {
 		^super.put(key, value, dispatch);
 	}
 
-	rowItems { arg row;
-		var items = this.items;
-		var rowItems = [];
-		if (row.isNil) {
-			^items;
-		};
-
-		items.do({ arg timestampWithItems;
-			var timestamp, items, timestampRowItems;
-			#timestamp, items = timestampWithItems;
-			timestampRowItems = items.select({ arg item; item.row == row });
-
-			if (timestampRowItems.size > 0) {
-				rowItems = rowItems.add([ timestamp, timestampRowItems ])
-			}
-		});
-
-		^rowItems;
-	}
-
 	items { arg timestamp = 0;
 		^Items(this).groupByTimestamp((start: timestamp));
+	}
+
+
+	itemsFlat {
+		^Items(this).flat;
 	}
 }
 
@@ -168,6 +153,10 @@ Items {
 				}
 			}
 		}
+	}
+
+	flat {
+		^items
 	}
 
 	filterByOptions { arg item, options;

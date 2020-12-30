@@ -23,9 +23,10 @@ RxEvent : Event {
 
 	init { arg event;
 		metadata = event.parent !? {
-			event.parent['metadata']
+			this.parent = event.parent;
+			event.parent['metadata'];
 		};
-
+		
 		know = true;
 		event.keysValuesDo { arg key, val;
 			super.put(key, val);
@@ -39,7 +40,7 @@ RxEvent : Event {
 			if (payload.path == metadata.path) {
 				parent = this.getParentFromMetadata(metadata);
 			}
-		})
+		});
 	}
 
 	parent {

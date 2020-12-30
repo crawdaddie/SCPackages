@@ -41,6 +41,17 @@ j = g.pairsDo { arg key, item;
 	true;
 };
 
+j = (0: 'a', 1: 'b', 2: ['c', 'd'])
+
+
+j.asSortedArray
+
+d = (a: 5, b: 7, c: 1, d: 0);
+d.asSortedArray;
+
+
+j.powerset
+
 
 
 nil.class
@@ -240,6 +251,11 @@ u.front;
 
 
 
+g.itemsFlat[1]
+.put('beats', 3)
+
+
+.beats = 3
 
 
 
@@ -314,10 +330,10 @@ var soundfile = 'data/oxygen'.import;
 var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
 var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
 var events = [
-	( soundfile: soundfile.path, beats: 0, startPos: 0, length: 2 ),
- 	( soundfile: soundfile.path, beats: 2, startPos: 0, length: 2 ),
- 	( soundfile: soundfile.path, beats: 4, startPos: 0, length: 2 ),
- 	( soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
+	( row: 0, soundfile: soundfile.path, beats: 0, startPos: 0, length: 2 ),
+ 	( row: 0, soundfile: soundfile.path, beats: 2, startPos: 0, length: 2 ),
+ 	( row: 0, soundfile: soundfile.path, beats: 4, startPos: 0, length: 2 ),
+ 	( row: 0, soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
 ].collect(_.parent_(sampleEvent));
 
 events = events.add((beats: 0, row: 2).parent_(sequencerEvent));
@@ -329,9 +345,54 @@ events.do { |event, index|
 
 )
 
+Object
+
+h = k => k + 1;
+
+
+valueWithEnvir
+
+
+g.itemsFlat[0]['getEmbedView']
+
+h.(1)
+
+
+t = 1;
+
+
+
+j = t => t.postln;
+
+
+j.()
+
+
+
+
+g.itemsFlat[0].put('beats', 2);
+
+1 >= 2;
+
+
+
+-
+
+Platform
+
+g = Store.global
+
+
+Platform.userAppSupportDir
+c = SequencerCanvas(Store.global);
+
+
+Store.global
+
+
 Dictionary
 
-Store.global.getItems().size;
+Store.global.items
 
 TestStore.run;
 
@@ -344,6 +405,8 @@ Dispatcher.debug = true;
 
 
 4
+
+g
 
 
 

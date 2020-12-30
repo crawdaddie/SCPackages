@@ -47,9 +47,7 @@
 ~sequencerEvent = ~inheritEvents.value(
 	(
 		type: 'sequencerEvent',
-		getEmbedView: { arg ev, zoom;
-			SequenceableBlock(ev, zoom);
-		},
+		embedView: SequenceableCanvasObject,
 		getView: { arg ev;
 			var view = EnvirGui(ev)
 				.putSpec(\row, ControlSpec(0, 128, \lin, 1, 0));
@@ -104,9 +102,7 @@ SynthDef(\stereo_player, { arg
 		type: 'sampleEvent',
 		soundfile: nil,
 		startPos: 0,
-		getEmbedView: { arg ev, zoom;
-			SequenceableSoundfileBlock(ev, zoom);
-		},
+		embedView: SoundfileCanvasObject,
 		getView: { arg ev;
 			var view = EnvirGui(ev)
 				.putSpec('row', ControlSpec(0, 128, 'lin', 1, 0))

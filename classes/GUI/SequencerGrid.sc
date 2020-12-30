@@ -16,19 +16,19 @@ SequencerGrid {
 	}
 
 
-	drawYGrid { arg origin, bounds, zoom;
-		var gap = SequenceableBlock.yFactor * zoom.y;
+	drawYGrid { arg origin, canvasBounds, zoom;
+		var gap = Theme.verticalUnit * zoom.y;
 		var yOffset = origin.y + (0 - origin.y).roundUp(gap);
 
 		Pen.strokeColor_(mainGridColor);
-		while ({ yOffset < bounds.height }) {
-			Pen.line(Point(0, yOffset), Point(bounds.width, yOffset));
+		while ({ yOffset < canvasBounds.height }) {
+			Pen.line(Point(0, yOffset), Point(canvasBounds.width, yOffset));
 			Pen.stroke;
 			yOffset = yOffset + gap;
 		}
 	}
 
-	drawXGrid { arg quantX, origin, timingOffset, bounds, zoom, subdivisions;
+	drawXGrid { arg quantX, origin, timingOffset, canvasBounds, zoom, subdivisions;
 		var gap = quantX * zoom.x;
 		var timingOffsetPixels = timingOffset * gap;
 		var initXOffset = origin.x + (0 - origin.x).roundUp(gap) - timingOffsetPixels;
@@ -42,16 +42,16 @@ SequencerGrid {
 
 		
 		Pen.strokeColor_(mainGridColor);
-		while ({ xOffset < bounds.width }) {
-			Pen.line(Point(xOffset, 0), Point(xOffset, bounds.height));
+		while ({ xOffset < canvasBounds.width }) {
+			Pen.line(Point(xOffset, 0), Point(xOffset, canvasBounds.height));
 			// Pen.stroke;
 			xOffset = xOffset + gap;
 		};
 
 
 		Pen.strokeColor_(subdivisionColor);
-		while ({ subOffset < bounds.width }) {
-			Pen.line(Point(subOffset, 0), Point(subOffset, bounds.height));
+		while ({ subOffset < canvasBounds.width }) {
+			Pen.line(Point(subOffset, 0), Point(subOffset, canvasBounds.height));
 			
 			// [tickNum, subOffset, minorGap].postln;
 			subOffset = subOffset + minorGap;
@@ -60,8 +60,12 @@ SequencerGrid {
 		Pen.stroke;
 	}
 
-	renderView { arg quantX, origin, timingOffset, bounds, zoom, subdivisions;
-		this.drawYGrid(origin, bounds, zoom);
-		this.drawXGrid(quantX, origin, timingOffset, bounds, zoom, subdivisions);
+	renderView { arg quantX, origin, timingOffset, canvasBounds, zoom, subdivisions = 1;
+		this.drawYGrid(origin, canvasBounds, zoom);
+		this.drawXGrid(quantX, origin, timingOffset, canvasBounds, zoom, subdivisions);
+	}
+
+	render { arg ctx;
+		^this.performWithEnvir('renderView', ctx)
 	}
 }
