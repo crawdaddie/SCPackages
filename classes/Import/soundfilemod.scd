@@ -30,7 +30,7 @@ Routine({
 
 ~createWaveform = { arg ev, zoom = 1;
 	var duration = ev.soundfile.duration;
-	var chunks = (duration * SequenceableBlock.xFactor * zoom).asInt;
+	var chunks = (duration * Theme.horizontalUnit * zoom).asInt;
 	var waveformObject = (waveform: Array.fill(chunks, [0, 0]));
 	ev.waveformCache.put(zoom, waveformObject);
 	ev.withRawArray { |rawArray|
