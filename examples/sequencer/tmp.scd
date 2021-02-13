@@ -23,7 +23,13 @@ Dispatcher('new', (a: 1, b: 2))
 Dispatcher.debug()
 
 (
+
+
+	ObjectGui
 )
+
+
+Event
 
 g = Store.global;
 g.addObject((beats: 1.0.rand, param: 2));
@@ -41,7 +47,12 @@ j = g.pairsDo { arg key, item;
 	true;
 };
 
+
+
 j = (0: 'a', 1: 'b', 2: ['c', 'd'])
+
+
+
 
 
 j.asSortedArray
@@ -98,6 +109,65 @@ g.pairsDo { arg key, value;
 g.select
 
 
+g.itemsFlat[0]
+j = Props((
+	a: 1,
+	b: 2,
+	c: 1@1,
+));
+
+k = Props().putAll((a: 1), j);
+
+k.c
+
+
+
+k
+
+j.c = 2@2;
+
+
+k = Props((
+	d: 1,
+	c: j.c
+));
+
+j.addDependant(k);
+
+
+k
+
+
+
+
+
+k = [1, 2];
+
+j = [3, 4];
+
+
+l = k ++ j
+
+
+
+l = k.addAll(j)
+
+
+j = Props(
+	a: 1,
+	b: 2
+);
+
+
+
+g
+
+.snap
+
+
+k.
+
+j.a = 2;
 
 
 g
@@ -139,6 +209,14 @@ e = (
 e.push;
 
 ~a
+
+
+
+
+j = (a: 1, b: 2);
+
+j.class
+
 
 ~a.a = 2;
 	

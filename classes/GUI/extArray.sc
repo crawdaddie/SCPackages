@@ -1,8 +1,19 @@
 + Array {
 	partition { arg predicate;
+		var selected = [];
+		var notSelected = [];
+
+		this.do { arg member;
+			if (predicate.value(member), {
+				selected = selected.add(member);
+			}, {
+				notSelected = notSelected.add(member);
+			});
+		}
+
 		^[
-			this.select({ arg member; predicate.value(member) }),
-			this.select({ arg member; predicate.value(member).not })
+			selected,
+			notSelected
 		];
 	}
 
@@ -11,7 +22,6 @@
 
 		this.do { | object |
 			var identifier = predicate.value(object);
-
 
 			partition.at(identifier) !? { |set|
 				set = set.add(object);

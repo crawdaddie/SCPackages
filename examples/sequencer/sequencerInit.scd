@@ -15,7 +15,7 @@ var events = [
  	( row: 0, soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
 ].collect(_.parent_(sampleEvent));
 
-events = events.add((beats: 0, row: 2).parent_(sequencerEvent));
+// events = events.add((beats: 0, row: 2).parent_(sequencerEvent));
 
 
 events.do { |event, index|
