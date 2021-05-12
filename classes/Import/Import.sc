@@ -22,9 +22,15 @@ Import {
 	}
 
 	*resolvePath { arg module;
-		var cwd = thisProcess.nowExecutingPath !? (_.dirname);
+    var moduleString = module.asString;
+    var pathMatch = if (moduleString.at(0) == $/, {
+      (moduleString ++ "*" ).pathMatch;
+    },
+    {
+      var cwd = thisProcess.nowExecutingPath !? (_.dirname);
+      (cwd +/+ module ++ "*").pathMatch;
+    });
 		var path;
-		var pathMatch = (cwd +/+ module ++ "*").pathMatch;
 		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ module ++ "*").pathMatch };
 
 
@@ -116,7 +122,7 @@ Mod : Environment {
 	}
 
 	loadFromSoundfile {
-		var modpath = Mod.filenameSymbol.asString.dirname +/+ "soundfileMod.scd";
+		var modpath = Mod.filenameSymbol.asString.dirname +/+ "soundfilemod.scd";
 			this.make {
 			modpath.load;
 		};
