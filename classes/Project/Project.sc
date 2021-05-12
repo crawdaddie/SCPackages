@@ -1,8 +1,8 @@
-	Project {
+Project {
 	classvar <recentProjects;
 	classvar recentProjectsFilePath;
 	classvar emptyProjectDir;
-	classvar <>defaultProjectsDir = "/Users/adamjuraszek/PROJECTS/supercollider/projects";
+	classvar <>defaultProjectsDir = "/home/adam/projects/supercollider/projects";
 
 	classvar <projectFile, <projectDir, <srcDir, <saveDir, <dataDir;
 	classvar <canvas;
@@ -60,15 +60,18 @@
 	}
 
 	*load { arg path;
+    this.setPaths(path);
 		(srcDir +/+ "synths.scd").load;
 		path !? {
 			Store.readFromArchive(path);
 		};
-
+    /*
 		canvas = canvas !? _.fromStore(Store.global) ?? {
-			SequencerCanvas.fromStore(Store.global)
+			SequencerCanvas(Store.global)
 		};
+    */
 
+		canvas = SequencerCanvas(Store.global);
 		path !? { canvas.parent.name = "sequencer - %".format(path.basename) };
 
 
@@ -249,7 +252,7 @@
 
 		synthDefView = assetView.addItem(["synthdefs"]);
 
-		SynthDescLib.global.synthDescs.values.select(_.find("system_").notNil).do { arg synthDesc;
+		SynthDescLib.global.synthDescs.values.select(_.find("system_").isNil).do { arg synthDesc;
 			synthDefView.addChild([synthDesc.name]);
 		};
 

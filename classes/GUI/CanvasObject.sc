@@ -113,7 +113,7 @@ SequenceableCanvasObject : CanvasObject {
 	snapBoundsToRow { arg renderBounds;
 		var y = renderBounds.top;
 
-		[y, props.origin.y * props.zoom.y, props.zoom.y * Theme.verticalUnit].postln;
+		//[y, props.origin.y * props.zoom.y, props.zoom.y * Theme.verticalUnit].postln;
 
 		renderBounds.top = y;
 		^renderBounds;

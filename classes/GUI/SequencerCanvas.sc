@@ -66,14 +66,14 @@ SequencerCanvas {
 		var keyAction;
 		canvas.keyDownAction = { arg canvas, char, modifiers, unicode, keycode, key;
 			if (canvas.hasFocus) {
-				// [modifiers, key].postln;
+				[modifiers, key].postln;
 				switch ([modifiers, key]) 
-					{ [ 1179648, 45 ] } { this.zoomBy(1.05.reciprocal, 1.05.reciprocal) } // cmd-shift-minus
-					{ [ 1179648, 61 ] } { this.zoomBy(1.05, 1.05) } // cmd-shift-plus
-					{ [ 2621440, 16777234 ] } { this.moveOrigin(-10, 0) } // option-left
-					{ [ 2621440, 16777236 ] } { this.moveOrigin(10, 0) } // option-right
-					{ [ 2621440, 16777235 ] } { this.moveOrigin(0, -10) } // option-up
-					{ [ 2621440, 16777237 ] } { this.moveOrigin(0, 10) } // option-down
+					{ [ 393216, 95 ] } { this.zoomBy(1.05.reciprocal, 1.05.reciprocal) } // cmd-shift-minus
+					{ [ 393216, 43 ] } { this.zoomBy(1.05, 1.05) } // cmd-shift-plus
+					{ [ 524288, 72 ] } { this.moveOrigin(-10, 0) } // option-h
+					{ [ 524288, 76 ] } { this.moveOrigin(10, 0) } // option-right
+					{ [ 524288, 75 ] } { this.moveOrigin(0, -10) } // option-up
+					{ [ 524288, 74 ] } { this.moveOrigin(0, 10) } // option-down
 				;
 			}
 		};
