@@ -59,18 +59,12 @@ Project {
 		);
 	}
 
+  this.setPaths(path);
 	*load { arg path;
-    this.setPaths(path);
 		(srcDir +/+ "synths.scd").load;
 		path !? {
 			Store.readFromArchive(path);
 		};
-    /*
-		canvas = canvas !? _.fromStore(Store.global) ?? {
-			SequencerCanvas(Store.global)
-		};
-    */
-
 		canvas = SequencerCanvas(Store.global);
 		path !? { canvas.parent.name = "sequencer - %".format(path.basename) };
 
@@ -91,7 +85,7 @@ Project {
 	*initFromProjectFile { arg path;
 		
 		if (path.pathMatch.size != 1) {
-			^Error("project file % does not exist".format(path)).throw;
+			Error("project file % does not exist".format(path)).throw;
 		};
 		this.setPaths(path);
 		this.load(path);
@@ -157,14 +151,14 @@ Project {
 				{ |path|
 					"saving to %".format(projectFile).postln;
 					this.setPaths(path);
-					Store.archive(projectFile);
+					Store.global.writeMinifiedTextArchive(projectFile);
 					canvas.parent.name = "sequencer - %".format(projectFile.basename);
 				},
 				path: saveDir
 			);
 		} {
 			"saving to %".format(projectFile).postln;
-			Store.archive(projectFile);
+			Store.global.writeMinifiedTextArchive(projectFile);
 			saveDir = projectFile.dirname;
 		};
 	}

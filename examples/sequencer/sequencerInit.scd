@@ -1,11 +1,10 @@
-// Project("/Users/adamjuraszek/PROJECTS/supercollider/packages/examples/sequencer/saves/opentest2.scproj");
-// Project.openLatest;
+//Project.openLatest;
 // 
-// Project.new;
+//Project.new;
 // Project.save;
 
 
-
+/*
 var soundfile = 'data/oxygen'.import;
 var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
 var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
@@ -27,3 +26,11 @@ events.do { |event, index|
 ~canvas = SequencerCanvas(Store.global);
 
 
+*/
+//Store.global.beats ?? 0
+Project("/home/adam/projects/supercollider/packages/examples/sequencer/saves/opentest.scproj");
+Store.postTree;
+4.postln;
+
+
+Store.at(1007)

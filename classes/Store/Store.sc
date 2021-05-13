@@ -24,9 +24,9 @@ PathManager {
 	setPath { arg id, path;
 		if (id.class == Integer) {
 			lookups[id] = path;
+
 		}
 	}
-
 	setChildPath { arg childId, parentId;
 		var parentPath = parentId !? { this.getPath(parentId) } ?? [];
 		this.setPath(childId, parentPath ++ [childId])
@@ -35,6 +35,30 @@ PathManager {
 	printLookups {
 		lookups.postln;
 	}
+  
+  traverseStore { arg store, cb, currentPath = [];
+    store.keysValuesDo { arg key, value;
+      if (key.class == Integer) {
+        var path = currentPath ++ [key];
+        cb.value(path, value);
+        if (value.class == Store) {
+          this.traverseStore(value, cb, path);
+        }
+      }
+    }
+  }
+  
+  resetPaths { arg store;
+		var maxArchiveId = 0;
+    this.traverseStore(store: store, cb: { arg path, value; 
+			var id = path[ path.size -1 ];
+			if (id.class == Integer) {
+				maxArchiveId = max(maxArchiveId, id);
+				this.setPath(id, path);
+			};
+		});	
+		lastId = maxArchiveId;
+  }
 }
 
 Store : RxEvent {
@@ -53,8 +77,8 @@ Store : RxEvent {
 		};
 
 		^global;
-	}
 
+	}
 	*global_ { arg obj; global = obj; }
 
 
@@ -63,6 +87,29 @@ Store : RxEvent {
 			timingContext: (bpm: 60),
 			transportContext: (),
 		);
+    pathManager = PathManager();
+	}
+
+  *readFromArchive { arg path;
+		global = path.load;
+		pathManager.resetPaths(global);
+
+  } 
+  *at { arg id;
+		var fullPath;
+    if (id == PathManager.initialId) {
+      ^this.global;
+    };
+		id ?? { ^global };
+		fullPath = pathManager.getPath(id);
+
+		fullPath ?? { ^nil };
+		if (fullPath.size > 1) {
+			var parentId = fullPath[fullPath.size - 2];
+			^Store.at(parentId).at(id);
+		} { 
+			^global.at(id);
+		}
 	}
 
 	*new { arg object;
@@ -74,12 +121,16 @@ Store : RxEvent {
 			this.putAll(object);
 			super.parent_(object.parent);
 		}
+    ^this
 	}
 
 	getRxEvent { arg object, id;
 		object['id'] = id;
 		^RxEvent(object);
 	}
+  getOffset {
+    ^this.beats ?? 0
+  }
 
 	addObject { arg object;
 		var objectId = pathManager.getId();
@@ -184,6 +235,15 @@ Items {
 		^itemsDict.asSortedArray;
 	}
 
+  itemsFlat {
+    var items = [];
+    this.values.keysValuesDo({ arg key, value;
+      if (key.class == Integer) {
+        items = items.add(value)
+      }
+    });
+    ^items
+  }
 }
 
 S {
@@ -193,7 +253,7 @@ S {
 	*push { arg id;
 		var env = (
 			'items': Store.at(id).orderedItems,
-			's': Store.at(id),
+      's': Store.at(id),
 		);
 		^env.push;
 	}

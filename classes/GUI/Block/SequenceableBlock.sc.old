@@ -13,6 +13,7 @@ SequenceableBlock : CanvasBlockBase {
 		id = event.id;
 		label = id.asString;
 		Dispatcher.connectObject(this, 'objectUpdated');
+    event.postln;
 	}
 
 	getAction { arg x, y;
