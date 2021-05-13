@@ -24,9 +24,9 @@ PathManager {
 	setPath { arg id, path;
 		if (id.class == Integer) {
 			lookups[id] = path;
+
 		}
 	}
-
 	setChildPath { arg childId, parentId;
 		var parentPath = parentId !? { this.getPath(parentId) } ?? [];
 		this.setPath(childId, parentPath ++ [childId])
@@ -77,8 +77,8 @@ Store : RxEvent {
 		};
 
 		^global;
-	}
 
+	}
 	*global_ { arg obj; global = obj; }
 
 
@@ -184,9 +184,7 @@ Store : RxEvent {
       }
     });
     ^items
-
   }
-
 }
 
 S {
