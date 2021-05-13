@@ -1,8 +1,8 @@
-	Project {
+Project {
 	classvar <recentProjects;
 	classvar recentProjectsFilePath;
 	classvar emptyProjectDir;
-	classvar <>defaultProjectsDir = "/Users/adamjuraszek/PROJECTS/supercollider/projects";
+	classvar <>defaultProjectsDir = "/home/adam/projects/supercollider/projects";
 
 	classvar <projectFile, <projectDir, <srcDir, <saveDir, <dataDir;
 	classvar <canvas;
@@ -60,13 +60,16 @@
 	}
 
 	*load { arg path;
-		(srcDir +/+ "synths.scd").load;
+		var store = Store.global;
+    store.postln;
+    (srcDir +/+ "synths.scd").load;
 		path !? {
 			Store.readFromArchive(path);
 		};
 
-		canvas = canvas !? _.fromStore(Store.global) ?? {
-			SequencerCanvas.fromStore(Store.global)
+
+		canvas = canvas !? _.fromStore(store) ?? {
+			SequencerCanvas.fromStore(store);
 		};
 
 		path !? { canvas.parent.name = "sequencer - %".format(path.basename) };
@@ -88,7 +91,7 @@
 	*initFromProjectFile { arg path;
 		
 		if (path.pathMatch.size != 1) {
-			^Error("project file % does not exist".format(path)).throw;
+			Error("project file % does not exist".format(path)).throw;
 		};
 		this.setPaths(path);
 		this.load(path);
@@ -154,14 +157,14 @@
 				{ |path|
 					"saving to %".format(projectFile).postln;
 					this.setPaths(path);
-					Store.archive(projectFile);
+					Store.global.writeMinifiedTextArchive(projectFile);
 					canvas.parent.name = "sequencer - %".format(projectFile.basename);
 				},
 				path: saveDir
 			);
 		} {
 			"saving to %".format(projectFile).postln;
-			Store.archive(projectFile);
+			Store.global.writeMinifiedTextArchive(projectFile);
 			saveDir = projectFile.dirname;
 		};
 	}

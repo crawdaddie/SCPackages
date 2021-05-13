@@ -48,6 +48,7 @@
 	(
 		type: 'sequencerEvent',
 		getEmbedView: { arg ev, zoom;
+      ["get embed view", ev, zoom].postln;
 			SequenceableBlock(ev, zoom);
 		},
 		getView: { arg ev;

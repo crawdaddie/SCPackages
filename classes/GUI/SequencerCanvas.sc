@@ -48,8 +48,9 @@ SequencerCanvas : UserView {
 
 	*fromStore { arg store;
 		var canvas = this.new(store.id);
-		var items = store.orderedItems;
-		
+		var items = store.itemsFlat;
+	  	
+    ["from store", store, items].postln;
 		canvas.addObjects(items);
 		^canvas;
 	}
@@ -59,12 +60,13 @@ SequencerCanvas : UserView {
 		
 		this.clear;
 		id = store.id;
-		items = store.orderedItems;
+		items = store.itemsFlat;
 		this.addObjects(items);
 		^this;
 	}
 
 	addObjects { arg newObjects;
+    ["add objects", newObjects].postln;
 		newObjects.do { |newObject|
 			this.addObject(newObject);
 		};
@@ -74,6 +76,7 @@ SequencerCanvas : UserView {
 	}
 
 	addObject { arg object;
+    ["add object", object].postln;
 		views = views.add(object.getEmbedView(zoom););
 	}
 
