@@ -5,6 +5,49 @@ a = (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S.push;
+
+~items[0]
+
+~items[0].put('row', 1)
+
+S.push
+
+~items[0].put('beats', 2);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ~sequencerEvet
 
 Platform.userConfigDir

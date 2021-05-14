@@ -51,7 +51,7 @@ Mod : Environment {
 	*new { arg path;
 		// check if module already exists and return that, or make a new one
 		var mod = all.at(path.asSymbol) !? { arg existingModule;
-			format("module % already exists (passing previously loaded module)", path.split($/).last).postln;
+			//format("module % already exists (passing previously loaded module)", path.split($/).last).postln;
 			existingModule;
 			} ?? {
 				super.new.init(path);
@@ -123,7 +123,7 @@ Mod : Environment {
 
 	loadFromSoundfile {
 		var modpath = Mod.filenameSymbol.asString.dirname +/+ "soundfilemod.scd";
-			this.make {
+		this.make {
 			modpath.load;
 		};
 	}

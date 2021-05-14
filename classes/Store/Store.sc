@@ -80,8 +80,6 @@ Store : RxEvent {
 
 	}
 	*global_ { arg obj; global = obj; }
-
-
 	*initClass {
 		defaultContexts = (
 			timingContext: (bpm: 60),
@@ -113,7 +111,7 @@ Store : RxEvent {
 	}
 
 	*new { arg object;
-		super.new.init(object)
+		^super.new.init(object)
 	}
 
 	init { arg object;
@@ -126,11 +124,13 @@ Store : RxEvent {
 
 	getRxEvent { arg object, id;
 		object['id'] = id;
+    object.postln;
 		^RxEvent(object);
 	}
   getOffset {
     ^this.beats ?? 0
   }
+  
 
 	addObject { arg object;
 		var objectId = pathManager.getId();
@@ -184,7 +184,8 @@ Store : RxEvent {
 
 
 	itemsFlat {
-		^Items(this).flat;
+		var it = Items(this).flat;
+    ^it;
 	}
 }
 
@@ -195,7 +196,7 @@ Items {
 	}
 
 	init { arg store;
-		
+	  items = [];	
 		store.pairsDo { arg key, value;
 			if (key.class == Integer) {
 				var beats = value.beats;
@@ -252,7 +253,7 @@ S {
 	}
 	*push { arg id;
 		var env = (
-			'items': Store.at(id).orderedItems,
+			'items': Store.at(id).itemsFlat,
       's': Store.at(id),
 		);
 		^env.push;

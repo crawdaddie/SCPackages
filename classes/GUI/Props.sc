@@ -6,6 +6,7 @@ Props : Event {
 
 	init { arg anEvent;
 		super.putAll(anEvent);
+    know = true;
 	}
 
 	put { arg key, value;

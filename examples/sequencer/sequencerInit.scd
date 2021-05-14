@@ -1,10 +1,3 @@
-//Project.openLatest;
-// 
-//Project.new;
-// Project.save;
-
-
-/*
 var soundfile = 'data/oxygen'.import;
 var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
 var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
@@ -15,22 +8,34 @@ var events = [
  	( row: 0, soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
 ].collect(_.parent_(sampleEvent));
 
+var codeEvent = (
+  beats: 0,
+  row: 3,
+  length: 2,
+  src: thisProcess.nowExecutingPath.dirname +/+ "src/moduleCode_1.scd"
+).parent_(sequencerEvent);
 
+var subStore = Store.new(
+  (
+    row: 1, 
+    beats: 2,
+    length: 2,
+    getView: { arg ev;
+      SequencerCanvas(ev); 
+    }
+  ).parent_(sequencerEvent)
+);
 
 events.do { |event, index|
+  subStore.addObject(event);
 	Store.global.addObject(event);
 };
 
+Store.global.addObject(subStore);
+Store.global.addObject(codeEvent);
 ~store = Store.global;
 
 ~canvas = SequencerCanvas(Store.global);
 
 
-*/
-//Store.global.beats ?? 0
-Project("/home/adam/projects/supercollider/packages/examples/sequencer/saves/opentest.scproj");
-Store.postTree;
-4.postln;
 
-
-Store.at(1007)

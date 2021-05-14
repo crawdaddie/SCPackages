@@ -1,7 +1,7 @@
 SequencerCanvas {
-	var canvas;
-
+	var <canvas;
 	var props; 
+
 	/**
 	 * (
 	 *   quantX: 100, // number in px
@@ -18,6 +18,10 @@ SequencerCanvas {
 	*new { arg store;
 		^super.new.init(store);
 	}
+
+  front {
+    canvas.front;
+  }
 
 	init { arg store;
 		var parent, bounds;
@@ -54,13 +58,18 @@ SequencerCanvas {
 		canvas.onClose = { arg view;
 			views.do(_.onClose);
 			grid.onClose;
+      this.release;
 		};
 
 		canvas.drawFunc = {
 			grid.render(props);
 			views.do(_.render());
 		};
+    
 	}
+  getContextMenuActions {
+    ^[]
+  }
 
 	connectKeyActions {
 		var keyAction;
@@ -92,7 +101,14 @@ SequencerCanvas {
 			#notSelected, selected = views.partition(_.contains(position).not);
 			views = notSelected ++ selected;
 
-			mouseAction = selected
+      if (selected.size > 0, {
+        canvas.setContextMenuActions(
+          *selected.last.getContextMenuActions()
+        );
+      }, { canvas.setContextMenuActions(*this.getContextMenuActions()) });
+			
+
+      mouseAction = selected
 				!? {
 					selected.do(_.select);
 

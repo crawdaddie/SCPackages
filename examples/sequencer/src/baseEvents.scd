@@ -12,9 +12,10 @@
 
 ~codeEvent = (
 	(
+
 		type: 'codeEvent',
 		getModule: { arg ev;
-			Mod.all[ev.src.asSymbol];
+      Mod(ev.src);
 		},
 		play: {
 			var ev = currentEnvironment;
@@ -60,7 +61,6 @@
 	),
 	~timingEvent,
 );
-
 ~midiNoteEvent = ~inheritEvents.value(
 	(
 		midinote: { arg ev;

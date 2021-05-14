@@ -68,4 +68,7 @@ SequencerGrid {
 	render { arg ctx;
 		^this.performWithEnvir('renderView', ctx)
 	}
+  onClose {
+    // no-op
+  }
 }

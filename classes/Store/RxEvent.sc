@@ -15,7 +15,7 @@ RxEvent : Event {
 	}
 
 	*new { arg event;
-		if (event.class == RxEvent) {
+		if (event.isKindOf(RxEvent)) {
 			^event;
 		};
 		^super.new.init(event)

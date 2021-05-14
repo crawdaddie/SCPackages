@@ -59,15 +59,13 @@ Project {
 		);
 	}
 
-  this.setPaths(path);
 	*load { arg path;
+    this.setPaths(path);
 		(srcDir +/+ "synths.scd").load;
 		path !? {
 			Store.readFromArchive(path);
 		};
 		canvas = SequencerCanvas(Store.global);
-		path !? { canvas.parent.name = "sequencer - %".format(path.basename) };
-
 
 		assetView = AssetView();
 
@@ -94,12 +92,12 @@ Project {
 
 	*initNewProject {
 		Dialog.savePanel({ arg path;
-			var name = path.basename;
+			var name = path.basename; 
 			"cp -R '%' '%'".format(emptyProjectDir, path).systemCmd;
 			this.setPaths((path +/+ "saves/%.scproj".format(name)));
-			this.load();
 			this.setRecents(projectFile);
 			this.save();
+      this.load(projectFile);
 		},
 		path: defaultProjectsDir
 		);

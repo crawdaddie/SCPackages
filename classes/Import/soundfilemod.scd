@@ -28,13 +28,13 @@ Routine({
 
 ~waveformCache = Dictionary();
 
-~createWaveform = { arg ev, zoom = 1;
+~createWaveform = { arg ev, zoom = 1, completionCallback;
 	var duration = ev.soundfile.duration;
 	var chunks = (duration * Theme.horizontalUnit * zoom).asInt;
 	var waveformObject = (waveform: Array.fill(chunks, [0, 0]));
 	ev.waveformCache.put(zoom, waveformObject);
 	ev.withRawArray { |rawArray|
-		ev.computeWaveform(rawArray, waveformObject);
+		ev.computeWaveform(rawArray, waveformObject, completionCallback);
 	};
 	waveformObject.complete = false;
 	waveformObject.task = Task {};
@@ -43,7 +43,7 @@ Routine({
 };
 
 
-~computeWaveform = { arg ev, rawArray, waveformObject;
+~computeWaveform = { arg ev, rawArray, waveformObject, completionCallback;
 
 	var chunks = waveformObject.waveform.size;
 	var chunkSize = (rawArray.size / chunks).asInt;
@@ -62,22 +62,28 @@ Routine({
 			waveformObject.waveform[index] = [maxVal, minVal];
 		};
 		waveformObject.complete = true;
+    "finished waveform computation".postln;
+    completionCallback.();
 	});
 	waveformObject.task.start(AppClock);
 };
 
-~getWaveform = { arg ev, zoom = 1;
+~getWaveform = { arg ev, zoom = 1, completionCallback;
 	var prevWaveform = selectedWaveform;
 
 	selectedWaveform = ev.waveformCache.at(zoom) !? { arg object;
 		object.task.resume;
 		object;
-		} ?? { ev.createWaveform(zoom) };
+		} ?? { ev.createWaveform(zoom, completionCallback) };
 
 	prevWaveform !? { |wf| wf.task.pause };
 
-	selectedWaveform;
+	(selectedWaveformObject: selectedWaveform, previousWaveformObject: prevWaveform);
 };
+
+
+
+
 
 
 

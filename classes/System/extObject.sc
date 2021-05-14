@@ -11,6 +11,7 @@
 			MethodError("Could not open file % for writing".format(pathname.asCompileString), this).throw;
 		}
 	}
+
 	asMinifiedTextArchive {
 		var objects, list, stream, firsttime = true;
 		if (this.archiveAsCompileString) {

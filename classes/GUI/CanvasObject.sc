@@ -39,6 +39,12 @@ CanvasObject {
 	selected {
 		^props.selected;
 	}
+  getContextMenuActions {
+    ^[
+      MenuAction("cut", { props.postln }),
+      MenuAction("copy", { props.postln }),
+    ]
+  }
 }
 
 SequenceableCanvasObject : CanvasObject {
@@ -50,34 +56,29 @@ SequenceableCanvasObject : CanvasObject {
 		^super.new.init(item, canvasProps);
 	}
 
+  getProps { arg item, canvasProps;
+    ^(
+			label: item.id.asString,
+      canvasProps: canvasProps,
+			renderBounds: this.renderBounds(item, canvasProps.origin, canvasProps.zoom),
+			redraw: canvasProps['redraw'],
+		)
+  }
+
+
 	init { arg anRxEvent, aCanvasProps;
 		item = anRxEvent;
-		props = Props((
-			color: Color.rand,
-			label: item.id.asString,
-			zoom: aCanvasProps.zoom,
-			canvasBounds: aCanvasProps.canvasBounds,
-			renderBounds: this.renderBounds(item, aCanvasProps.origin, aCanvasProps.zoom),
-			origin: aCanvasProps.origin,
-			redraw: aCanvasProps['redraw'],
-			selected: false,
-		));
+		props = Props((color: Color.rand, selected: false).putAll(this.getProps(item, aCanvasProps)));
 
 		aCanvasProps.addDependant(props);
-		
 		props.onUpdate_({ arg aCanvasProps;
-			(
-				zoom: aCanvasProps.zoom,
-				canvasBounds: aCanvasProps.canvasBounds,
-				renderBounds: this.renderBounds(item, aCanvasProps.origin, aCanvasProps.zoom);,
-				origin: aCanvasProps.origin,
-				redraw: aCanvasProps['redraw']
-			)
+			this.getProps(item, aCanvasProps); 
 		});
 
 		this.listen(
 			Topics.objectUpdated,
 			{ arg payload;
+        props.putAll(this.getProps(item, props.canvasProps));
 				props.redraw();
 			}
 		);
@@ -92,7 +93,7 @@ SequenceableCanvasObject : CanvasObject {
 	}
 
 	contains { arg aPoint;
-		^this.bounds(item, props.origin, props.zoom).contains(aPoint);
+		^this.bounds(item, props.canvasProps.origin, props.canvasProps.zoom).contains(aPoint);
 	}
 
 	bounds { arg item, origin, zoom;
@@ -110,28 +111,13 @@ SequenceableCanvasObject : CanvasObject {
 			.scaleBy(zoom.x, zoom.y)
 	}
 
-	snapBoundsToRow { arg renderBounds;
-		var y = renderBounds.top;
-
-		//[y, props.origin.y * props.zoom.y, props.zoom.y * Theme.verticalUnit].postln;
-
-		renderBounds.top = y;
-		^renderBounds;
-	}
-
-	snapBoundsToBeat { arg renderBounds;
-		var x = renderBounds.left;
-
-		renderBounds.left = x;
-		^renderBounds;
-	}
 
 	renderBounds { arg item, origin, zoom;
 		^this.bounds(item, origin, zoom).moveBy(origin.x, origin.y);
 	}
 
-	renderView { arg renderBounds, origin, zoom, canvasBounds, color, label, selected;
-		if (renderBounds.intersects(canvasBounds).not) { ^false };
+	renderView { arg renderBounds, origin, zoom, canvasBounds, color, label, selected, canvasProps;
+		if (renderBounds.intersects(canvasProps.canvasBounds).not) { ^false };
 
 		Pen.smoothing = true;
 		Pen.addRect(renderBounds);
@@ -149,7 +135,7 @@ SequenceableCanvasObject : CanvasObject {
 	}
 
 	onDrag { arg aMouseAction;
-		var renderBounds = this.renderBounds(item, props.origin, props.zoom);
+		var renderBounds = this.renderBounds(item, props.canvasProps.origin, props.canvasProps.zoom);
 		var delta = aMouseAction.position - aMouseAction.initialPosition;
 		
 		var newBounds = Rect(
@@ -159,20 +145,24 @@ SequenceableCanvasObject : CanvasObject {
 			renderBounds.height,
 		);
 
-		props.renderBounds = this.snapBoundsToRow(newBounds);
+    props.put(
+      'renderBounds',
+      newBounds
+        .snapToRow(props)
+        .snapToBeat(props)
+    );
 		
 		props.redraw();
 	}
 
 	onDragEnd { arg aMouseAction;
-		var origin = props.origin;
-		var zoom = props.zoom;
+		var origin = props.canvasProps.origin;
+		var zoom = props.canvasProps.zoom;
 		var xFactor = Theme.horizontalUnit;
 		var yFactor = Theme.verticalUnit;
 		var bounds;
 		var itemParams;
 
-		props.renderBounds = this.snapBoundsToBeat(props.renderBounds);
 		
 		bounds = props.renderBounds
 			.moveBy(-1 * origin.x, -1 * origin.y)
@@ -185,11 +175,20 @@ SequenceableCanvasObject : CanvasObject {
 		);
 
 		item.putAll(itemParams);
-
 	}
+
+  getContextMenuActions {
+    var actions = [
+      MenuAction("edit", { item.getView }),
+    ];
+    if (item.src.notNil) {
+      actions = actions.add(
+        MenuAction("edit source", { var mod = item.getModule; mod.open}),
+
+      );
+    }
+    ^actions;
+  }
 }
 
 
-SoundfileCanvasObject : SequenceableCanvasObject {
-
-}

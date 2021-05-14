@@ -45,16 +45,19 @@ Waveform {
 }
 
 WaveformCache {
+  classvar <waveforms;
 	var <cache;
 	var <rawArray;
 	var <soundfile;
-
+  *initClass {
+    waveforms = ();
+  }
 	*new { arg soundfile, zoom = 1;
-		^super.new.init(soundfile, zoom);
+		^waveforms[soundfile] ?? super.new.init(soundfile, zoom);
 	}
 
 	init { arg argSoundfile, zoom;
-		soundfile = Soundfile;
+		soundfile = SoundFile.openRead(argSoundfile);
 		cache = Dictionary();
 		this.createWaveform(zoom);
 
@@ -63,6 +66,7 @@ WaveformCache {
 			soundfile.readData(rawArray);
 			this.computeWaveforms(rawArray);
 		}).play(AppClock);
+    waveforms.put(argSoundfile, this);
 	}
 
 	createWaveform { arg zoom;
