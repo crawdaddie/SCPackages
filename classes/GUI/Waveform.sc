@@ -1,4 +1,4 @@
-Waveform {
+Waveform_ {
 	var <waveformData;
 	var <task;
 

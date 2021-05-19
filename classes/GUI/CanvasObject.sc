@@ -13,14 +13,6 @@ CanvasObject {
 	
 	}
 
-	getMouseAction { arg x, y;
-		^(
-			initialPosition: x@y,
-			mouseMoveAction: { arg ev; this.onDrag(ev) },
-			mouseUpAction: { arg ev; this.onDragEnd(ev); this.select(false); },
-		)
-	}
-
 	renderView {
 	}
 
@@ -57,6 +49,12 @@ SequenceableCanvasObject : CanvasObject {
 	}
 
   getProps { arg item, canvasProps;
+    // translate item parameters to prop values
+    // props are used to tell the gui how to visually represent a musical object
+    // they depend on the original item, and also a few parameters from the parent canvas
+    // the rendered object can be changed (moved around etc) by changing these prop values
+    // after edits in the gui have finished these props can be translated back to item params and
+    // used to update the item in the store
     ^(
 			label: item.id.asString,
       canvasProps: canvasProps,
@@ -65,10 +63,40 @@ SequenceableCanvasObject : CanvasObject {
 		)
   }
 
+  getItemParams { arg props;
+    // translate props (eg typically pixel-based values) back to item params
+    // (typically values with musical interpretation)
+    var origin = props.canvasProps.origin;
+		var zoom = props.canvasProps.zoom;
+		var xFactor = Theme.horizontalUnit;
+		var yFactor = Theme.verticalUnit;
+		var bounds;
+		var itemParams;
+
+		
+		bounds = props.renderBounds
+			.moveBy(-1 * origin.x, -1 * origin.y)
+			.scaleBy(zoom.x.reciprocal, zoom.y.reciprocal);
+
+		itemParams = (
+			beats: bounds.left / xFactor,
+			row: bounds.top / yFactor,
+			length: bounds.width / xFactor
+		);
+    ^itemParams;
+  }
+
 
 	init { arg anRxEvent, aCanvasProps;
 		item = anRxEvent;
-		props = Props((color: Color.rand, selected: false).putAll(this.getProps(item, aCanvasProps)));
+		props = Props(
+      (
+        color: Color.rand,
+        selected: false
+      ).putAll(
+        this.getProps(item, aCanvasProps)
+      )
+    );
 
 		aCanvasProps.addDependant(props);
 		props.onUpdate_({ arg aCanvasProps;
@@ -133,6 +161,12 @@ SequenceableCanvasObject : CanvasObject {
 	  Pen.stringInRect(label, renderBounds, font: Theme.font, color: Theme.grey);
 
 	}
+  
+  onResizeRight { arg aMouseAction;
+  }
+
+  onResizeLeft { arg aMouseAction;
+  }
 
 	onDrag { arg aMouseAction;
 		var renderBounds = this.renderBounds(item, props.canvasProps.origin, props.canvasProps.zoom);
@@ -144,6 +178,7 @@ SequenceableCanvasObject : CanvasObject {
 			renderBounds.width,
 			renderBounds.height,
 		);
+    aMouseAction.postln;
 
     props.put(
       'renderBounds',
@@ -155,25 +190,9 @@ SequenceableCanvasObject : CanvasObject {
 		props.redraw();
 	}
 
+
 	onDragEnd { arg aMouseAction;
-		var origin = props.canvasProps.origin;
-		var zoom = props.canvasProps.zoom;
-		var xFactor = Theme.horizontalUnit;
-		var yFactor = Theme.verticalUnit;
-		var bounds;
-		var itemParams;
-
-		
-		bounds = props.renderBounds
-			.moveBy(-1 * origin.x, -1 * origin.y)
-			.scaleBy(zoom.x.reciprocal, zoom.y.reciprocal);
-
-		itemParams = (
-			beats: bounds.left / xFactor,
-			row: bounds.top / yFactor,
-			length: bounds.width / xFactor
-		);
-
+		var itemParams = this.getItemParams(props);
 		item.putAll(itemParams);
 	}
 
@@ -184,7 +203,6 @@ SequenceableCanvasObject : CanvasObject {
     if (item.src.notNil) {
       actions = actions.add(
         MenuAction("edit source", { var mod = item.getModule; mod.open}),
-
       );
     }
     ^actions;

@@ -75,7 +75,7 @@ SequencerCanvas {
 		var keyAction;
 		canvas.keyDownAction = { arg canvas, char, modifiers, unicode, keycode, key;
 			if (canvas.hasFocus) {
-				[modifiers, key].postln;
+				//[modifiers, key].postln;
 				switch ([modifiers, key]) 
 					{ [ 393216, 95 ] } { this.zoomBy(1.05.reciprocal, 1.05.reciprocal) } // cmd-shift-minus
 					{ [ 393216, 43 ] } { this.zoomBy(1.05, 1.05) } // cmd-shift-plus
@@ -111,8 +111,10 @@ SequencerCanvas {
       mouseAction = selected
 				!? {
 					selected.do(_.select);
+           
 
 					(
+            modifiers: modifiers,
 						initialPosition: position.x@position.y,
 						mouseMoveAction: { arg ev; selected.collect(_.onDrag(ev)) },
 						mouseUpAction: { arg ev;

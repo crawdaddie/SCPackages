@@ -1,4 +1,5 @@
 SoundfileCanvasObject : SequenceableCanvasObject { 
+  var waveformArray;
   *new { arg item, canvasProps;
     ^super.new(item, canvasProps).init(item, canvasProps);
   }
@@ -6,7 +7,7 @@ SoundfileCanvasObject : SequenceableCanvasObject {
   getProps { arg item, canvasProps;
     var baseProps = super.getProps(item, canvasProps);
     ^baseProps.putAll((
-      waveformObjects: Mod(item.soundfile).getWaveform(canvasProps.zoom.x, canvasProps['redraw']),
+      waveform: Waveform(item.soundfile).getWaveform(canvasProps.zoom.x, canvasProps['redraw']),
       startPos: item.startPos,
     ))
   }
@@ -19,7 +20,7 @@ SoundfileCanvasObject : SequenceableCanvasObject {
 
 
   renderWaveform { arg renderBounds, origin, zoom, canvasBounds, color, label, selected, waveformObjects, startPos, canvasProps;
-    var currentWF = waveformObjects.selectedWaveformObject;
+    var currentWF = waveform.waveformArray;
     var waveform = if ((currentWF.status.notNil && currentWF.status), {
       currentWF.waveform
     }, {
@@ -49,4 +50,28 @@ SoundfileCanvasObject : SequenceableCanvasObject {
 			}
     });
 	}
+  
+  moveStartPos { arg aMouseAction;
+    var renderBounds = props.renderBounds;
+    if (renderBounds.contains(aMouseAction.position)) {
+      var delta = aMouseAction.position.x - aMouseAction.initialPosition.x;
+      delta.postln;
+    }
+  }
+
+  onDrag { arg aMouseAction;
+    if (aMouseAction.modifiers == 524288, {
+      ^this.moveStartPos(aMouseAction)
+    });
+    ^super.onDrag(aMouseAction)
+  }
+  getItemParams { arg props;
+    var baseParams = super.getItemParams(props);
+    ^baseParams.putAll(
+      (
+        startPos: props.startPos,
+      )
+    );
+  }
+  
 }
