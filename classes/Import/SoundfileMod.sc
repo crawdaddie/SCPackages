@@ -13,6 +13,10 @@ Waveform {
     soundfile = Soundfile.openRead(aPath); 
   }
   getWaveform { arg zoom = 1, cb;
+    waveformCache[zoom] !? { arg waveform;
+      waveform.task.resume;
+      ^waveform;
+    } ?? { ^this.createWaveform(zoom, cb) }
     
   }
 }
