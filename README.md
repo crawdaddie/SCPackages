@@ -3,4 +3,4 @@ helpful sc classes
 
 to install
 (from supercollider extension directory)
-```ln -s /path/to/EndutLib/classes EndutLib```
+```ln -s /path/to/SCPackages/classes EndutLib```
