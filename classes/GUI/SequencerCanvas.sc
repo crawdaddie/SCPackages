@@ -72,35 +72,19 @@ SequencerCanvas {
   }
 
 	connectKeyActions {
-		var keyAction;
-		canvas.keyDownAction = { arg canvas, char, modifiers, unicode, keycode, key;
-			if (canvas.hasFocus) {
-				switch ([modifiers, key]) 
-					{ [ 393216, 95 ] } { this.zoomBy(1.05.reciprocal, 1.05.reciprocal) } // cmd-shift-minus
-					{ [ 393216, 43 ] } { this.zoomBy(1.05, 1.05) } // cmd-shift-plus
-					{ [ 524288, 72 ] } { this.moveOrigin(-10, 0) } // option-h
-					{ [ 524288, 76 ] } { this.moveOrigin(10, 0) } // option-right
-					{ [ 524288, 75 ] } { this.moveOrigin(0, -10) } // option-up
-					{ [ 524288, 74 ] } { this.moveOrigin(0, 10) } // option-down
-          { [ 262144, 83 ] } { } // ctrl-s
-				;
-			}
-		};
-
-		canvas.keyUpAction = { arg canvas, char, modifiers, unicode, keycode, key;
-			keyAction = nil;
-		};
+    var keyActionManager = KeyActionManager(this);
 	}
 
 	connectMouseActions {
 		var mouseAction;
 		
 		canvas.mouseDownAction = { arg view, mouseX, mouseY, modifiers, buttonNumber, clickCount;
-			var position = this.translateMousePosition(mouseX, mouseY);
+      var initialCanvasPosition = Point(mouseX, mouseY); /* this is a position relative to the window or canvas bounds (eg canvas objects can compare it to their own renderBounds props) */
+			var position = this.translateMousePosition(mouseX, mouseY); /* this is a position relative to the origin*/ 
 			var notSelected, selected;
 			#notSelected, selected = views.partition(_.contains(position).not);
-			views = notSelected ++ selected;
 
+      views = notSelected ++ selected;
       mouseAction = if (selected.size > 0, 
 				{
           var baseAction;
@@ -114,6 +98,7 @@ SequencerCanvas {
           });
           baseAction = ( modifiers: modifiers,
 						initialPosition: position,
+            initialCanvasPosition: initialCanvasPosition,
             selected: selected,
 						mouseMoveAction: { arg ev; ev.selected.collect(_.onDrag(ev)) },
 						mouseUpAction: { arg ev;
@@ -126,10 +111,10 @@ SequencerCanvas {
           canvas.setContextMenuActions(*this.getContextMenuActions());
           (
             initialPosition: position,
-            mouseMoveAction: { arg ev; selectionRectangle.onDrag(ev)},
-            mouseUpAction: { arg ev;
-              selectionRectangle.onDragEnd(ev)
-            }
+            //mouseMoveAction: { arg ev; selectionRectangle.onDrag(ev)},
+            //mouseUpAction: { arg ev;
+            //  selectionRectangle.onDragEnd(ev)
+            //}
           )
         });
 		};

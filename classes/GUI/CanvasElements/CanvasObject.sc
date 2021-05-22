@@ -161,7 +161,7 @@ SequenceableCanvasObject : CanvasObject {
     mouseMoveAction: Function,
     mouseUpAction: Function
   ) */;
-    var initialPosition = aMouseAction.initialPosition;
+    var initialPosition = aMouseAction.initialCanvasPosition;
     var modifiers = aMouseAction.modifiers;
     var renderBounds = props.renderBounds;
     props.initialBounds = renderBounds;

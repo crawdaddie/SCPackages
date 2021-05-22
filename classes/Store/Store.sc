@@ -182,6 +182,10 @@ Store : RxEvent {
 		^Items(this).groupByTimestamp((start: timestamp));
 	}
 
+  getNextEventGroup { arg timestamp = 0;
+    ^Items(this).getNextEventGroup(timestamp);
+  }
+
 
 	itemsFlat {
 		var it = Items(this).flat;
@@ -222,6 +226,18 @@ Items {
 			// && ( options.rows !? (options.rows.includes(item.row)) ?? true )
 		)
 	}
+  
+  getNextEventGroup { arg timestamp = 0;
+    var itemsDict = ();
+    
+    items.do { arg item;
+      var beats = item.beats;
+      if (beats > timestamp) {
+        itemsDict[beats] = itemsDict[beats] ++ [item];
+      }
+    };
+    ^itemsDict.asSortedArray[0]
+  }
 
 	groupByTimestamp { arg options;
 		var itemsDict = ();

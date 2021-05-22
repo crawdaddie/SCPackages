@@ -47,3 +47,36 @@ Store.global.addObject(codeEvent);
 ~canvas = SequencerCanvas(Store.global);
 
 
+
+
+
+
+//~stream.(~store);
+
+(
+p = p({
+  var eventGroup = ~store.items(0)[0];
+
+
+  while ({eventGroup.notNil}, {
+    var time = eventGroup[0];
+    var nextEventGroup = ~store.getNextEventGroup(time);
+    postf("beats: % seconds: % time: % \n",
+      thisThread.beats, thisThread.seconds, Main.elapsedTime
+    );
+    if (nextEventGroup.isNil, {
+      (events: eventGroup[1]).yield;
+      eventGroup = Nil;
+    }, {
+      var dur = nextEventGroup[0] - time; 
+      (events: eventGroup[1], delta: dur).yield; 
+      eventGroup = nextEventGroup;
+    }); 
+  })
+});
+
+
+)
+//p.play;
+
+
