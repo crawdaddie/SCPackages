@@ -4,6 +4,9 @@ CanvasObject {
 	onClose {
 		Dispatcher.removeListenersForObject(this)
 	}
+  
+  onDragStart { arg aMouseAction;
+  }
 
 	onDrag { arg aMouseAction;
 	
@@ -11,14 +14,6 @@ CanvasObject {
 
 	onDragEnd { arg aMouseAction;
 	
-	}
-
-	getMouseAction { arg x, y;
-		^(
-			initialPosition: x@y,
-			mouseMoveAction: { arg ev; this.onDrag(ev) },
-			mouseUpAction: { arg ev; this.onDragEnd(ev); this.select(false); },
-		)
 	}
 
 	renderView {
@@ -56,19 +51,42 @@ SequenceableCanvasObject : CanvasObject {
 		^super.new.init(item, canvasProps);
 	}
 
-  getProps { arg item, canvasProps;
+  getProps { arg item, canvasProps; /*: Props */
+    // translation item -> props
     ^(
-			label: item.id.asString,
       canvasProps: canvasProps,
 			renderBounds: this.renderBounds(item, canvasProps.origin, canvasProps.zoom),
 			redraw: canvasProps['redraw'],
 		)
   }
+  getItemParams { arg props; /*: Item */
+    // translation props -> item
+		var origin = props.canvasProps.origin;
+		var zoom = props.canvasProps.zoom;
+		var xFactor = Theme.horizontalUnit;
+		var yFactor = Theme.verticalUnit;
+
+		
+		var bounds = props.renderBounds
+			.moveBy(-1 * origin.x, -1 * origin.y)
+			.scaleBy(zoom.x.reciprocal, zoom.y.reciprocal);
+
+		var itemParams = (
+			beats: bounds.left / xFactor,
+			row: bounds.top / yFactor,
+			length: bounds.width / xFactor
+		);
+    ^itemParams;
+  }
 
 
 	init { arg anRxEvent, aCanvasProps;
 		item = anRxEvent;
-		props = Props((color: Color.rand, selected: false).putAll(this.getProps(item, aCanvasProps)));
+		props = Props((
+      color: Color.rand,
+      selected: false,
+      label: item.id.asString,
+    ).putAll(this.getProps(item, aCanvasProps)));
 
 		aCanvasProps.addDependant(props);
 		props.onUpdate_({ arg aCanvasProps;
@@ -131,12 +149,69 @@ SequenceableCanvasObject : CanvasObject {
 		};
 
 	  Pen.stringInRect(label, renderBounds, font: Theme.font, color: Theme.grey);
-
 	}
+  onDragStart {
+    props.initialBounds = props.renderBounds;
+  }
+  getMouseAction { arg aMouseAction/*: (
+    modifiers: Number, 
+    initialPosition: Point,
+    mouseDelta: Point,
+    position: Point,
+    mouseMoveAction: Function,
+    mouseUpAction: Function
+  ) */;
+    var initialPosition = aMouseAction.initialPosition;
+    var modifiers = aMouseAction.modifiers;
+    var renderBounds = props.renderBounds;
+    props.initialBounds = renderBounds;
 
-	onDrag { arg aMouseAction;
-		var renderBounds = this.renderBounds(item, props.canvasProps.origin, props.canvasProps.zoom);
-		var delta = aMouseAction.position - aMouseAction.initialPosition;
+    if (renderBounds.width < 20) {
+      ^();
+    };
+
+    if ((modifiers == 262144) && (this.pointInLeftWidget(initialPosition, renderBounds))) {
+      ^(
+        mouseMoveAction: { arg ev; ev.selected.collect(_.resizeLeft(ev))}
+      )
+    };
+
+    if ((modifiers == 262144) && (this.pointInRightWidget(initialPosition, renderBounds))) {
+      ^(
+        mouseMoveAction: { arg ev; ev.selected.collect(_.resizeRight(ev))}
+      )
+    };
+
+    ^()
+  }
+  pointInRightWidget { arg aPoint, aRect;
+    ^Rect(
+      aRect.right - 10,
+      aRect.top,
+      10,
+      aRect.height,
+    ).contains(aPoint)
+  }
+  
+  pointInLeftWidget { arg aPoint, aRect;
+    ^Rect(
+      aRect.left,
+      aRect.top,
+      10,
+      aRect.height,
+    ).contains(aPoint)
+  }
+  
+  dragProps { arg aMouseAction /*: (
+    modifiers: Number, 
+    initialPosition: Point,
+    mouseDelta: Point,
+    position: Point,
+    mouseMoveAction: Function,
+    mouseUpAction: Function
+  ) */;
+    var renderBounds = this.renderBounds(item, props.canvasProps.origin, props.canvasProps.zoom);
+		var delta = aMouseAction.mouseDelta;
 		
 		var newBounds = Rect(
 			renderBounds.left + delta.x,
@@ -144,37 +219,55 @@ SequenceableCanvasObject : CanvasObject {
 			renderBounds.width,
 			renderBounds.height,
 		);
-
-    props.put(
-      'renderBounds',
-      newBounds
+    ^(
+      renderBounds: newBounds
         .snapToRow(props)
         .snapToBeat(props)
     );
-		
+  }
+
+	onDrag { arg aMouseAction;
+    props.putAll(this.dragProps(aMouseAction));
 		props.redraw();
 	}
 
+  resizeRight { arg aMouseAction;
+    var dragProps;
+    var delta = aMouseAction.mouseDelta;
+    var initialBounds = props.initialBounds;
+  
+    dragProps = (
+      renderBounds: Rect(
+        initialBounds.left,
+        initialBounds.top,
+        initialBounds.width + (delta.x),
+        initialBounds.height
+      ) 
+    );
+    props.putAll(dragProps);
+    props.redraw();
+  }
+
+  resizeLeft { arg aMouseAction;
+    var dragProps;
+    var delta = aMouseAction.mouseDelta;
+    var newBounds = props.renderBounds;
+    var initialBounds = props.initialBounds;
+  
+    dragProps = (
+      renderBounds: Rect(
+        initialBounds.left + (delta.x),
+        initialBounds.top,
+        initialBounds.width - (delta.x),
+        initialBounds.height
+      ) 
+    ); 
+    props.putAll(dragProps);
+    props.redraw();
+  }
+
 	onDragEnd { arg aMouseAction;
-		var origin = props.canvasProps.origin;
-		var zoom = props.canvasProps.zoom;
-		var xFactor = Theme.horizontalUnit;
-		var yFactor = Theme.verticalUnit;
-		var bounds;
-		var itemParams;
-
-		
-		bounds = props.renderBounds
-			.moveBy(-1 * origin.x, -1 * origin.y)
-			.scaleBy(zoom.x.reciprocal, zoom.y.reciprocal);
-
-		itemParams = (
-			beats: bounds.left / xFactor,
-			row: bounds.top / yFactor,
-			length: bounds.width / xFactor
-		);
-
-		item.putAll(itemParams);
+    item.putAll(this.getItemParams(props));
 	}
 
   getContextMenuActions {
@@ -189,6 +282,8 @@ SequenceableCanvasObject : CanvasObject {
     }
     ^actions;
   }
+
+
 }
 
 

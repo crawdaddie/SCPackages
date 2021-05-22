@@ -75,7 +75,6 @@ SequencerCanvas {
 		var keyAction;
 		canvas.keyDownAction = { arg canvas, char, modifiers, unicode, keycode, key;
 			if (canvas.hasFocus) {
-				[modifiers, key].postln;
 				switch ([modifiers, key]) 
 					{ [ 393216, 95 ] } { this.zoomBy(1.05.reciprocal, 1.05.reciprocal) } // cmd-shift-minus
 					{ [ 393216, 43 ] } { this.zoomBy(1.05, 1.05) } // cmd-shift-plus
@@ -83,6 +82,7 @@ SequencerCanvas {
 					{ [ 524288, 76 ] } { this.moveOrigin(10, 0) } // option-right
 					{ [ 524288, 75 ] } { this.moveOrigin(0, -10) } // option-up
 					{ [ 524288, 74 ] } { this.moveOrigin(0, 10) } // option-down
+          { [ 262144, 83 ] } { } // ctrl-s
 				;
 			}
 		};
@@ -101,32 +101,44 @@ SequencerCanvas {
 			#notSelected, selected = views.partition(_.contains(position).not);
 			views = notSelected ++ selected;
 
-      if (selected.size > 0, {
-        canvas.setContextMenuActions(
-          *selected.last.getContextMenuActions()
-        );
-      }, { canvas.setContextMenuActions(*this.getContextMenuActions()) });
-			
+      mouseAction = if (selected.size > 0, 
+				{
+          var baseAction;
+          canvas.setContextMenuActions(
+            *selected.last.getContextMenuActions()
+          );
 
-      mouseAction = selected
-				!? {
-					selected.do(_.select);
-
-					(
-						initialPosition: position.x@position.y,
-						mouseMoveAction: { arg ev; selected.collect(_.onDrag(ev)) },
+          selected.do({ arg view;
+            view.select;
+            view.onDragStart;
+          });
+          baseAction = ( modifiers: modifiers,
+						initialPosition: position,
+            selected: selected,
+						mouseMoveAction: { arg ev; ev.selected.collect(_.onDrag(ev)) },
 						mouseUpAction: { arg ev;
-							selected.do(_.unselect);
-							selected.collect(_.onDragEnd(ev))
+							ev.selected.do(_.unselect);
+							ev.selected.collect(_.onDragEnd(ev))
 						},
-					)
-				}
-				?? ( initialPosition: position );
+					);
+          selected[0] !? baseAction.putAll(selected[0].getMouseAction(baseAction)) ?? baseAction;
+				}, {
+          canvas.setContextMenuActions(*this.getContextMenuActions());
+          (
+            initialPosition: position,
+            mouseMoveAction: { arg ev; selectionRectangle.onDrag(ev)},
+            mouseUpAction: { arg ev;
+              selectionRectangle.onDragEnd(ev)
+            }
+          )
+        });
 		};
 
 		canvas.mouseMoveAction = { arg view, mouseX, mouseY, modifiers, buttonNumber, clickCount;
 			var position = this.translateMousePosition(mouseX, mouseY);
 			mouseAction.position = position;
+    
+      mouseAction.mouseDelta = position - mouseAction.initialPosition;
 			mouseAction !? { mouseAction.mouseMoveAction }
 		};
 
@@ -137,7 +149,7 @@ SequencerCanvas {
 	}
 
 	translateMousePosition { arg mouseX, mouseY;
-		var translatedMouse = Point(mouseX, mouseY) - props.origin;
+    var translatedMouse = Point(mouseX, mouseY) - props.origin;
 		^translatedMouse;
 	}
 

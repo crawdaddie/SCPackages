@@ -10,10 +10,33 @@ SoundfileCanvasObject : SequenceableCanvasObject {
       startPos: item.startPos,
     ))
   }
+  getItemParams { arg item, canvasProps;
+    var baseParams = super.getItemParams(item, canvasProps);
+    ^baseParams.putAll((
+      startPos: props.startPos,
+    ))
+  }
   
   renderView { arg renderBounds, origin, zoom, canvasBounds, color, label, selected, waveformObjects, startPos, canvasProps; 
     super.renderView(renderBounds, origin, zoom, canvasBounds, color, label, selected, canvasProps);
     this.renderWaveform(renderBounds, origin, zoom, canvasBounds, color, label, selected, waveformObjects, startPos);
+  }
+  
+  onDragStart { arg aMouseAction;
+    props.initialStartPos = props.startPos;
+  }
+
+  dragProps { arg aMouseAction;
+    if (aMouseAction.modifiers == 524288) {
+      var currentWF = props.waveformObjects.selectedWaveformObject;
+      var waveform = currentWF.waveform;
+      var waveformSize = waveform.size;
+      var startPosInPixelFrames = (props.initialStartPos * waveformSize);
+      var newStartPosInPixelFrames = startPosInPixelFrames - aMouseAction.mouseDelta.x;
+      var newStartPos = newStartPosInPixelFrames / waveformSize;
+      ^(startPos: newStartPos.clip(0.0, 1.0))
+    }
+    ^super.dragProps(aMouseAction);
   }
 
 

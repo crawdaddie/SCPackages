@@ -7,6 +7,13 @@ var events = [
  	( row: 0, soundfile: soundfile.path, beats: 2, startPos: 0, length: 2 ),
  	( row: 0, soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
 ].collect(_.parent_(sampleEvent));
+var subStoreEvents = [
+	( row: 0, soundfile: soundfile.path, beats: 0, startPos: 0, length: 2 ),
+  ( row: 0, soundfile: soundfile.path, beats: 4, startPos: 0, length: 2 ),
+ 	( row: 0, soundfile: soundfile.path, beats: 2, startPos: 0, length: 2 ),
+ 	( row: 0, soundfile: soundfile.path, beats: 6.5, startPos: 0.2, length: 2 ),
+].collect(_.parent_(sampleEvent));
+
 
 var codeEvent = (
   beats: 0,
@@ -27,8 +34,10 @@ var subStore = Store.new(
 );
 
 events.do { |event, index|
-  subStore.addObject(event);
 	Store.global.addObject(event);
+};
+subStoreEvents.do { |event|
+  subStore.addObject(event);
 };
 
 Store.global.addObject(subStore);
@@ -36,6 +45,5 @@ Store.global.addObject(codeEvent);
 ~store = Store.global;
 
 ~canvas = SequencerCanvas(Store.global);
-
 
 
