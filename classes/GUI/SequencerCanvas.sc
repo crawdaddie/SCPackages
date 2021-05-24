@@ -15,6 +15,8 @@ SequencerCanvas {
 	var grid;
 	var views;
 
+  var store;
+
 	*new { arg store;
 		^super.new.init(store);
 	}
@@ -23,9 +25,10 @@ SequencerCanvas {
     canvas.front;
   }
 
-	init { arg store;
+	init { arg aStore;
 		var parent, bounds;
-		var title = format("sequencer - %", store.id);
+		var title = format("sequencer - %", aStore.id);
+    store = aStore;
 
 		if (store.id == 1000) {
 			title = title ++ " (top level)"
@@ -157,4 +160,8 @@ SequencerCanvas {
 		props.origin = (props.origin.x + x)@(props.origin.y + y);
 		canvas.refresh;
 	}
+
+  play {
+    store.play;
+  }
 }

@@ -3,6 +3,6 @@ var hidden = 1;
 
 
 ~play = M { arg ev;
-  hidden.postln;
-  ev.postln;
+  //hidden.postln;
+  //ev.postln;
 }

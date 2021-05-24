@@ -182,15 +182,14 @@ Store : RxEvent {
 		^Items(this).groupByTimestamp((start: timestamp));
 	}
 
-  getNextEventGroup { arg timestamp = 0;
-    ^Items(this).getNextEventGroup(timestamp);
-  }
-
 
 	itemsFlat {
 		var it = Items(this).flat;
     ^it;
 	}
+  play {
+    ^Prout(StorePlayer(this).getRoutineFunc).play; 
+  }
 }
 
 Items {

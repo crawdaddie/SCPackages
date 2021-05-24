@@ -39,7 +39,7 @@
 		absolute: 0,
 		beats: 0,
 		unit: 'beats',
-		length: 1
+		dur: 1
 	),
 	~codeEvent
 );

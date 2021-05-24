@@ -266,7 +266,7 @@ KeyActionManager {
 					{ [ 524288, 75 ] } { sequencerCanvas.moveOrigin(0, -10) } // option-up
 					{ [ 524288, 74 ] } { sequencerCanvas.moveOrigin(0, 10) } // option-down
           { [ 262144, 83 ] } { } // ctrl-s
-          { [ 262144, 32 ] } { } // ctrl-space
+          { [ 262144, 32 ] } { sequencerCanvas.play; } // ctrl-space
 				;
 			}
 		};

@@ -43,9 +43,14 @@ CanvasObject {
 }
 
 SequenceableCanvasObject : CanvasObject {
-	var <item;
+  classvar widgetSize;
+	var item;
 	var props;
 	var canvasProps;
+
+  *initClass {
+    widgetSize = 5;
+  }
 
 	*new { arg item, canvasProps;
 		^super.new.init(item, canvasProps);
@@ -74,7 +79,7 @@ SequenceableCanvasObject : CanvasObject {
 		var itemParams = (
 			beats: bounds.left / xFactor,
 			row: bounds.top / yFactor,
-			length: bounds.width / xFactor
+			dur: bounds.width / xFactor
 		);
     ^itemParams;
   }
@@ -121,7 +126,7 @@ SequenceableCanvasObject : CanvasObject {
 		var bounds = Rect(
 			item.beats * xFactor,
 			item.row * yFactor,
-			item.length * xFactor,
+			item.dur * xFactor,
 			yFactor
 		);
 
@@ -166,7 +171,7 @@ SequenceableCanvasObject : CanvasObject {
     var renderBounds = props.renderBounds;
     props.initialBounds = renderBounds;
 
-    if (renderBounds.width < 20) {
+    if (renderBounds.width < (widgetSize * 2)) {
       ^();
     };
 
@@ -186,9 +191,9 @@ SequenceableCanvasObject : CanvasObject {
   }
   pointInRightWidget { arg aPoint, aRect;
     ^Rect(
-      aRect.right - 10,
+      aRect.right - widgetSize,
       aRect.top,
-      10,
+      widgetSize,
       aRect.height,
     ).contains(aPoint)
   }
@@ -197,7 +202,7 @@ SequenceableCanvasObject : CanvasObject {
     ^Rect(
       aRect.left,
       aRect.top,
-      10,
+      widgetSize,
       aRect.height,
     ).contains(aPoint)
   }
@@ -240,7 +245,7 @@ SequenceableCanvasObject : CanvasObject {
       renderBounds: Rect(
         initialBounds.left,
         initialBounds.top,
-        initialBounds.width + (delta.x),
+        max(initialBounds.width + (delta.x), 10),
         initialBounds.height
       ) 
     );
@@ -258,7 +263,7 @@ SequenceableCanvasObject : CanvasObject {
       renderBounds: Rect(
         initialBounds.left + (delta.x),
         initialBounds.top,
-        initialBounds.width - (delta.x),
+        max(initialBounds.width - (delta.x), 10),
         initialBounds.height
       ) 
     ); 
