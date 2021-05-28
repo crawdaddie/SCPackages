@@ -7,4 +7,7 @@ Topics {
 
 	classvar <mouseMoved = 'mouseMoved';
 	classvar <moduleReload = 'moduleReload';
+
+  classvar <storePlayerStart = 'storePlayerStart';
+  classvar <storePlayerStop = 'storePlayerStop';
 }

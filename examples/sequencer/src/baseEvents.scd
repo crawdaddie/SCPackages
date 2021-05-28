@@ -21,7 +21,13 @@
 			var ev = currentEnvironment;
 			var mod = ev.getModule;
 			mod.play(ev);
-		}
+		},
+    create: { arg ev, concreteParams;
+      var newEvent = ();
+      newEvent.insertParent(ev);
+      newEvent.putAll(concreteParams);
+      newEvent;
+    }
 	)
 );
 
@@ -121,7 +127,7 @@ SynthDef(\stereo_player, { arg
 				instrument: ~instrument,
 				atk: ~atk,
 				decay: ~decay,
-				sustain: ~length,
+				sustain: ~sustain,
 				startPos: ~startPos,
 				buffer: soundfileMod.buffer
 			).play;
@@ -138,7 +144,7 @@ SynthDef(\stereo_player, { arg
 	~timingEvent
 );
 
-
+~storeEvent = ~inheritEvents.value((embedView: StoreCanvasObject, getView: { arg ev; SequencerCanvas(ev) }), ~sequencerEvent)
 
 
 

@@ -105,6 +105,12 @@ RxEvent : Event {
 	id {
 		^this['id']
 	}
+  
+  copyAsEvent {
+    var newEvent = ().putAll(this); 
+    newEvent.parent_(this.parent);
+    ^newEvent;
+  }
 
 	// == { arg that;
 

@@ -10,12 +10,12 @@ StorePlayer {
 
   }
 
-  getFirstEventGroup { arg start;
-    ^Items(store).groupByTimestamp((start: start))[0];
+  getFirstEventGroup { arg start, end;
+    ^Items(store).groupByTimestamp((start: start, end: end))[0];
   }
   
-  getNextEventGroup { arg start;
-    ^Items(store).getNextEventGroup(start);
+  getNextEventGroup { arg start, end;
+    ^Items(store).getNextEventGroup(start, end);
   }
 
   getPlayerEvent { arg eventGroup, delta;
@@ -31,16 +31,21 @@ StorePlayer {
     );
   }
   
-  getRoutineFunc { arg start = 0;
+  getRoutineFunc { arg start = 0, dur;
+    var eventGroups = Items(store).groupByTimestamp((start: start));
+    var firstEventGroup = eventGroups[0];
+    var end = if (dur.isNil, {eventGroups.last[0]}, { start + dur });
+
     ^{
-      var storeEventGroup = this.getFirstEventGroup(start);
+      var storeEventGroup = this.getFirstEventGroup(start, end);
       var time, nextStoreEventGroup;
+      Dispatcher('storePlayerStart', (), this);
       "start playing store".postln;
 
       while ({ storeEventGroup.notNil }, {
         time = storeEventGroup[0];
 
-        nextStoreEventGroup = this.getNextEventGroup(time);
+        nextStoreEventGroup = this.getNextEventGroup(time, end);
 
         if (nextStoreEventGroup.isNil, {
           this.getPlayerEvent(storeEventGroup).yield;

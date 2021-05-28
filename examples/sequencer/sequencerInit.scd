@@ -1,38 +1,36 @@
 var soundfile = 'data/oxygen'.import;
 var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
 var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
+var storeEvent = 'storeEvent'.importFrom('src/baseEvents');
 var events = [
-	( row: 0, soundfile: soundfile.path, beats: 0, startPos: 0, dur: 2 ),
-  ( row: 0, soundfile: soundfile.path, beats: 4, startPos: 0, dur: 2 ),
- 	( row: 0, soundfile: soundfile.path, beats: 2, startPos: 0, dur: 2 ),
- 	( row: 0, soundfile: soundfile.path, beats: 6.5, startPos: 0.2, dur: 2 ),
-].collect(_.parent_(sampleEvent));
+	( soundfile: soundfile.path ),
+  ( soundfile: soundfile.path, beats: 2 ),
+  ( soundfile: soundfile.path, beats: 4, dur: 2 ),
+ 	( soundfile: soundfile.path, beats: 6.5, startPos: 0.2, ),
+].collect(sampleEvent.create(_));
 
 var subStoreEvents = [
-	( row: 0, soundfile: soundfile.path, beats: 0, startPos: 0, dur: 2 ),
-  ( row: 0, soundfile: soundfile.path, beats: 4, startPos: 0, dur: 2 ),
- 	( row: 0, soundfile: soundfile.path, beats: 2, startPos: 0, dur: 2 ),
- 	( row: 0, soundfile: soundfile.path, beats: 6.5, startPos: 0.2, dur: 2 ),
-].collect(_.parent_(sampleEvent));
+	( soundfile: soundfile.path, beats: 0 ),
+  ( soundfile: soundfile.path, beats: 4 ),
+ 	( soundfile: soundfile.path, beats: 2 ),
+ 	( soundfile: soundfile.path, beats: 6.5, startPos: 0.2, dur: 2 ),
+].collect(sampleEvent.create(_));
 
 
-var codeEvent = (
+var codeEvent = sequencerEvent.create((
   beats: 0,
   row: 3,
   dur: 2,
   src: thisProcess.nowExecutingPath.dirname +/+ "src/moduleCode_1.scd"
-).parent_(sequencerEvent);
+));
 
 var subStore = Store.new(
-  (
+  storeEvent.create((
     row: 1, 
     beats: 2,
     dur: 2,
-    getView: { arg ev;
-      SequencerCanvas(ev); 
-    },
     src: thisProcess.nowExecutingPath.dirname +/+ "src/storeCode.scd"
-  ).parent_(sequencerEvent)
+  ))
 );
 
 events.do { |event, index|
@@ -47,7 +45,6 @@ Store.global.addObject(codeEvent);
 ~store = Store.global;
 
 ~canvas = SequencerCanvas(Store.global);
-
 
 
 

@@ -1,66 +1,3 @@
-PathManager {
-	var lastId;
-	var lookups;
-	classvar <initialId = 1000;
-
-	*new {
-		^super.new.init()
-	}
-
-	init {
-		lookups = Dictionary();
-		lastId = initialId;		
-	}
-
-	getId {
-		lastId = lastId + 1;
-		^lastId;
-	}
-
-	getPath { arg id;
-		^lookups[id]
-	}
-
-	setPath { arg id, path;
-		if (id.class == Integer) {
-			lookups[id] = path;
-
-		}
-	}
-	setChildPath { arg childId, parentId;
-		var parentPath = parentId !? { this.getPath(parentId) } ?? [];
-		this.setPath(childId, parentPath ++ [childId])
-	}
-
-	printLookups {
-		lookups.postln;
-	}
-  
-  traverseStore { arg store, cb, currentPath = [];
-    store.keysValuesDo { arg key, value;
-      if (key.class == Integer) {
-        var path = currentPath ++ [key];
-        cb.value(path, value);
-        if (value.class == Store) {
-          this.traverseStore(value, cb, path);
-        }
-      }
-    }
-  }
-  
-  resetPaths { arg store;
-		var maxArchiveId = 0;
-    this.traverseStore(store: store, cb: { arg path, value; 
-			var id = path[ path.size -1 ];
-			if (id.class == Integer) {
-				maxArchiveId = max(maxArchiveId, id);
-				this.setPath(id, path);
-			};
-		});	
-		lastId = maxArchiveId;
-  }
-}
-
 Store : RxEvent {
 	classvar global;
 	classvar pathManager;
@@ -77,8 +14,8 @@ Store : RxEvent {
 		};
 
 		^global;
-
 	}
+
 	*global_ { arg obj; global = obj; }
 	*initClass {
 		defaultContexts = (
@@ -121,10 +58,15 @@ Store : RxEvent {
 		}
     ^this
 	}
+  embedView {
+    ^StoreCanvasObject;
+  }
+  getView {
+    ^SequencerCanvas(this);
+  }
 
 	getRxEvent { arg object, id;
 		object['id'] = id;
-    object.postln;
 		^RxEvent(object);
 	}
   getOffset {
@@ -188,7 +130,19 @@ Store : RxEvent {
     ^it;
 	}
   play {
-    ^Prout(StorePlayer(this).getRoutineFunc).play; 
+    var duration = this.dur;
+    ^Prout(StorePlayer(this).getRoutineFunc(0, duration)).play; 
+  }
+  copy {
+    var newStore = Store(());
+    this.pairsDo { arg key, value;
+			if (key.class == Integer, {
+        newStore.addObject(value.copyAsEvent);
+      }, {
+        newStore.put(key, value);
+      });
+		}
+    ^newStore;
   }
 }
 
@@ -218,20 +172,22 @@ Items {
 		if (item.beats.isNil || item.row.isNil) {
 			^false;
 		};
+    item.beats.postln;
+    [options, ( options.end !? (item.beats < options.end) ?? true  )].postln;
 
 		^(
 			( options.start !? (item.beats >= options.start) ?? true )
-			// && ( options.end !? (item.beats <= options.end) ?? true )
+			//&& ( options.end !? (item.beats < options.end) ?? true )
 			// && ( options.rows !? (options.rows.includes(item.row)) ?? true )
 		)
 	}
   
-  getNextEventGroup { arg timestamp = 0;
+  getNextEventGroup { arg start = 0, end;
     var itemsDict = ();
     
     items.do { arg item;
       var beats = item.beats;
-      if (beats > timestamp) {
+      if (beats > start) {
         itemsDict[beats] = itemsDict[beats] ++ [item];
       }
     };
@@ -260,6 +216,7 @@ Items {
     });
     ^items
   }
+
 }
 
 S {

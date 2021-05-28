@@ -187,6 +187,7 @@ SequenceableCanvasObject : CanvasObject {
       )
     };
 
+
     ^()
   }
   pointInRightWidget { arg aPoint, aRect;
@@ -271,6 +272,33 @@ SequenceableCanvasObject : CanvasObject {
     props.redraw();
   }
 
+  copy {
+    props.postln;
+  } 
+  
+  copyTo { arg position, store;
+    var newProps = props.copy;
+    var bounds = newProps.renderBounds;
+    var newItem = item.copyAsEvent;
+
+    newProps.putAll(
+      (
+        renderBounds: Rect(
+          position.x,
+          position.y,
+          bounds.width,
+          bounds.height
+        )
+        .snapToRow(props)
+        .snapToBeat(props)
+      )
+    );
+
+    newItem.putAll(this.getItemParams(newProps));
+    newItem.postln;
+    store.addObject(newItem);
+  }
+
 	onDragEnd { arg aMouseAction;
     item.putAll(this.getItemParams(props));
 	}
@@ -282,13 +310,10 @@ SequenceableCanvasObject : CanvasObject {
     if (item.src.notNil) {
       actions = actions.add(
         MenuAction("edit source", { var mod = item.getModule; mod.open}),
-
       );
     }
     ^actions;
   }
-
-
 }
 
 

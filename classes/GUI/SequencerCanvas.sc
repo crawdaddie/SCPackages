@@ -68,10 +68,30 @@ SequencerCanvas {
 			grid.render(props);
 			views.do(_.render());
 		};
-    
+
+    this.listen(Topics.objectAdded, { arg payload;
+      var item = payload.object;
+      var viewClass = item.embedView ?? CanvasObject;
+			var view = viewClass.new(item, props);
+      views = views.add(view);
+      canvas.refresh();
+    });
 	}
-  getContextMenuActions {
-    ^[]
+
+  listen { arg type, fn;
+		Dispatcher.addListener(type, this, { arg payload;
+			if (payload.storeId == store.id) {
+				fn.value(payload)
+			}
+		})
+	}
+
+  getContextMenuActions { arg mouseAction, clipboard;
+    ^[MenuAction("paste", {
+      clipboard.do { arg view;
+        var newView = view.copyTo(mouseAction.initialCanvasPosition, store);
+      }
+    })]
   }
 
 	connectKeyActions {
@@ -80,6 +100,7 @@ SequencerCanvas {
 
 	connectMouseActions {
 		var mouseAction;
+    var clipboard;
 		
 		canvas.mouseDownAction = { arg view, mouseX, mouseY, modifiers, buttonNumber, clickCount;
       var initialCanvasPosition = Point(mouseX, mouseY); /* this is a position relative to the window or canvas bounds (eg canvas objects can compare it to their own renderBounds props) */
@@ -92,6 +113,10 @@ SequencerCanvas {
 				{
           var baseAction;
           canvas.setContextMenuActions(
+            MenuAction(
+              "copy",
+              { clipboard = selected }
+            ),
             *selected.last.getContextMenuActions()
           );
 
@@ -111,14 +136,18 @@ SequencerCanvas {
 					);
           selected[0] !? baseAction.putAll(selected[0].getMouseAction(baseAction)) ?? baseAction;
 				}, {
-          canvas.setContextMenuActions(*this.getContextMenuActions());
-          (
+          var baseAction = (
             initialPosition: position,
+            initialCanvasPosition: initialCanvasPosition,
             //mouseMoveAction: { arg ev; selectionRectangle.onDrag(ev)},
             //mouseUpAction: { arg ev;
             //  selectionRectangle.onDragEnd(ev)
             //}
-          )
+          );
+          canvas.setContextMenuActions(
+            *this.getContextMenuActions(baseAction, clipboard)
+          );
+          baseAction;
         });
 		};
 
