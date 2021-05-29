@@ -21,4 +21,19 @@ StoreCanvasObject : SequenceableCanvasObject {
     newStore.putAll(this.getItemParams(newProps));
     parentStore.addObject(newStore);
   }
+
+  renderView { arg renderBounds, origin, zoom, canvasBounds, color, label, selected, canvasProps;
+    this.renderContainedItems(renderBounds, origin, zoom, canvasBounds, color, label, selected);
+    super.renderView(renderBounds, origin, zoom, canvasBounds, color, label, selected, canvasProps);
+  }
+
+  renderContainedItems { arg renderBounds, origin, zoom, canvasBounds, color, label, selected, canvasProps;
+		var itemColor = color.multiply(Color(0.5, 0.5, 0.5));
+    item.pairsDo { arg key, value;
+      if (key.class == Integer) { 
+        [value.beats <= item.dur].postln
+      };
+    }
+
+  }
 }
