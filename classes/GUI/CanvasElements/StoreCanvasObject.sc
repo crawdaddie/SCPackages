@@ -3,7 +3,7 @@ StoreCanvasObject : SequenceableCanvasObject {
   copyTo { arg position, parentStore;
     var newProps = props.copy;
     var bounds = newProps.renderBounds;
-    var newStore = item.copy;
+    var newStore = item.copy.put('id', nil);
 
     newProps.putAll(
       (

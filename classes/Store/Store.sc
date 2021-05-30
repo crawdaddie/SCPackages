@@ -1,6 +1,6 @@
 Store : RxEvent {
 	classvar global;
-	classvar pathManager;
+	classvar <pathManager;
 	
 	classvar defaultContexts;
 
@@ -73,9 +73,8 @@ Store : RxEvent {
     ^this.beats ?? 0
   }
   
-
 	addObject { arg object;
-		var objectId = pathManager.getId();
+		var objectId = object.id ?? pathManager.getId();
 		var rxObject = this.getRxEvent(object, objectId);
 
 

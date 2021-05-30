@@ -107,7 +107,7 @@ RxEvent : Event {
 	}
   
   copyAsEvent {
-    var newEvent = ().putAll(this); 
+    var newEvent = ().putAll(this).put('id', nil); 
     newEvent.parent_(this.parent);
     ^newEvent;
   }

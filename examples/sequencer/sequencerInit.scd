@@ -36,20 +36,18 @@ var subStore = Store.new(
 events.do { |event, index|
 	Store.global.addObject(event);
 };
+Store.global.addObject(subStore);
+Store.global.addObject(codeEvent);
 subStoreEvents.do { |event|
   subStore.addObject(event);
 };
 
-Store.global.addObject(subStore);
-Store.global.addObject(codeEvent);
 ~store = Store.global;
 
 ~canvas = SequencerCanvas(Store.global);
 
 
-
-
-
+Store.pathManager.printLookups
 //~stream.(~store);
 
 //(
