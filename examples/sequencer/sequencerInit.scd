@@ -48,14 +48,12 @@ subStoreEvents.do { |event|
 //~canvas = SequencerCanvas(Store.global);
 //~store.writeMinifiedTextArchive("/home/adam/projects/supercollider/packages/examples/sequencer/archive.scproj");
 
-Store.readFromArchive("/home/adam/projects/supercollider/packages/examples/sequencer/archive.scproj");
-~store = Store.global;
-~canvas = SequencerCanvas(~store);
-~store[1005]
-
-
+//Store.readFromArchive("/home/adam/projects/supercollider/packages/examples/sequencer/archive.scproj");
+//~store = Store.global;
+//~canvas = SequencerCanvas(~store);
+//~store[1005]
 //~stream.(~store);
-
+Project.openLatest;
 //(
 //p = p({
 //  var eventGroup = ~store.items(0)[0];

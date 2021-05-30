@@ -77,6 +77,7 @@ Project {
 		saveDir = projectFile.dirname;
 		projectDir = saveDir.dirname;
 		srcDir = projectDir +/+ "src";
+    Import.projectModulePath = srcDir;
 		dataDir = projectDir +/+ "data";
 	}
 

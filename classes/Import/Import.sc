@@ -1,5 +1,6 @@
 Import {
 	classvar <> defaultModulePath;
+  classvar <> projectModulePath;
 	*initClass {
 		defaultModulePath = Platform.userConfigDir +/+ "_modules";
 	}
@@ -31,8 +32,9 @@ Import {
       (cwd +/+ module ++ "*").pathMatch;
     });
 		var path;
-		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ module ++ "*").pathMatch };
+		if (pathMatch.isEmpty && projectModulePath) { pathMatch = (projectModulePath +/+ module ++ "*").pathMatch };
 
+		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ module ++ "*").pathMatch };
 
 		path = pathMatch[0];
 
