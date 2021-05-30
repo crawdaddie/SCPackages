@@ -1,5 +1,5 @@
-+ Object {
-		// archiving
++ Store {
+	// archiving
 	writeMinifiedTextArchive { arg pathname;
 		var text = this.asMinifiedTextArchive;
 		var file = File(pathname, "w");
@@ -12,16 +12,24 @@
 		}
 	}
 
+  getArchivableMembers {
+    pathManager.traverseStore(this, { arg path, item;
+      item.parent_(nil);
+    });
+    ^this;
+  }  
+
 	asMinifiedTextArchive {
 		var objects, list, stream, firsttime = true;
-		if (this.archiveAsCompileString) {
-			this.checkCanArchive;
-			^this.asCompileString ++ "\n"
+    var copy = this.copy.getArchivableMembers;
+		if (copy.archiveAsCompileString) {
+			copy.checkCanArchive;
+			^copy.asCompileString ++ "\n"
 		};
 
 		objects = IdentityDictionary.new;
 
-		this.getContainedObjects(objects);
+		copy.getContainedObjects(objects);
 
 		stream = CollStream.new;
 		stream << "var o,p,n=nil;\n";

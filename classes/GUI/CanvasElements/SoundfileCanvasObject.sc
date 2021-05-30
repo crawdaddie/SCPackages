@@ -71,4 +71,9 @@ SoundfileCanvasObject : SequenceableCanvasObject {
 			}
     });
 	}
+  getItemEditView {
+		var view = super.getItemEditView
+			.putSpec('startPos', ControlSpec(0, 1, 'lin'));
+		^view;
+	}
 }

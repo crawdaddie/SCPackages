@@ -46,8 +46,6 @@ subStoreEvents.do { |event|
 
 ~canvas = SequencerCanvas(Store.global);
 
-
-Store.pathManager.printLookups
 //~stream.(~store);
 
 //(

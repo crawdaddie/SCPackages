@@ -272,10 +272,6 @@ SequenceableCanvasObject : CanvasObject {
     props.redraw();
   }
 
-  copy {
-    props.postln;
-  } 
-  
   copyTo { arg position, store;
     var newProps = props.copy;
     var bounds = newProps.renderBounds;
@@ -303,13 +299,22 @@ SequenceableCanvasObject : CanvasObject {
     item.putAll(this.getItemParams(props));
 	}
 
+  getItemEditView {
+    var view = EnvirGui(item, options: [\proto])
+      .putSpec(\row, ControlSpec(0, 128, \lin, 1, 0));
+
+		view.viewForParam('id').visible_(false);
+		view.parent.name = item.id;
+		^view;
+  }
+
   getContextMenuActions {
     var actions = [
-      MenuAction("edit", { item.getView }),
+      MenuAction("edit", { this.getItemEditView }),
     ];
     if (item.src.notNil) {
       actions = actions.add(
-        MenuAction("edit source", { var mod = item.getModule; mod.open}),
+        MenuAction("edit source", { item.getModule.open}),
       );
     }
     ^actions;

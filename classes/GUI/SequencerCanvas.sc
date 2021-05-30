@@ -71,12 +71,25 @@ SequencerCanvas {
 
     this.listen(Topics.objectAdded, { arg payload;
       var item = payload.object;
-      var viewClass = item.embedView ?? CanvasObject;
+      var viewClass = this.getItemEmbedView(item);
 			var view = viewClass.new(item, props);
       views = views.add(view);
       canvas.refresh();
     });
 	}
+
+  getItemEmbedView { arg item;
+    if (item.type == 'sampleEvent') {
+      ^SoundfileCanvasObject;
+    };
+    if (item.type == 'storeEvent') {
+      ^StoreCanvasObject;
+    };
+    if (item.type == 'sequencerEvent') {
+      ^SequenceableCanvasObject;
+    };
+    ^CanvasObject;
+  }
 
   listen { arg type, fn;
 		Dispatcher.addListener(type, this, { arg payload;
@@ -173,7 +186,7 @@ SequencerCanvas {
 	addChildViews { arg items;
 		grid = SequencerGrid();
 		views = items.collect({ arg item;
-			var class = item.embedView ?? CanvasObject;
+			var class = this.getItemEmbedView(item);
 			class.new(item, props);
 		});
 	}

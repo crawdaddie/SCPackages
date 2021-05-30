@@ -1,8 +1,3 @@
-~timingTypes = (
-	beats: 'beats',
-	absolute: 'absolute'
-);
-
 ~inheritEvents = #{ arg event ... parentEvents;
 	parentEvents.do { arg parentEvent;
 		event.insertParent(parentEvent);
@@ -24,7 +19,7 @@
 		},
     create: { arg ev, concreteParams;
       var newEvent = ();
-      newEvent.insertParent(ev);
+      newEvent.parent_(ev);
       newEvent.putAll(concreteParams);
       newEvent;
     }
@@ -34,17 +29,7 @@
 ~timingEvent = ~inheritEvents.value(
 	(
 		type: 'timingEvent',
-		timestamp: { arg ev;
-			var timestamp = if (ev.unit == 'beats') {
-				ev[ev.unit]; // events will be played on a tempo clock so beats is the more universal measure
-			} {
-				ev[ev.unit] * ev.timingContext.bpm / 60; // a time in seconds is converted to a beat value
-			};
-			timestamp;
-		},
-		absolute: 0,
 		beats: 0,
-		unit: 'beats',
 		dur: 1
 	),
 	~codeEvent
@@ -54,15 +39,6 @@
 ~sequencerEvent = ~inheritEvents.value(
 	(
 		type: 'sequencerEvent',
-		embedView: SequenceableCanvasObject,
-		getView: { arg ev;
-			var view = EnvirGui(ev)
-				.putSpec(\row, ControlSpec(0, 128, \lin, 1, 0));
-
-			view.viewForParam('id').visible_(false);
-			view.parent.name = ev.id;
-			view;
-		},
 		row: 0,
 	),
 	~timingEvent,
@@ -108,16 +84,6 @@ SynthDef(\stereo_player, { arg
 		type: 'sampleEvent',
 		soundfile: nil,
 		startPos: 0,
-		embedView: SoundfileCanvasObject,
-		getView: { arg ev;
-			var view = EnvirGui(ev)
-				.putSpec('row', ControlSpec(0, 128, 'lin', 1, 0))
-				.putSpec('startPos', ControlSpec(0, 1, 'lin'));
-
-			view.viewForParam('id').visible_(false);
-			view.parent.name = ev.id;
-			view;
-		},
 		atk: 0.05,
 		decay: 0.05,
 		instrument: 'stereo_player',
@@ -144,7 +110,7 @@ SynthDef(\stereo_player, { arg
 	~timingEvent
 );
 
-~storeEvent = ~inheritEvents.value((embedView: StoreCanvasObject, getView: { arg ev; SequencerCanvas(ev) }), ~sequencerEvent)
+~storeEvent = ~inheritEvents.value((type: 'storeEvent'), ~sequencerEvent)
 
 
 

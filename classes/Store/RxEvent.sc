@@ -54,6 +54,7 @@ RxEvent : Event {
 
 	parent_ { arg parentEvent;
 		if (parentEvent.isNil) {
+      parent = nil;
 			^this
 		};
 
