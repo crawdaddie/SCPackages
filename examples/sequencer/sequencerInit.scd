@@ -1,9 +1,9 @@
+~setupStore = {
 var soundfile = 'data/oxygen'.import;
 var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
 var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
 var storeEvent = 'storeEvent'.importFrom('src/baseEvents');
-var events = [
-	( soundfile: soundfile.path ),
+var events = [ ( soundfile: soundfile.path ),
   ( soundfile: soundfile.path, beats: 2 ),
   ( soundfile: soundfile.path, beats: 4, dur: 2 ),
  	( soundfile: soundfile.path, beats: 6.5, startPos: 0.2, ),
@@ -41,10 +41,18 @@ Store.global.addObject(codeEvent);
 subStoreEvents.do { |event|
   subStore.addObject(event);
 };
+};
 
+//~setupStore.();
+//~store = Store.global;
+//~canvas = SequencerCanvas(Store.global);
+//~store.writeMinifiedTextArchive("/home/adam/projects/supercollider/packages/examples/sequencer/archive.scproj");
+
+Store.readFromArchive("/home/adam/projects/supercollider/packages/examples/sequencer/archive.scproj");
 ~store = Store.global;
+~canvas = SequencerCanvas(~store);
+~store[1005]
 
-~canvas = SequencerCanvas(Store.global);
 
 //~stream.(~store);
 

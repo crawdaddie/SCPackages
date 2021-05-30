@@ -21,4 +21,7 @@ StoreCanvasObject : SequenceableCanvasObject {
     newStore.putAll(this.getItemParams(newProps));
     parentStore.addObject(newStore);
   }
+  getItemEditView {
+    SequencerCanvas(item);
+  }
 }

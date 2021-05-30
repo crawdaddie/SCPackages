@@ -291,7 +291,6 @@ SequenceableCanvasObject : CanvasObject {
     );
 
     newItem.putAll(this.getItemParams(newProps));
-    newItem.postln;
     store.addObject(newItem);
   }
 

@@ -82,7 +82,8 @@ SequencerCanvas {
     if (item.type == 'sampleEvent') {
       ^SoundfileCanvasObject;
     };
-    if (item.type == 'storeEvent') {
+    if (item.class == Store) {
+      ["item is store", item].postln;
       ^StoreCanvasObject;
     };
     if (item.type == 'sequencerEvent') {

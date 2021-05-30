@@ -21,15 +21,16 @@
 
 	asMinifiedTextArchive {
 		var objects, list, stream, firsttime = true;
-    var copy = this.copy.getArchivableMembers;
-		if (copy.archiveAsCompileString) {
-			copy.checkCanArchive;
-			^copy.asCompileString ++ "\n"
-		};
+    //var copy = this.copy.getArchivableMembers;
+    //var copy = this.copy;
+		//if (this.archiveAsCompileString) {
+		//	this.checkCanArchive;
+		//	^copy.asCompileString ++ "\n"
+		//};
 
 		objects = IdentityDictionary.new;
 
-		copy.getContainedObjects(objects);
+		this.getContainedObjects(objects);
 
 		stream = CollStream.new;
 		stream << "var o,p,n=nil;\n";

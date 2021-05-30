@@ -12,15 +12,19 @@ Store : RxEvent {
 			pathManager = PathManager();
 			super.new.init(defaultContexts.put('id', PathManager.initialId));
 		};
+    thisThread.randSeed = global.randSeed;
 
 		^global;
 	}
 
-	*global_ { arg obj; global = obj; }
+	*global_ { arg obj;
+    global = obj;
+  }
 	*initClass {
 		defaultContexts = (
 			timingContext: (bpm: 60),
 			transportContext: (),
+      randSeed: 1000 
 		);
     pathManager = PathManager();
 	}
@@ -28,8 +32,8 @@ Store : RxEvent {
   *readFromArchive { arg path;
 		global = path.load;
 		pathManager.resetPaths(global);
-
   } 
+
   *at { arg id;
 		var fullPath;
     if (id == PathManager.initialId) {
