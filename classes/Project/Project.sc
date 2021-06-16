@@ -202,53 +202,6 @@ Project {
 	}
 
 	*initAssetView {
-		var srcModule, itemCallback, traverse;
-		var srcView;
-		var sfView;
-		var synthDefView;
-
-		assetView = TreeView();
-		assetView.canSort_(true);
-		assetView.columns_(["name", "path"]);
-
-		// 
-		srcView = assetView.addItem(["src"]);
-		srcModule = Mod.new(srcDir);
-		
-		itemCallback = { arg item;
-			try {
-				item.md !? { arg md;
-					srcView.addChild([md.memberKey, md.path]);
-				}
-			} { arg e;
-				e.postln;
-			}
-		};
-
-		traverse = { arg mod;
-			mod.keysValuesDo { arg key, item;
-				if (item.class == Mod) {
-					traverse.value(item);
-				} {
-					itemCallback.value(item);
-				}
-			}
-		};
-
-		traverse.value(srcModule);
-
-		sfView = assetView.addItem(["soundfiles"]);
-
-		(dataDir ++ "/*").pathMatch.do { arg path;
-			sfView.addChild([path.basename, path]);
-		};
-
-		synthDefView = assetView.addItem(["synthdefs"]);
-
-		SynthDescLib.global.synthDescs.values.select(_.find("system_").isNil).do { arg synthDesc;
-			synthDefView.addChild([synthDesc.name]);
-		};
-
-		assetView.front;
-	}
+    ^AssetView();
+  }
 }

@@ -1,15 +1,15 @@
 ~setupStore = {
+var sampleEvent, sequencerEvent, storeEvent, events, subStoreEvents, codeEvent, subStore;
 var soundfile = 'data/oxygen'.import;
-var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
-var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
-var storeEvent = 'storeEvent'.importFrom('src/baseEvents');
-var events = [ ( soundfile: soundfile.path ),
+# sampleEvent, sequencerEvent, storeEvent = ['sampleEvent', 'sequencerEvent', 'storeEvent'].importFrom('src/baseEvents');
+
+events = [ ( soundfile: soundfile.path ),
   ( soundfile: soundfile.path, beats: 2 ),
   ( soundfile: soundfile.path, beats: 4, dur: 2 ),
  	( soundfile: soundfile.path, beats: 6.5, startPos: 0.2, ),
 ].collect(sampleEvent.create(_));
 
-var subStoreEvents = [
+subStoreEvents = [
 	( soundfile: soundfile.path, beats: 0 ),
   ( soundfile: soundfile.path, beats: 4 ),
  	( soundfile: soundfile.path, beats: 2 ),
@@ -17,20 +17,20 @@ var subStoreEvents = [
 ].collect(sampleEvent.create(_));
 
 
-var codeEvent = sequencerEvent.create((
+codeEvent = sequencerEvent.create((
   beats: 0,
   row: 3,
   dur: 2,
   src: thisProcess.nowExecutingPath.dirname +/+ "src/moduleCode_1.scd"
 ));
 
-var subStore = Store.new(
+subStore = Store.new(
   storeEvent.create((
     row: 1, 
     beats: 2,
+  ))
     dur: 2,
     src: thisProcess.nowExecutingPath.dirname +/+ "src/storeCode.scd"
-  ))
 );
 
 events.do { |event, index|
@@ -43,10 +43,22 @@ subStoreEvents.do { |event|
 };
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
 //~setupStore.();
 //~store = Store.global;
 //~canvas = SequencerCanvas(Store.global);
-//~store.writeMinifiedTextArchive("/home/adam/projects/supercollider/packages/examples/sequencer/archive.scproj");
+//~store.writeMinifiedTextArchive("/home/adam/projects/supercollider/packages/examples/sequencer2/archive.scproj");
 
 //Store.readFromArchive("/home/adam/projects/supercollider/packages/examples/sequencer/archive.scproj");
 //~store = Store.global;

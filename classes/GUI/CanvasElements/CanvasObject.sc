@@ -313,9 +313,12 @@ SequenceableCanvasObject : CanvasObject {
     ];
     if (item.src.notNil) {
       actions = actions.add(
-        MenuAction("edit source", { item.getModule.open}),
+        MenuAction("edit source", { item.getModule.open }),
       );
-    }
+    };
+    if (item.auxiliaryActions.notNil) {
+      actions = actions ++ [MenuAction.separator] ++ item.auxiliaryActions
+    };
     ^actions;
   }
 }

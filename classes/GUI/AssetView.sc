@@ -27,8 +27,9 @@ AssetView {
 		srcModule = Mod.new(srcDir);
 		
 		itemCallback = { arg item;
-			try {
+    try {
 				item.md !? { arg md;
+          md.postln;
 					srcView.addChild([md.memberKey, md.path])
 						.setView(0,
 							View()
@@ -42,7 +43,7 @@ AssetView {
 						)
 				}
 			} { arg e;
-				e.postln;
+				//e.postln;
 			}
 		};
 
@@ -88,15 +89,25 @@ AssetView {
 
 		srcDir = Project.srcDir;
 		dataDir = Project.dataDir;
+    
 
-		view = TreeView();
-		view.canSort_(true);
-		view.columns_(["name", "path"]);
+    view = View().layout_(
+      VLayout(*this.getSrcViews)
+    );
+		//view.canSort_(true);
+		//view.columns_(["name", "path"]);
 
-		this.getSrcView;
-		this.getSfView;
-		this.getSynthdefView;
+		//this.getSrcView;
+		//this.getSfView;
+		//this.getSynthdefView;
 		view.front;
 
 	}
+  getSrcViews {
+    ^[
+      [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), stretch:1, align:\top ],
+      [StaticText().string_("item2"), stretch:1, align:\top ],
+      [StaticText().string_("item3"), stretch:1, align:\top ]
+    ]
+  }
 }

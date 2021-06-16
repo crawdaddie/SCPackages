@@ -22,7 +22,14 @@
       newEvent.parent_(ev);
       newEvent.putAll(concreteParams);
       newEvent;
+    },
+/*
+    auxiliaryActions: { arg item;
+      [
+        { MenuAction("do something else", { }),
+      ]
     }
+*/
 	)
 );
 
@@ -97,8 +104,13 @@ SynthDef(\stereo_player, { arg
 				startPos: ~startPos,
 				buffer: soundfileMod.buffer
 			).play;
-		}
-	),
+		},
+    /*auxiliaryActions: { arg item;
+      [
+        MenuAction("soundfile edit", { item.postln }),
+      ]
+    }*/
+  ),
 	~sequencerEvent
 );
 

@@ -97,7 +97,10 @@ SynthDef(\stereo_player, { arg
 				startPos: ~startPos,
 				buffer: soundfileMod.buffer
 			).play;
-		}
+		},
+    auxiliaryActions: [
+      { MenuAction("edit soundfile", {"action pressed".postln}); }
+    ]
 	),
 	~sequencerEvent
 );
