@@ -76,4 +76,13 @@ SoundfileCanvasObject : SequenceableCanvasObject {
 			.putSpec('startPos', ControlSpec(0, 1, 'lin'));
 		^view;
 	}
+  getContextMenuActions {
+    var actions = super.getContextMenuActions();
+    ^actions ++ [
+      MenuAction("edit soundfile", {
+        var sf = Mod(item.soundfile).soundfile;
+        SoundfileEditor(sf, sf.numFrames * item.startPos, sf.numFrames); 
+      });
+    ];
+  }
 }

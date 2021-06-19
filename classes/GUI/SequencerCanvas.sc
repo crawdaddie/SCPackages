@@ -60,8 +60,8 @@ SequencerCanvas {
 
 		canvas.onClose = { arg view;
 			views.do(_.onClose);
-			grid.onClose;
       this.release;
+			grid.onClose;
 		};
 
 		canvas.drawFunc = {
@@ -76,6 +76,11 @@ SequencerCanvas {
       views = views.add(view);
       canvas.refresh();
     });
+
+    canvas.canReceiveDragHandler_({ arg view; true });
+    canvas.receiveDragHandler_({ arg item, x, y;
+      [View.currentDrag, x, y].postln;
+    });
 	}
 
   getItemEmbedView { arg item;
@@ -83,7 +88,6 @@ SequencerCanvas {
       ^SoundfileCanvasObject;
     };
     if (item.class == Store) {
-      ["item is store", item].postln;
       ^StoreCanvasObject;
     };
     if (item.type == 'sequencerEvent') {

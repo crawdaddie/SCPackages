@@ -218,7 +218,8 @@ Project {
 		itemCallback = { arg item;
 			try {
 				item.md !? { arg md;
-					srcView.addChild([md.memberKey, md.path]);
+					var v = srcView.addChild([md.memberKey, md.path]);
+          v.setView(0, StaticText().string_(md.memberKey).beginDragAction_({ arg v; v.postln}));
 				}
 			} { arg e;
 				e.postln;
@@ -240,7 +241,8 @@ Project {
 		sfView = assetView.addItem(["soundfiles"]);
 
 		(dataDir ++ "/*").pathMatch.do { arg path;
-			sfView.addChild([path.basename, path]);
+			var v = sfView.addChild([path.basename, path]);
+      v.setContextMenuActions(MenuAction("edit", { "edit soundfile".postln }));
 		};
 
 		synthDefView = assetView.addItem(["synthdefs"]);

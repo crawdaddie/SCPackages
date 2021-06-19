@@ -3,7 +3,8 @@ var soundfile = 'data/oxygen'.import;
 var sampleEvent = 'sampleEvent'.importFrom('src/baseEvents');
 var sequencerEvent = 'sequencerEvent'.importFrom('src/baseEvents');
 var storeEvent = 'storeEvent'.importFrom('src/baseEvents');
-var events = [ ( soundfile: soundfile.path ),
+var events = [
+  ( soundfile: soundfile.path ),
   ( soundfile: soundfile.path, beats: 2 ),
   ( soundfile: soundfile.path, beats: 4, dur: 2 ),
  	( soundfile: soundfile.path, beats: 6.5, startPos: 0.2, ),

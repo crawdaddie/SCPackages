@@ -62,7 +62,6 @@ Routine({
 			waveformObject.waveform[index] = [maxVal, minVal];
 		};
 		waveformObject.complete = true;
-    "finished waveform computation".postln;
     completionCallback.();
 	});
 	waveformObject.task.start(AppClock);
