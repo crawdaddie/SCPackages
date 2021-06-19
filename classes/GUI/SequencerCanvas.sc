@@ -60,8 +60,8 @@ SequencerCanvas {
 
 		canvas.onClose = { arg view;
 			views.do(_.onClose);
-			grid.onClose;
       this.release;
+			grid.onClose;
 		};
 
 		canvas.drawFunc = {
@@ -75,6 +75,11 @@ SequencerCanvas {
 			var view = viewClass.new(item, props);
       views = views.add(view);
       canvas.refresh();
+    });
+
+    canvas.canReceiveDragHandler_({ arg view; true });
+    canvas.receiveDragHandler_({ arg item, x, y;
+      [View.currentDrag, x, y].postln;
     });
 	}
 
