@@ -104,10 +104,11 @@ AssetView {
 
 	}
   getSrcViews {
+    var layoutParams = [stretch: 2, align: \topLeft];
     ^[
-      [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), stretch:1, align:\top ],
-      [StaticText().string_("item2"), stretch:1, align:\top ],
-      [StaticText().string_("item3"), stretch:1, align:\top ]
+      [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }) ] ++ layoutParams,
+      [StaticText().string_("item2")] ++ layoutParams,
+      [StaticText().string_("item3")] ++ layoutParams,
     ]
   }
 }
