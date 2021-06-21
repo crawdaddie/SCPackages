@@ -1,3 +1,50 @@
+ItemRow {
+  var <view;
+  var <menuActions;
+  *new { arg item ... columns;
+    ^super.new.init(item, *columns)
+  }
+
+  init { arg item ... columns;
+    view = View().layout_(
+      HLayout(
+        *columns.collect({ arg val; StaticText().string_(val) })
+      )
+    )
+    .beginDragAction_({ arg v; item.value() });
+    ^this
+  }
+  menuActions_ { arg actions; 
+    view.setContextMenuActions(*actions.collect({ arg action; MenuAction(action[0], action[1])}));
+    ^this
+  }
+}
+
+ExpandableList {
+  var <view;
+  *new { arg parent, header, children;
+    ^super.new.init(parent, header, children);
+  }
+  init { arg parent, headerText, children;
+    var open, layout, header;
+    open = false;
+
+    layout = VLayout(*children);
+
+    view = View().layout_(layout);
+    header = StaticText().string_(headerText)
+      .mouseDownAction_({
+        open = open.not;
+        view.visible_(open);
+        view.refresh;
+      });
+    header.font = Font(bold: true); 
+    
+    parent.add(header);
+    parent.add(view);
+  }
+}
+
 AssetView {
 	var <view;
 	var <srcView;
@@ -8,42 +55,23 @@ AssetView {
 		^super.new.init();
 	}
 
-	getTextView { arg text;
-		var v = View();
-		v.addFLowLayout;
-
-		StaticText(parent: v).string_(text);
-		v.mouseDownAction = { arg v;
-			text.postln;
-		};
-		^v;
-	}
-
-	getSrcView {
+	getSrcViews { arg parent;
 		var srcDir = Project.srcDir;
 		var srcModule, itemCallback, traverse;
+    var views = [];
 
-		srcView = view.addItem(["src"]);
 		srcModule = Mod.new(srcDir);
-		
 		itemCallback = { arg item;
-    try {
+      try {
 				item.md !? { arg md;
-          md.postln;
-					srcView.addChild([md.memberKey, md.path])
-						.setView(0,
-							View()
-								.children_([StaticText().string_(md.memberKey)])
-								.mouseDownAction_({ md.memberKey.postln })
-						)
-						.setView(1,
-							View()
-								.children_([StaticText().string_(md.path)])
-								.mouseDownAction_({ md.path.postln })
-						)
-				}
+          views = views.add(
+            ItemRow(item, item.md.memberKey).menuActions_([
+              ["edit",  {Document.open(md.path)}]
+            ]).view
+          )
+        }
 			} { arg e;
-				//e.postln;
+        //
 			}
 		};
 
@@ -58,57 +86,55 @@ AssetView {
 		};
 
 		traverse.value(srcModule);
-		^srcView;
+    ExpandableList(parent, "src", views);
+		^views;
 	}
 
-	getSfView {
+	getSfViews { arg parent;
 		var dataDir = Project.dataDir;
-		sfView = view.addItem(["soundfiles"]);
-
-		(dataDir ++ "/*").pathMatch.do { arg path;
-			sfView.addChild([path.basename, path]);
+		var views = (dataDir ++ "/*").pathMatch.collect { arg path;
+      ItemRow((soundfile: path), path.basename)
+        .menuActions_([
+          ["edit", { SoundFile.use(path, { arg sf; SoundfileEditor(sf) })}]
+        ])
+        .view
 		};
-		^sfView;
+    ExpandableList(parent, "soundfiles", views);
 	}
 
-	getSynthdefView {
-		synthdefView = view.addItem(["synthdefs"]);
-
-		SynthDescLib.global.synthDescs.values.select(_.find("system_").notNil).do { arg synthDesc;
-			synthdefView.addChild([synthDesc.name]);
+	getSynthdefViews { arg parent;
+    var views;
+		views = SynthDescLib.global.synthDescs.values.select(_.find("system_").notNil).collect { arg synthDesc;
+			ItemRow((synthDef: synthDesc.name), synthDesc.name).view;
 		};
+    ExpandableList(parent, "synthdefs", views);
 	}
 
 
 	init {
 		var srcDir, dataDir;
-
 		var srcView;
 		var sfView;
 		var synthDefView;
+    var layout = VLayout();
+    var scroll = ScrollView(bounds:Rect(0,0,300,300).center_(Window.availableBounds.center));
+    var canvas = View();
+    var actionManager = ProjectKeyActionManager();
 
 		srcDir = Project.srcDir;
 		dataDir = Project.dataDir;
     
 
-    view = View().layout_(
-      VLayout(*this.getSrcViews)
-    );
-		//view.canSort_(true);
-		//view.columns_(["name", "path"]);
-
-		//this.getSrcView;
-		//this.getSfView;
-		//this.getSynthdefView;
-		view.front;
-
+    this.getSrcViews(layout);
+    this.getSfViews(layout);
+    this.getSynthdefViews(layout);
+    scroll.keyDownAction = { arg ... args;
+      if (scroll.hasFocus) {
+        actionManager.keyDownAction(*args);
+      }
+    };
+    canvas.layout = layout;
+    scroll.canvas = canvas;
+    scroll.front;
 	}
-  getSrcViews {
-    var layoutParams = [stretch: 2, align: \topLeft];
-    ^[
-      [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }) ] ++ layoutParams,
-      [StaticText().string_("item2")] ++ layoutParams,
-      [StaticText().string_("item3")] ++ layoutParams,
-    ]
-  }
 }

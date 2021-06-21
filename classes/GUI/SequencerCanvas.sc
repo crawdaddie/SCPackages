@@ -78,13 +78,36 @@ SequencerCanvas {
     });
 
     canvas.canReceiveDragHandler_({ arg view; true });
-    canvas.receiveDragHandler_({ arg item, x, y;
-      [View.currentDrag, x, y].postln;
+    canvas.receiveDragHandler_({ arg view, x, y;
+      var params = this.getNewItemParams(x, y);
+      var item = View.currentDrag;
+      var baseEvent = if (item.soundfile.notNil, { Mod(item.soundfile).getSFEvent.copyAsEvent }, {item});
+      var newItem = baseEvent.create(params);
+      newItem.postcs;
+      store.addObject(newItem);
     });
 	}
 
+  getNewItemParams { arg x, y;
+    var point = Point(x, y);
+    var origin = props.origin;
+		var zoom = props.zoom;
+		var xFactor = Theme.horizontalUnit;
+		var yFactor = Theme.verticalUnit;
+    var itemParams;
+		point = (point + Point(-1 * origin.x, -1 * origin.y)) * Point(zoom.x.reciprocal, zoom.y.reciprocal);
+
+		itemParams = (
+			beats: (point.x / xFactor).round(1),
+			row: (point.y / yFactor).round(1),
+			//dur: bounds.width / xFactor
+		);
+    ^itemParams;
+  }
+
   getItemEmbedView { arg item;
     if (item.type == 'sampleEvent') {
+      if (item.soundfile.notNil, { Mod(item.soundfile).setSFEvent(item) });
       ^SoundfileCanvasObject;
     };
     if (item.class == Store) {
@@ -113,7 +136,7 @@ SequencerCanvas {
   }
 
 	connectKeyActions {
-    var keyActionManager = KeyActionManager(this);
+    var keyActionManager = CanvasKeyActionManager(this, ProjectKeyActionManager());
 	}
 
 	connectMouseActions {
@@ -121,7 +144,8 @@ SequencerCanvas {
     var clipboard;
 		
 		canvas.mouseDownAction = { arg view, mouseX, mouseY, modifiers, buttonNumber, clickCount;
-      var initialCanvasPosition = Point(mouseX, mouseY); /* this is a position relative to the window or canvas bounds (eg canvas objects can compare it to their own renderBounds props) */
+      var initialCanvasPosition = Point(mouseX, mouseY); /* this is a position relative to the
+      window or canvas bounds (eg canvas objects can compare it to their own renderBounds props) */
 			var position = this.translateMousePosition(mouseX, mouseY); /* this is a position relative to the origin*/ 
 			var notSelected, selected;
 			#notSelected, selected = views.partition(_.contains(position).not);

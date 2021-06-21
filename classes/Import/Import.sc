@@ -111,8 +111,6 @@ Mod : Environment {
 			} {
 				(~path +/+ "*.scd").pathMatch.do({ arg fullPath;
 					var mod = Mod(fullPath);
-					fullPath.postln;
-					mod.postln;
 					currentEnvironment.put(fullPath.basename.splitext[0].asSymbol, mod);
 				});
 			}

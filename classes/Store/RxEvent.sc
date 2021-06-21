@@ -22,6 +22,7 @@ RxEvent : Event {
 	}
 
 	init { arg event;
+    
 		metadata = event.parent !? {
 			this.parent = event.parent;
 			event.parent['metadata'];

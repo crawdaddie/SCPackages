@@ -43,6 +43,7 @@
 	),
 	~timingEvent,
 );
+
 ~midiNoteEvent = ~inheritEvents.value(
 	(
 		midinote: { arg ev;
@@ -51,8 +52,6 @@
 	),
 	~sequencerEvent
 );
-
-
 
 // one loop segment
 SynthDef(\stereo_player, { arg
@@ -98,9 +97,6 @@ SynthDef(\stereo_player, { arg
 				buffer: soundfileMod.buffer
 			).play;
 		},
-    auxiliaryActions: [
-      { MenuAction("edit soundfile", {"action pressed".postln}); }
-    ]
 	),
 	~sequencerEvent
 );
@@ -113,7 +109,15 @@ SynthDef(\stereo_player, { arg
 	~timingEvent
 );
 
-~storeEvent = ~inheritEvents.value((type: 'storeEvent'), ~sequencerEvent)
+~storeEvent = ~inheritEvents.value((
+  type: 'storeEvent',
+  create: { arg ev, concreteParams;
+      var newEvent = ev.parent['create'].value(ev, concreteParams);
+      Store.new(newEvent);
+    }
+  ),
+  ~sequencerEvent
+);
 
 
 

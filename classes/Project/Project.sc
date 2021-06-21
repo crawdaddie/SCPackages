@@ -205,3 +205,15 @@ Project {
     ^AssetView();
   }
 }
+
+ProjectKeyActionManager {
+  *new {
+    ^super.new();
+  }
+  keyDownAction { arg view, char, modifiers, unicode, keycode, key;
+		switch ([modifiers, key]) 
+      { [ 262144, 83 ] } { Project.save } // ctrl-s
+    ;
+  }
+
+}

@@ -227,8 +227,8 @@ SequenceableCanvasObject : CanvasObject {
 		);
     ^(
       renderBounds: newBounds
-        .snapToRow(props)
-        .snapToBeat(props)
+        .snapToRow(props.canvasProps)
+        .snapToBeat(props.canvasProps)
     );
   }
 
@@ -285,8 +285,8 @@ SequenceableCanvasObject : CanvasObject {
           bounds.width,
           bounds.height
         )
-        .snapToRow(props)
-        .snapToBeat(props)
+        .snapToRow(props.canvasProps)
+        .snapToBeat(props.canvasProps)
       )
     );
 

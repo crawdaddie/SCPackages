@@ -1,10 +1,12 @@
 (
-w=Window().layout_( GridLayout.rows(
-  [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), rows: 1 ],
-  [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), rows: 1 ],
-  [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), rows: 1 ],
-  [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), rows: 1 ],
-)).front;
+w=Window().layout_(
+  GridLayout.rows(
+    [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), rows: 1 ],
+    [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), rows: 1 ],
+    [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), rows: 1 ],
+    [StaticText().string_("item1").beginDragAction_({ arg view; view.postln }), rows: 1 ],
+  )
+).front;
 )
 (
 w = Window.new;

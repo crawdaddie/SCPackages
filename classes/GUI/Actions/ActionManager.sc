@@ -249,15 +249,15 @@ KeyActionManager_ {
 }
 
 
-KeyActionManager {
-  *new { arg canvas;
-    ^super.new.init(canvas);
+CanvasKeyActionManager {
+  *new { arg canvas ... mixins;
+    ^super.new.init(canvas, *mixins);
   }
-  init { arg sequencerCanvas;
+  init { arg sequencerCanvas ... mixins;
     var canvas = sequencerCanvas.canvas;
     canvas.keyDownAction = { arg canvas, char, modifiers, unicode, keycode, key;
 			if (canvas.hasFocus) {
-        [modifiers, key].postln;
+        //[modifiers, key].postln;
 				switch ([modifiers, key]) 
 					{ [ 393216, 95 ] } { sequencerCanvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) } // cmd-shift-minus
 					{ [ 393216, 43 ] } { sequencerCanvas.zoomBy(1.05, 1.05) } // cmd-shift-plus
@@ -268,12 +268,16 @@ KeyActionManager {
           { [ 262144, 83 ] } { } // ctrl-s
           { [ 262144, 32 ] } { sequencerCanvas.play; } // ctrl-space
 				;
+        mixins.do { arg mixin;
+          mixin.keyDownAction(canvas, char, modifiers, unicode, keycode, key);
+        };
 			}
 		};
 
 		//canvas.keyUpAction = { arg canvas, char, modifiers, unicode, keycode, key;};
   }
 }
+
 
 
 MouseActionManager {

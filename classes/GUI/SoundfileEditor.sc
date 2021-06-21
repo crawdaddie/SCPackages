@@ -7,6 +7,7 @@ SoundfileEditor {
       HLayout(Button(), Button(), Button())
     ));
     var sfview = SoundFileView(view);
+    //var actionManager = ProjectKeyActionManager();
     sfview.soundfile = soundfile;
     sfview.read(0, soundfile.numFrames);
     sfview
@@ -23,6 +24,13 @@ SoundfileEditor {
         startPos: startPos,
       );
     });
+    /* 
+    view.keyDownAction = { arg ... args;
+      if (view.hasFocus) {
+        actionManager.keyDownAction(*args);
+      }
+    };
+    */
 
     view.refresh;
     view.front; 

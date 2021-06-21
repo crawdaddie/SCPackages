@@ -29,9 +29,9 @@ subStore = Store.new(
   storeEvent.create((
     row: 1, 
     beats: 2,
-  ))
     dur: 2,
     src: thisProcess.nowExecutingPath.dirname +/+ "src/storeCode.scd"
+  ))
 );
 
 events.do { |event, index|

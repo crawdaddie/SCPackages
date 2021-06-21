@@ -8,8 +8,7 @@
 		)
 	}
 
-  snapToRow { arg props;
-    var canvasCtx = props.canvasProps;
+  snapToRow { arg canvasCtx;
     var y = this.top;
     var unit = canvasCtx.zoom.y * Theme.verticalUnit;
     var offset = canvasCtx.origin.y ; 
@@ -19,8 +18,7 @@
 		^this; 
   }
 
-  snapToBeat { arg props;
-    var canvasCtx = props.canvasProps;
+  snapToBeat { arg canvasCtx;
     var x = this.left;
     var unit = canvasCtx.zoom.x * Theme.horizontalUnit;
     var offset = canvasCtx.origin.x;
@@ -28,6 +26,26 @@
 
 		this.left = constrainedValue;
 		^this;
-
   } 
+}
+
++ Point {
+  snapToRow { arg canvasCtx;
+    var y = this.y;
+    var unit = canvasCtx.zoom.y * Theme.verticalUnit;
+    var offset = canvasCtx.origin.y ; 
+    var constrainedValue = (y - offset).round(unit) + offset;
+
+		this.y = constrainedValue;
+		^this; 
+  }
+  snapToBeat { arg canvasCtx;
+    var x = this.x;
+    var unit = canvasCtx.zoom.x * Theme.horizontalUnit;
+    var offset = canvasCtx.origin.x;
+    var constrainedValue = (x - offset).round(unit) + offset;
+
+		this.x = constrainedValue;
+		^this;
+  }
 }
