@@ -117,7 +117,7 @@ AssetView {
 		var sfView;
 		var synthDefView;
     var layout = VLayout();
-    var scroll = ScrollView(bounds:Rect(0,0,300,300).center_(Window.availableBounds.center));
+    var scroll = ScrollView(bounds:Rect(0,0,300,400).left_(Window.availableBounds.left));
     var canvas = View();
     var actionManager = ProjectKeyActionManager();
 
@@ -135,6 +135,7 @@ AssetView {
     };
     canvas.layout = layout;
     scroll.canvas = canvas;
+    scroll.name = format("% (%)", Project.projectDir.basename, Project.projectFile.basename);
     scroll.front;
 	}
 }

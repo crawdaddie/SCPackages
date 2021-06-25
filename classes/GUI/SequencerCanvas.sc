@@ -81,9 +81,8 @@ SequencerCanvas {
     canvas.receiveDragHandler_({ arg view, x, y;
       var params = this.getNewItemParams(x, y);
       var item = View.currentDrag;
-      var baseEvent = if (item.soundfile.notNil, { Mod(item.soundfile).getSFEvent.copyAsEvent }, {item});
+      var baseEvent = if (item.soundfile.notNil, { Mod(item.soundfile).getSFEvent.copyAsEvent }, { item });
       var newItem = baseEvent.create(params);
-      newItem.postcs;
       store.addObject(newItem);
     });
 	}
