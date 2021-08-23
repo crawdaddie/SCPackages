@@ -81,11 +81,23 @@ SequencerCanvas {
     canvas.receiveDragHandler_({ arg view, x, y;
       var params = this.getNewItemParams(x, y);
       var item = View.currentDrag;
-      var baseEvent = if (item.soundfile.notNil, { Mod(item.soundfile).getSFEvent.copyAsEvent }, { item });
-      var newItem = baseEvent.create(params);
+      var newItem = this.getDragItemEvent(View.currentDrag, params);
       store.addObject(newItem);
     });
 	}
+  
+  getDragItemEvent { arg currentDrag, params;
+    if (currentDrag.class == String) {
+      var mod = Mod(currentDrag);
+      if (mod.soundfile.notNil, {^mod.getSFEvent.create(
+        params.putAll(
+          (soundfile: currentDrag)
+        )
+      )})
+    };
+
+    if (currentDrag.soundfile.notNil, { ^Mod(currentDrag.soundfile).getSFEvent.create(params.putAll((soundfile: currentDrag.soundfile))) }, { ^currentDrag });
+  }
 
   getNewItemParams { arg x, y;
     var point = Point(x, y);

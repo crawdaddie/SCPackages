@@ -66,8 +66,8 @@ Project {
 			Store.readFromArchive(path);
 		};
 		canvas = SequencerCanvas(Store.global);
-
 		assetView = AssetView();
+    EnvirGui(Store.global.timingContext);
 
 		Store.postTree;
 	}
@@ -77,7 +77,6 @@ Project {
 		saveDir = projectFile.dirname;
 		projectDir = saveDir.dirname;
 		srcDir = projectDir +/+ "src";
-    Import.projectModulePath = srcDir;
 		dataDir = projectDir +/+ "data";
 	}
 

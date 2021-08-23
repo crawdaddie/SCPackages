@@ -61,6 +61,7 @@ AssetView {
     var views = [];
 
 		srcModule = Mod.new(srcDir);
+
 		itemCallback = { arg item;
       try {
 				item.md !? { arg md;
@@ -104,7 +105,7 @@ AssetView {
 
 	getSynthdefViews { arg parent;
     var views;
-		views = SynthDescLib.global.synthDescs.values.select(_.find("system_").notNil).collect { arg synthDesc;
+		views = SynthDescLib.global.synthDescs.values.reject(_.find("system_").notNil).collect { arg synthDesc;
 			ItemRow((synthDef: synthDesc.name), synthDesc.name).view;
 		};
     ExpandableList(parent, "synthdefs", views);

@@ -24,7 +24,6 @@ PathManager {
 	setPath { arg id, path;
 		if (id.class == Integer) {
 			lookups[id] = path;
-
 		}
 	}
 	setChildPath { arg childId, parentId;
@@ -49,7 +48,7 @@ PathManager {
   }
   
   resetPaths { arg store;
-		var maxArchiveId = 0;
+		var maxArchiveId = initialId;
     this.traverseStore(store: store, cb: { arg path, value; 
 			var id = path[ path.size -1 ];
 			if (id.class == Integer) {

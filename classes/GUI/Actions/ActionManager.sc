@@ -257,7 +257,7 @@ CanvasKeyActionManager {
     var canvas = sequencerCanvas.canvas;
     canvas.keyDownAction = { arg canvas, char, modifiers, unicode, keycode, key;
 			if (canvas.hasFocus) {
-        //[modifiers, key].postln;
+        [modifiers, key].postln;
 				switch ([modifiers, key]) 
 					{ [ 393216, 95 ] } { sequencerCanvas.zoomBy(1.05.reciprocal, 1.05.reciprocal) } // cmd-shift-minus
 					{ [ 393216, 43 ] } { sequencerCanvas.zoomBy(1.05, 1.05) } // cmd-shift-plus
@@ -265,7 +265,6 @@ CanvasKeyActionManager {
 					{ [ 524288, 76 ] } { sequencerCanvas.moveOrigin(10, 0) } // option-right
 					{ [ 524288, 75 ] } { sequencerCanvas.moveOrigin(0, -10) } // option-up
 					{ [ 524288, 74 ] } { sequencerCanvas.moveOrigin(0, 10) } // option-down
-          { [ 262144, 83 ] } { } // ctrl-s
           { [ 262144, 32 ] } { sequencerCanvas.play; } // ctrl-space
 				;
         mixins.do { arg mixin;

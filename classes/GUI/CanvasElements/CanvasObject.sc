@@ -169,19 +169,21 @@ SequenceableCanvasObject : CanvasObject {
     var initialPosition = aMouseAction.initialCanvasPosition;
     var modifiers = aMouseAction.modifiers;
     var renderBounds = props.renderBounds;
+    var modifierKey = Platform.keys.modKey;
+
     props.initialBounds = renderBounds;
 
     if (renderBounds.width < (widgetSize * 2)) {
       ^();
     };
 
-    if ((modifiers == 262144) && (this.pointInLeftWidget(initialPosition, renderBounds))) {
+    if ((modifiers == modifierKey) && (this.pointInLeftWidget(initialPosition, renderBounds))) {
       ^(
         mouseMoveAction: { arg ev; ev.selected.collect(_.resizeLeft(ev))}
       )
     };
 
-    if ((modifiers == 262144) && (this.pointInRightWidget(initialPosition, renderBounds))) {
+    if ((modifiers == modifierKey) && (this.pointInRightWidget(initialPosition, renderBounds))) {
       ^(
         mouseMoveAction: { arg ev; ev.selected.collect(_.resizeRight(ev))}
       )
@@ -299,7 +301,7 @@ SequenceableCanvasObject : CanvasObject {
 	}
 
   getItemEditView {
-    var view = EnvirGui(item, options: [\proto])
+    var view = EnvirGui(item)
       .putSpec(\row, ControlSpec(0, 128, \lin, 1, 0));
 
 		view.viewForParam('id').visible_(false);

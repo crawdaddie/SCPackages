@@ -1,0 +1,72 @@
+var o,p,n=nil;
+o=[Store.prNew,Array.prNew(32),RxEvent.prNew,Array.prNew(32),"/Users/adam/projects/sc/lib/Drum_Hits/Clap_04.wav",Event.prNew,Array.prNew(4),Event.prNew,Array.prNew(28),{
+			var soundfileMod = ~soundfile.value.asSoundfileMod;
+			(
+				instrument: ~instrument.value,
+				atk: ~atk.value,
+				decay: ~decay.value,
+				sustain: ~sustain.value,
+				startPos: ~startPos.value,
+				buffer: soundfileMod.buffer,
+        dur: ~dur.value,
+			).play;
+		},Event.prNew,Array.prNew(8),"/Users/adam/Library/Application Support/SuperCollider/core-modules/baseEvents.scd",Event.prNew,Array.prNew(16),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(12),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(16),{ arg ev;
+      Mod(ev.src);
+		},{ arg ev, concreteParams;
+      var newEvent = ();
+      newEvent.parent_(ev);
+      newEvent.putAll(concreteParams);
+      newEvent;
+    },{
+			var ev = currentEnvironment;
+			var mod = ev.getModule;
+			mod.play(ev);
+		},RxEvent.prNew,Array.prNew(32),"/Users/adam/projects/sc/ecosystem-projects/example/data/oxygen.wav",Event.prNew,Array.prNew(28),{
+			var soundfileMod = ~soundfile.value.asSoundfileMod;
+			(
+				instrument: ~instrument.value,
+				atk: ~atk.value,
+				decay: ~decay.value,
+				sustain: ~sustain.value,
+				startPos: ~startPos.value,
+				buffer: soundfileMod.buffer,
+        dur: ~dur.value,
+			).play;
+		},Event.prNew,Array.prNew(8),"/Users/adam/Library/Application Support/SuperCollider/core-modules/baseEvents.scd",Event.prNew,Array.prNew(16),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(12),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(16),{ arg ev;
+      Mod(ev.src);
+		},{ arg ev, concreteParams;
+      var newEvent = ();
+      newEvent.parent_(ev);
+      newEvent.putAll(concreteParams);
+      newEvent;
+    },{
+			var ev = currentEnvironment;
+			var mod = ev.getModule;
+			mod.play(ev);
+		},Event.prNew,Array.prNew(4),RxEvent.prNew,Array.prNew(32),RxEvent.prNew,Array.prNew(32),"/Users/adam/projects/sc/lib/Drum_Hits/Kick_09.wav",Event.prNew,Array.prNew(4),Event.prNew,Array.prNew(28),{
+			var soundfileMod = ~soundfile.value.asSoundfileMod;
+      soundfileMod.buffer.postln;
+			(
+				instrument: ~instrument.value,
+				atk: ~atk.value,
+				decay: ~decay.value,
+				sustain: ~sustain.value,
+				startPos: ~startPos.value,
+				buffer: soundfileMod.buffer.bufnum,
+        dur: ~dur.value,
+			).play;
+		},Event.prNew,Array.prNew(8),"/Users/adam/Library/Application Support/SuperCollider/core-modules/baseEvents.scd",Event.prNew,Array.prNew(16),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(12),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(16),{ arg ev;
+      Mod(ev.src);
+		},{ arg ev, concreteParams;
+      var newEvent = ();
+      newEvent.parent_(ev);
+      newEvent.putAll(concreteParams);
+      newEvent;
+    },{
+			var ev = currentEnvironment;
+			var mod = ev.getModule;
+			mod.play(ev);
+		},Event.prNew,Array.prNew(4),RxEvent.prNew,Array.prNew(32),RxEvent.prNew,Array.prNew(32),TimelineItems.prNew,Event.prNew,Array.prNew(16),Array.prNew(1),Array.prNew(2),Array.prNew(1),Array.prNew(1),Array.prNew(1),SortedList.prNew,Array.prNew(5),{ arg a, b; a < b }];
+p=[0,[array:o[1],size:10,proto:nil,parent:nil,know:true,metadata:nil,timelineItems:o[82],player:nil],1,[1005,o[2],n,n,1002,o[26],'timingContext',o[48],1001,o[50],1006,o[52],n,n,'transportContext',o[76],1003,o[78],1004,o[80],n,n,n,n,n,n,'id',1000,n,n,'randSeed',1000],2,[array:o[3],size:6,proto:nil,parent:o[5],know:true,metadata:nil],3,['startPos',0,'beats',2.0,n,n,'soundfile',o[4],'dur',1.0,n,n,n,n,n,n,n,n,n,n,n,n,'row',3.0,n,n,'id',1005,n,n,n,n],5,[array:o[6],size:1,proto:nil,parent:o[7],know:true],6,[n,n,'soundfile',o[4]],7,[array:o[8],size:7,proto:nil,parent:o[13],know:true],8,['startPos',0,n,n,'atk',0.05,n,n,'instrument','stereo_player',n,n,n,n,'play',o[9],n,n,'type','sampleEvent',n,n,'decay',0.05,n,n,'md',o[10]],10,[array:o[11],size:2,proto:nil,parent:nil,know:true],11,[n,n,'path',o[12],n,n,'memberKey','sampleEvent'],13,[array:o[14],size:3,proto:nil,parent:o[17],know:true],14,[n,n,'md',o[15],n,n,'row',0,n,n,'type','sequencerEvent',n,n,n,n],15,[array:o[16],size:2,proto:nil,parent:nil,know:true],16,[n,n,'path',o[12],n,n,'memberKey','sequencerEvent'],17,[array:o[18],size:4,proto:nil,parent:o[21],know:true],18,['dur',1,'beats',0,n,n,'md',o[19],n,n,'type','timingEvent'],19,[array:o[20],size:2,proto:nil,parent:nil,know:true],20,[n,n,'path',o[12],n,n,'memberKey','timingEvent'],21,[array:o[22],size:4,proto:nil,parent:nil,know:true],22,[n,n,n,n,n,n,'getModule',o[23],'create',o[24],'type','codeEvent','play',o[25],n,n],26,[array:o[27],size:3,proto:nil,parent:o[29],know:true,metadata:nil],27,[n,n,'beats',3,n,n,'soundfile',o[28],n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'id',1002,n,n,n,n],29,[array:o[30],size:7,proto:nil,parent:o[35],know:true],30,['startPos',0,n,n,'atk',0.05,n,n,'instrument','stereo_player',n,n,n,n,'play',o[31],n,n,'type','sampleEvent',n,n,'decay',0.05,n,n,'md',o[32]],32,[array:o[33],size:2,proto:nil,parent:nil,know:true],33,[n,n,'path',o[34],n,n,'memberKey','sampleEvent'],35,[array:o[36],size:3,proto:nil,parent:o[39],know:true],36,[n,n,'md',o[37],n,n,'row',0,n,n,'type','sequencerEvent',n,n,n,n],37,[array:o[38],size:2,proto:nil,parent:nil,know:true],38,[n,n,'path',o[34],n,n,'memberKey','sequencerEvent'],39,[array:o[40],size:4,proto:nil,parent:o[43],know:true],40,['dur',1,'beats',0,n,n,'md',o[41],n,n,'type','timingEvent'],41,[array:o[42],size:2,proto:nil,parent:nil,know:true],42,[n,n,'path',o[34],n,n,'memberKey','timingEvent'],43,[array:o[44],size:4,proto:nil,parent:nil,know:true],44,[n,n,n,n,n,n,'getModule',o[45],'create',o[46],'type','codeEvent','play',o[47],n,n],48,[array:o[49],size:1,proto:nil,parent:nil,know:true],49,['bpm',186.54098190516,n,n],50,[array:o[51],size:6,proto:nil,parent:o[29],know:true,metadata:nil],51,['startPos',0,'beats',0.0,n,n,'soundfile',o[28],'dur',1.0,n,n,n,n,n,n,n,n,n,n,n,n,'row',0.0,n,n,'id',1001,n,n,n,n],52,[array:o[53],size:6,proto:nil,parent:o[55],know:true,metadata:nil],53,['startPos',0,'beats',0.0,n,n,'soundfile',o[54],'dur',1.96,n,n,n,n,n,n,n,n,n,n,n,n,'row',2.0,n,n,'id',1006,n,n,n,n],55,[array:o[56],size:1,proto:nil,parent:o[57],know:true],56,[n,n,'soundfile',o[54]],57,[array:o[58],size:7,proto:nil,parent:o[63],know:true],58,['startPos',0,n,n,'atk',0.05,n,n,'instrument','stereo_player',n,n,n,n,'play',o[59],n,n,'type','sampleEvent',n,n,'decay',0.05,n,n,'md',o[60]],60,[array:o[61],size:2,proto:nil,parent:nil,know:true],61,[n,n,'path',o[62],n,n,'memberKey','sampleEvent'],63,[array:o[64],size:3,proto:nil,parent:o[67],know:true],64,[n,n,'md',o[65],n,n,'row',0,n,n,'type','sequencerEvent',n,n,n,n],65,[array:o[66],size:2,proto:nil,parent:nil,know:true],66,[n,n,'path',o[62],n,n,'memberKey','sequencerEvent'],67,[array:o[68],size:4,proto:nil,parent:o[71],know:true],68,['dur',1,'beats',0,n,n,'md',o[69],n,n,'type','timingEvent'],69,[array:o[70],size:2,proto:nil,parent:nil,know:true],70,[n,n,'path',o[62],n,n,'memberKey','timingEvent'],71,[array:o[72],size:4,proto:nil,parent:nil,know:true],72,[n,n,n,n,n,n,'getModule',o[73],'create',o[74],'type','codeEvent','play',o[75],n,n],76,[array:o[77],size:0,proto:nil,parent:nil,know:true],77,[n,n,n,n],78,[array:o[79],size:4,proto:nil,parent:o[29],know:true,metadata:nil],79,[n,n,'beats',5,n,n,'dur',2,'soundfile',o[28],n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'id',1003,n,n,n,n],80,[array:o[81],size:4,proto:nil,parent:o[29],know:true,metadata:nil],81,['startPos',0.2,'beats',7.5,n,n,'soundfile',o[28],n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'id',1004,n,n,n,n],82,[timeline:o[83],sortedTimestamps:o[90]],83,[array:o[84],size:5,proto:nil,parent:nil,know:true],84,[5,o[85],n,n,0.0,o[86],7.5,o[87],n,n,2.0,o[88],n,n,3,o[89]],85,[o[78]],86,[o[50],o[52]],87,[o[80]],88,[o[2]],89,[o[26]],90,[array:o[91],function:o[92]],91,[0.0,2.0,3,5,7.5]
+];
+prUnarchive(o,p);

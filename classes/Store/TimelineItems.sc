@@ -1,0 +1,51 @@
+TimelineItems {
+  var timeline, sortedTimestamps;
+
+  *new { arg items;
+    ^super.new.init(items)
+  }
+  init { arg items;
+    timeline = ();
+    sortedTimestamps = SortedList();
+    this.addItem(*items)
+  }
+  addItem { arg ...items;
+    items.do { arg item;
+      var newItems = timeline[item.beats] !? { arg existingItems;
+        existingItems ++ [item]
+        } ?? {
+        sortedTimestamps.add(item.beats);
+        [item]
+      };
+      timeline[item.beats] = newItems;
+    };
+  }
+  getRoutineFunc { arg start = 0, dur;
+    var timestamps = sortedTimestamps.select { arg timestamp;
+      timestamp >= start;
+    };
+
+    if (timestamps[0] != start, {
+      timestamps = [start] ++ timestamps;
+    });
+ 
+    ^{ arg inval;
+      timestamps.do { arg timestamp, i;
+        var nextTimestamp = timestamps[i + 1];
+        var delta = nextTimestamp !? { nextTimestamp - timestamp } ?? { nil };
+        var events = timeline[timestamp] ?? [];
+
+        inval.putAll((
+          events: events,
+          delta: delta,
+          play: {
+            ~events.do { arg ev;
+              ev.[\play].postcs;
+              ev.play;
+            }
+          }
+        )).yield
+      }
+    } 
+  }
+}

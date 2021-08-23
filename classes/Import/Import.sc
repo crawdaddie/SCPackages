@@ -2,7 +2,7 @@ Import {
 	classvar <> defaultModulePath;
   classvar <> projectModulePath;
 	*initClass {
-		defaultModulePath = Platform.userConfigDir +/+ "_modules";
+		defaultModulePath = Platform.userConfigDir +/+ "core-modules";
 	}
 	// this class is supposed to contain utilities for resolving a symbol into a path
 	// used for loading an instance of Mod (module)
@@ -25,20 +25,20 @@ Import {
 	*resolvePath { arg module;
     var moduleString = module.asString;
     var pathMatch = if (moduleString.at(0) == $/, {
+      // absolute path
       (moduleString ++ "*" ).pathMatch;
     },
     {
       var cwd = thisProcess.nowExecutingPath !? (_.dirname);
+      // matches paths relative to the current file 
       (cwd +/+ module ++ "*").pathMatch;
     });
-		var path;
-		if (pathMatch.isEmpty && projectModulePath) { pathMatch = (projectModulePath +/+ module ++ "*").pathMatch };
+
+		if (pathMatch.isEmpty && Project.srcDir.notNil) { pathMatch = (Project.srcDir +/+ module ++ "*").pathMatch };
 
 		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ module ++ "*").pathMatch };
 
-		path = pathMatch[0];
-
-		^path
+		^pathMatch[0]
 	}
 }
 

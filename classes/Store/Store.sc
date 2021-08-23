@@ -4,7 +4,7 @@ Store : RxEvent {
 	
 	classvar defaultContexts;
 
-	var <>orderedItems;
+  var <timelineItems;
 	var <player;
 
 	*global {
@@ -30,7 +30,7 @@ Store : RxEvent {
 	}
 
   *readFromArchive { arg path;
-		global = path.load;
+		global = this.new(path.load);
 		pathManager.resetPaths(global);
   } 
 
@@ -59,7 +59,13 @@ Store : RxEvent {
 		object !? { 
 			this.putAll(object);
 			super.parent_(object.parent);
-		}
+		};
+    timelineItems = TimelineItems(this.items);
+
+    Dispatcher.addListener(Topics.objectUpdated, this, { arg payload;
+      timelineItems = TimelineItems(this.items);
+    });
+
     ^this
 	}
   embedView {
@@ -97,6 +103,9 @@ Store : RxEvent {
 		if (rxObject['row'].notNil) {
 			this.resolveOverlaps(rxObject);
 		};
+    if (rxObject['beats'].notNil) {
+      timelineItems.addItem(rxObject);
+    };
 	}
 
 	resolveOverlaps { arg object;
@@ -104,13 +113,16 @@ Store : RxEvent {
 		rowItems.do { arg timestampWithItem;
 			var timestamp, items;
 			#timestamp, items = timestampWithItem;
-
 		}
 	}
 
 	put { arg key, value, dispatch = true;
 		if (value == nil) {
+      var oldItem = this[key];
 			super.put(key, value, false);
+      if (oldItem['beats'].notNil) {
+        [key, value, oldItem].postln;
+      };
 			^this.dispatch(
 				Topics.objectDeleted,
 				(
@@ -123,19 +135,33 @@ Store : RxEvent {
 		^super.put(key, value, dispatch);
 	}
 
-	items { arg timestamp = 0;
-		^Items(this).groupByTimestamp((start: timestamp));
-	}
+	items {
+    var items = [];	
+		this.pairsDo { arg key, value;
+			if (key.class == Integer) {
+				var beats = value.beats;
+				if (beats.notNil) {
+					items = items.add(value);
+				}
+			}
+		};
+
+		^items
+  }
 
 
 	itemsFlat {
-		var it = Items(this).flat;
-    ^it;
+    ^this.items;
 	}
+
   play {
     var duration = this.dur;
-    ^Prout(StorePlayer(this).getRoutineFunc(0, duration)).play; 
+    ^Prout(timelineItems.getRoutineFunc(0, duration)).play(
+      clock: TempoClock(global.timingContext.bpm / 60),
+      protoEvent: (storeCtx: this),
+    ).trace; 
   }
+
   copy {
     var newStore = Store(());
     this.pairsDo { arg key, value;
@@ -149,88 +175,3 @@ Store : RxEvent {
   }
 }
 
-Items {
-	var <items;
-	*new { arg store;
-		^super.new.init(store);
-	}
-
-	init { arg store;
-	  items = [];	
-		store.pairsDo { arg key, value;
-			if (key.class == Integer) {
-				var beats = value.beats;
-				if (beats.notNil) {
-					items = items.add(value);
-				}
-			}
-		}
-	}
-
-	flat {
-		^items
-	}
-
-	filterByOptions { arg item, options;
-		if (item.beats.isNil || item.row.isNil) {
-			^false;
-		};
-    item.beats.postln;
-    [options, ( options.end !? (item.beats < options.end) ?? true  )].postln;
-
-		^(
-			( options.start !? (item.beats >= options.start) ?? true )
-			//&& ( options.end !? (item.beats < options.end) ?? true )
-			// && ( options.rows !? (options.rows.includes(item.row)) ?? true )
-		)
-	}
-  
-  getNextEventGroup { arg start = 0, end;
-    var itemsDict = ();
-    
-    items.do { arg item;
-      var beats = item.beats;
-      if (beats > start) {
-        itemsDict[beats] = itemsDict[beats] ++ [item];
-      }
-    };
-    ^itemsDict.asSortedArray[0]
-  }
-
-	groupByTimestamp { arg options;
-		var itemsDict = ();
-
-		items.do { arg item;
-			var beats = item.beats;
-			if (this.filterByOptions(item, options)) {
-				itemsDict[beats] = itemsDict[beats] ++ [item];
-			};
-		};
-
-		^itemsDict.asSortedArray;
-	}
-
-  itemsFlat {
-    var items = [];
-    this.values.keysValuesDo({ arg key, value;
-      if (key.class == Integer) {
-        items = items.add(value)
-      }
-    });
-    ^items
-  }
-
-}
-
-S {
-	*new { arg id;
-		^Store.at(id);
-	}
-	*push { arg id;
-		var env = (
-			'items': Store.at(id).itemsFlat,
-      's': Store.at(id),
-		);
-		^env.push;
-	}
-}

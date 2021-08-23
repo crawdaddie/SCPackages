@@ -1,5 +1,5 @@
 var selectedWaveform;
-var lastUsedSFEvent;
+var lastUsedSFEvent = 'sampleEvent'.importFrom('baseEvents').create((soundfile: ~path));
 ~soundfile = SoundFile.openRead(~path);
 
 ~rawArray = nil;
@@ -85,10 +85,8 @@ Routine({
 ~setSFEvent = M { arg event;
   lastUsedSFEvent = event; 
 };
+
 ~getSFEvent = M { lastUsedSFEvent };
-
-
-
 
 ~buffer = nil;
 
