@@ -21,7 +21,7 @@
 
 	asMinifiedTextArchive {
 		var objects, list, stream, firsttime = true;
-    //var copy = this.copy.getArchivableMembers;
+    // var copy = this.copy.getArchivableMembers;
     //var copy = this.copy;
 		//if (this.archiveAsCompileString) {
 		//	this.checkCanArchive;

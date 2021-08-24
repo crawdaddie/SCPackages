@@ -40,7 +40,6 @@ TimelineItems {
           delta: delta,
           play: {
             ~events.do { arg ev;
-              ev.[\play].postcs;
               ev.play;
             }
           }

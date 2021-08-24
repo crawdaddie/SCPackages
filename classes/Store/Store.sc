@@ -30,7 +30,9 @@ Store : RxEvent {
 	}
 
   *readFromArchive { arg path;
-		global = this.new(path.load);
+    var archivedObject = path.load;
+    ["read from archive", archivedObject].postln;
+		global = this.new(archivedObject);
 		pathManager.resetPaths(global);
   } 
 
@@ -172,6 +174,10 @@ Store : RxEvent {
       });
 		}
     ^newStore;
+  }
+  updateAfterLoadFromArchive {
+    super.updateAfterLoadFromArchive;
+    timelineItems = TimelineItems(this.items)
   }
 }
 

@@ -66,7 +66,7 @@ Project {
 			Store.readFromArchive(path);
 		};
 		canvas = SequencerCanvas(Store.global);
-		assetView = AssetView();
+		// assetView = AssetView();
     EnvirGui(Store.global.timingContext);
 
 		Store.postTree;

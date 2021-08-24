@@ -51,6 +51,7 @@ PathManager {
 		var maxArchiveId = initialId;
     this.traverseStore(store: store, cb: { arg path, value; 
 			var id = path[ path.size -1 ];
+      value.updateAfterLoadFromArchive;
 			if (id.class == Integer) {
 				maxArchiveId = max(maxArchiveId, id);
 				this.setPath(id, path);

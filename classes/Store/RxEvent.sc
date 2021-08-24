@@ -39,7 +39,7 @@ RxEvent : Event {
 
 		this.listen(Topics.moduleReload, { arg payload;
 			if (payload.path == metadata.path) {
-				parent = this.getParentFromMetadata(metadata);
+        this.reloadMetadata(metadata)
 			}
 		});
 	}
@@ -69,6 +69,14 @@ RxEvent : Event {
 	getParentFromMetadata { arg md;
 		^Mod(md.path).at(md.memberKey);
 	}
+
+  reloadMetadata { arg metadata;
+    parent = this.getParentFromMetadata(parent.md)
+  }
+
+  updateAfterLoadFromArchive {
+    this.reloadMetadata(metadata)
+  }
 
 	put { arg key, value, dispatch = true;
 		var originalValue = this.at(key);

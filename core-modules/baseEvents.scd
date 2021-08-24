@@ -89,14 +89,14 @@ SynthDef(\stereo_player, { arg
 		instrument: 'stereo_player',
 		play: {
 			var soundfileMod = ~soundfile.value.asSoundfileMod;
-      soundfileMod.buffer.postln;
+      inval.postln;
 			(
 				instrument: ~instrument.value,
 				atk: ~atk.value,
 				decay: ~decay.value,
 				sustain: ~sustain.value,
 				startPos: ~startPos.value,
-				buffer: soundfileMod.buffer.bufnum,
+				buf: soundfileMod.buffer,
         dur: ~dur.value,
 			).play;
 		},
