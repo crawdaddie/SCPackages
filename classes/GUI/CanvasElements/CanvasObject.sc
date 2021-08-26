@@ -44,6 +44,7 @@ CanvasObject {
 
 SequenceableCanvasObject : CanvasObject {
   classvar widgetSize;
+  var <id;
 	var item;
 	var props;
 	var canvasProps;
@@ -87,6 +88,7 @@ SequenceableCanvasObject : CanvasObject {
 
 	init { arg anRxEvent, aCanvasProps;
 		item = anRxEvent;
+    id = item.id;
 		props = Props((
       color: Color.rand,
       selected: false,
@@ -274,10 +276,12 @@ SequenceableCanvasObject : CanvasObject {
     props.redraw();
   }
 
-  copyTo { arg position, store;
+  copyTo { arg position, store, link = false;
     var newProps = props.copy;
     var bounds = newProps.renderBounds;
-    var newItem = item.copyAsEvent;
+    var newItem = if (link.not, { item.copyAsEvent }, {()});
+    var rxObject;
+    var itemParams;
 
     newProps.putAll(
       (
@@ -291,9 +295,15 @@ SequenceableCanvasObject : CanvasObject {
         .snapToBeat(props.canvasProps)
       )
     );
-
-    newItem.putAll(this.getItemParams(newProps));
-    store.addObject(newItem);
+    itemParams = this.getItemParams(newProps);
+    if (link.not, { newItem.putAll(itemParams); store.addObject(newItem) }, {
+      newItem.putAll((
+        beats: itemParams.beats,
+        dur: itemParams.dur,
+        row: itemParams.row,
+      ));
+      store.addObject(newItem.proto_(item));
+    });
   }
 
 	onDragEnd { arg aMouseAction;
@@ -307,6 +317,10 @@ SequenceableCanvasObject : CanvasObject {
 		view.viewForParam('id').visible_(false);
 		view.parent.name = item.id;
 		^view;
+  }
+
+  deleteFromStore { arg store;
+    store.put(id, nil);
   }
 
   getContextMenuActions {

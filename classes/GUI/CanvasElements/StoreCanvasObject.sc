@@ -3,7 +3,8 @@ StoreCanvasObject : SequenceableCanvasObject {
   copyTo { arg position, parentStore;
     var newProps = props.copy;
     var bounds = newProps.renderBounds;
-    var newStore = item.copy.put('id', nil);
+    var newStore = item.copyAsEvent.put('id', nil);
+    props.postln;
 
     newProps.putAll(
       (
@@ -13,13 +14,13 @@ StoreCanvasObject : SequenceableCanvasObject {
           bounds.width,
           bounds.height
         )
-        .snapToRow(props)
-        .snapToBeat(props)
+        .snapToRow(props.canvasProps)
+        .snapToBeat(props.canvasProps)
       )
     );
 
     newStore.putAll(this.getItemParams(newProps));
-    parentStore.addObject(newStore);
+    parentStore.addObject(Store.new(newStore));
   }
   getItemEditView {
     SequencerCanvas(item);

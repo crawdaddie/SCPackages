@@ -20,7 +20,7 @@
 
   snapToBeat { arg canvasCtx;
     var x = this.left;
-    var unit = canvasCtx.zoom.x * Theme.horizontalUnit;
+    var unit = canvasCtx.zoom.x * Theme.horizontalUnit / canvasCtx.quantSubdivisions;
     var offset = canvasCtx.origin.x;
     var constrainedValue = (x - offset).round(unit) + offset;
 

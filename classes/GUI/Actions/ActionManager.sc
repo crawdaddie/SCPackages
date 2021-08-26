@@ -152,6 +152,8 @@ KeyActionManager_ {
 			{ [ 2097152, 16777236 ] } { canvas.moveCursorHandler(1,  0); } //right
 			{ [ 2097152, 16777235 ] } { canvas.moveCursorHandler(0, -1); } //up
 			{ [ 2097152, 16777237 ] } { canvas.moveCursorHandler(0,  1); } //down
+      { [ 262144, 93 ] } { canvas.incrementQuantSubdivision( 1); } 
+      { [ 262144, 91 ] } { canvas.incrementQuantSubdivision(-1); }
 			{ [ 0, 32 ]} { canvas.playStore; }
 		;
 	}
@@ -266,6 +268,8 @@ CanvasKeyActionManager {
 					{ [ 524288, 75 ] } { sequencerCanvas.moveOrigin(0, -10) } // option-up
 					{ [ 524288, 74 ] } { sequencerCanvas.moveOrigin(0, 10) } // option-down
           { [ 262144, 32 ] } { sequencerCanvas.play; } // ctrl-space
+          { [ 262144, 93 ] } { sequencerCanvas.incrementQuantSubdivision( 1); } 
+          { [ 262144, 91 ] } { sequencerCanvas.incrementQuantSubdivision(-1); }
 				;
         mixins.do { arg mixin;
           mixin.keyDownAction(canvas, char, modifiers, unicode, keycode, key);

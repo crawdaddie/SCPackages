@@ -8,12 +8,11 @@ SequencerGrid {
 	}
 
 	*initClass {
-		mainGridColor = Color.grey(0.8, 1);
+		mainGridColor = Color.grey(0.7, 1);
 		subdivisionColor = Color.grey(0.7, 0.5);
 	}
 
-	init {
-	}
+	init {}
 
 
 	drawYGrid { arg origin, canvasBounds, zoom;
@@ -28,13 +27,13 @@ SequencerGrid {
 		}
 	}
 
-	drawXGrid { arg quantX, origin, timingOffset, canvasBounds, zoom, subdivisions;
+	drawXGrid { arg quantX, origin, timingOffset, canvasBounds, zoom, quantSubdivisions;
 		var gap = quantX * zoom.x;
 		var timingOffsetPixels = timingOffset * gap;
 		var initXOffset = origin.x + (0 - origin.x).roundUp(gap) - timingOffsetPixels;
 		var xOffset = initXOffset;
 		
-		var minorGap = gap / subdivisions;
+		var minorGap = gap / quantSubdivisions;
 		var initSubOffset = origin.x + (0 - origin.x).roundUp(minorGap) - timingOffsetPixels; 
 		var subOffset = initSubOffset;
 		// var tickNum = 0;
@@ -60,9 +59,9 @@ SequencerGrid {
 		Pen.stroke;
 	}
 
-	renderView { arg quantX, origin, timingOffset, canvasBounds, zoom, subdivisions = 1;
+	renderView { arg quantX, origin, timingOffset, canvasBounds, zoom, quantSubdivisions = 1;
 		this.drawYGrid(origin, canvasBounds, zoom);
-		this.drawXGrid(quantX, origin, timingOffset, canvasBounds, zoom, subdivisions);
+		this.drawXGrid(quantX, origin, timingOffset, canvasBounds, zoom, quantSubdivisions);
 	}
 
 	render { arg ctx;

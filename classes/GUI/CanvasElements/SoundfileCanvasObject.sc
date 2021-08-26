@@ -7,7 +7,7 @@ SoundfileCanvasObject : SequenceableCanvasObject {
     var baseProps = super.getProps(item, canvasProps);
     ^baseProps.putAll((
       waveformObjects: if (item.soundfile.notNil, {
-        Mod(item.soundfile).getWaveform(canvasProps.zoom.x, canvasProps['redraw'])
+        Mod(item.soundfile).getWaveform(canvasProps.zoom.x * canvasProps.bps, canvasProps['redraw'])
       }, {
         (
           selectedWaveformObject: (waveform: [], complete: true),
@@ -25,7 +25,7 @@ SoundfileCanvasObject : SequenceableCanvasObject {
   
   renderView { arg renderBounds, origin, zoom, canvasBounds, color, label, selected, waveformObjects, startPos, canvasProps; 
     super.renderView(renderBounds, origin, zoom, canvasBounds, color, label, selected, canvasProps);
-    this.renderWaveform(renderBounds, origin, zoom, canvasBounds, color, label, selected, waveformObjects, startPos);
+    this.renderWaveform(renderBounds, origin, zoom, canvasBounds, color, label, selected, waveformObjects, startPos, canvasProps);
   }
   
   onDragStart { arg aMouseAction;
@@ -68,8 +68,8 @@ SoundfileCanvasObject : SequenceableCanvasObject {
 
 			min(renderBounds.width, framesToRender).do { arg index;
 				var data = waveform[index + firstFrame];
-				var max = middlePoint + Point(0, data[0] * height / 2);
-				var min = middlePoint + Point(0, data[1] * height / 2);
+				var max = middlePoint + Point(0, data[0] * height * item.amp / 2);
+				var min = middlePoint + Point(0, data[1] * height * item.amp / 2);
 
 				Pen.line(max, min);
 				Pen.fillStroke;

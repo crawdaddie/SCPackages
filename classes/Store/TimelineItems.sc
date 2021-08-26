@@ -20,13 +20,20 @@ TimelineItems {
       timeline[item.beats] = newItems;
     };
   }
-  getRoutineFunc { arg start = 0, dur;
+  getRoutineFunc { arg start = 0, loopPoints;
     var timestamps = sortedTimestamps.select { arg timestamp;
       timestamp >= start;
     };
 
     if (timestamps[0] != start, {
       timestamps = [start] ++ timestamps;
+    });
+
+    if (loopPoints.notNil, {
+      ^{ arg inval;
+
+
+      }
     });
  
     ^{ arg inval;
@@ -40,7 +47,7 @@ TimelineItems {
           delta: delta,
           play: {
             ~events.do { arg ev;
-              ev.play;
+              ev.play(storeCtx: ~storeCtx, clock: ~clock);
             }
           }
         )).yield

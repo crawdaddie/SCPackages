@@ -1,3 +1,4 @@
+var sampleEvent;
 ~inheritEvents = #{ arg event ... parentEvents;
 	parentEvents.do { arg parentEvent;
 		event.insertParent(parentEvent);
@@ -8,10 +9,9 @@
 
 ~codeEvent = (
 	(
-
 		type: 'codeEvent',
 		getModule: { arg ev;
-      Mod(ev.src);
+      Import(ev.src, expose: false);
 		},
 		play: {
 			var ev = currentEnvironment;
@@ -63,10 +63,12 @@ SynthDef(\stereo_player, { arg
 	sustain = 1,
 	amp = 1,
 	atk = 0.01,
-	decay = 0.01
+	decay = 0.01,
+  rate = 1
 	;
 
 	var sig = PlayBuf.ar(2, buf,
+    rate: rate,
 		startPos: startPos * BufFrames.kr(buf),
 		loop: 0
 	);
@@ -74,12 +76,12 @@ SynthDef(\stereo_player, { arg
 	var env = EnvGen.kr(
 		Env.asr(atk, amp, decay),
 		gate: gate,
-		doneAction: Done.freeSelf
+		doneAction: 2
 	);
   Out.ar(out, (sig * env));
 }).add;
 
-~sampleEvent = ~inheritEvents.value(
+sampleEvent = ~inheritEvents.value(
 	(
 		type: 'sampleEvent',
 		soundfile: nil,
@@ -87,9 +89,10 @@ SynthDef(\stereo_player, { arg
 		atk: 0.05,
 		decay: 0.05,
 		instrument: 'stereo_player',
+    rate: 1,
+    amp: 1,
 		play: {
 			var soundfileMod = ~soundfile.value.asSoundfileMod;
-      inval.postln;
 			(
 				instrument: ~instrument.value,
 				atk: ~atk.value,
@@ -98,11 +101,19 @@ SynthDef(\stereo_player, { arg
 				startPos: ~startPos.value,
 				buf: soundfileMod.buffer,
         dur: ~dur.value,
+        rate: ~rate.value,
 			).play;
 		},
 	),
 	~sequencerEvent
 );
+~sampleEvent = sampleEvent;
+~percEvent = sampleEvent.create((atk: 0));
+
+~getSoundfileEvent = { arg ev, soundfile, base = sampleEvent;
+  Import(soundfile);
+  base.create((soundfile: soundfile));
+};
 
 ~automationEvent = ~inheritEvents.value(
 	(

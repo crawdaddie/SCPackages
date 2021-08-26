@@ -6,8 +6,10 @@ Project {
 
 	classvar <projectFile, <projectDir, <srcDir, <saveDir, <dataDir;
 	classvar <canvas;
+  classvar <timingContextGui;
 	classvar <player;
 	classvar <assetView;
+  classvar mainMenuUnregister;
 
 	*initClass {
 		recentProjectsFilePath = Project.filenameSymbol.asString.dirname +/+ "recentProjects";
@@ -18,6 +20,7 @@ Project {
 		
 
 		emptyProjectDir = Project.filenameSymbol.asString.dirname +/+ "emptyProject";
+    this.registerMainMenuItems;
 	}
 
 	*setRecents { arg path;
@@ -41,25 +44,17 @@ Project {
 	}
 
 	*initProject { arg projectFile;
-		
 		projectFile !? {
 			this.initFromProjectFile(projectFile);
 		} ?? {
 			this.initNewProject()
 		};
 		StoreHistory.enable;	
-		Dispatcher.connectObject(
-			this,
-			'moveObjects',
-			'deleteObjects',
-			'pasteObjects',
-			'save',
-			'open',
-			'playStore',
-		);
 	}
 
 	*load { arg path;
+    timingContextGui !? _.close;
+    canvas !? _.close;
     this.setPaths(path);
 		(srcDir +/+ "synths.scd").load;
 		path !? {
@@ -67,10 +62,26 @@ Project {
 		};
 		canvas = SequencerCanvas(Store.global);
 		// assetView = AssetView();
-    EnvirGui(Store.global.timingContext);
-
+    timingContextGui = EnvirGui(Store.global.timingContext);
 		Store.postTree;
+    this.registerMainMenuItems;
+    this.setRecents(path);
 	}
+
+  *registerMainMenuItems {
+    MainMenu.register(MenuAction("New", {this.initProject}), "File");
+    MainMenu.register(MenuAction("Save", {this.save}), "File");
+    MainMenu.register(
+      Menu(
+        *recentProjects.collect({ arg recentProject;
+          MenuAction(recentProject, {this.openPath(recentProject)})
+        })
+      ).title_("open recent"),
+      "File"
+    );
+
+    MainMenu.register(MenuAction(), "Edit");
+  }
 
 	*setPaths { arg path;
 		projectFile = path;
@@ -103,45 +114,6 @@ Project {
 		);
 	}
 
-	*moveObjects { arg payload;
-		var updates = Dictionary();
-		var store = Store.at(payload.storeId);
-		var timingContext = store.timingContext;
-	
-		updates = payload.updates.do { |update|
-			var id = update.id;
-			var newState = (
-				beats: update.x,
-				row: update.y,
-				length: update.length
-			);
-			updates.put(id, newState);
-		};
-		if (updates.size > 0) {
-			Store.patch(updates, store.id);
-		}
-	}
-
-	*deleteObjects { arg payload;
-		Store.patch(
-			Dictionary.with(
-				*payload.toDelete.collect({ arg id; id -> [nil] })
-			),
-			payload.storeId
-		);
-	}
-
-	*pasteObjects { arg payload;
-		var newItems = payload.items.collect({ arg item;
-			item.timestamp = payload.x + item.timestamp;
-			item.row = payload.y + item.row;
-			item;
-		});
-
-		newItems.do { arg item;
-			Store.addObject(item, payload.storeId)
-		}
-	}
 	
 	*save { arg payload;
 		if (projectFile.isNil) {
@@ -160,44 +132,18 @@ Project {
 			saveDir = projectFile.dirname;
 		};
 	}
+  *openPath { arg path;
+    this.setPaths(path);
+		this.load(path);
+  }
 	
 	*open { arg payload;
 		Dialog.openPanel(
 			{ |path|
-				this.setPaths(path);
-				this.load(path);
+        this.openPath(path)
 			},
 			path: saveDir
 		);
-	}
-
-	*playStore { arg payload;
-		var offset = Store.at(payload.storeId).getOffset;
-		var startPos = payload.startPos + offset;
-		player !? {
-			player.stop;
-			Dispatcher((
-				type: 'playerStopped',
-				payload: (
-					player: player,
-					stopPosition: player.currentPosition
-				)
-			));
-			player = nil;
-		} ?? {
-			player = StorePlayer(
-				Store.global,
-				startPos
-			);
-			player.play;
-			Dispatcher((
-				type: 'playerStarted',
-				payload: (
-					player: player,
-					startPosition: startPos
-				)
-			));
-		}
 	}
 
 	*initAssetView {

@@ -24,19 +24,16 @@ Import {
 
 	*resolvePath { arg module;
     var moduleString = module.asString;
-    var pathMatch = if (moduleString.at(0) == $/, {
-      // absolute path
-      (moduleString ++ "*" ).pathMatch;
-    },
-    {
-      var cwd = thisProcess.nowExecutingPath !? (_.dirname);
+    var pathMatch = (moduleString ++ "*" ).pathMatch;
+    if (pathMatch.isEmpty) {
+      var cwd = thisProcess.nowExecutingPath !? (_.dirname) ?? "./";
       // matches paths relative to the current file 
-      (cwd +/+ module ++ "*").pathMatch;
-    });
+      pathMatch = (cwd +/+ moduleString ++ "*").pathMatch;
+    };
 
-		if (pathMatch.isEmpty && Project.srcDir.notNil) { pathMatch = (Project.srcDir +/+ module ++ "*").pathMatch };
+		if (pathMatch.isEmpty && Project.srcDir.notNil) { pathMatch = (Project.srcDir +/+ moduleString ++ "*").pathMatch };
 
-		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ module ++ "*").pathMatch };
+		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ moduleString ++ "*").pathMatch };
 
 		^pathMatch[0]
 	}
@@ -210,6 +207,10 @@ O : ModObject {}
 
 + String {
 	asSoundfileMod {
-		^Mod.all.at(this.asSymbol);
+		var mod = Mod.all.at(this.asSymbol);
+    if (mod.isNil) {
+      mod = Import(this);
+    };
+    ^mod;
 	}
 }

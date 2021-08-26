@@ -7,7 +7,7 @@
 		^Import(this, false)
 	}
 
-	importFrom { arg module, expose = true;
+	importFrom { arg module, expose = false;
 		var importedMember;
 		try {
 			var mod = module.asModule;

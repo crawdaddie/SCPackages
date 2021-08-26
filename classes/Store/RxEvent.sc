@@ -71,7 +71,9 @@ RxEvent : Event {
 	}
 
   reloadMetadata { arg metadata;
-    parent = this.getParentFromMetadata(parent.md)
+    if (parent.notNil, {
+      parent = this.getParentFromMetadata(parent.md)
+    })
   }
 
   updateAfterLoadFromArchive {
@@ -122,10 +124,14 @@ RxEvent : Event {
     ^newEvent;
   }
 
-	// == { arg that;
-
-		
-	// }
+  play { arg storeCtx, clock;
+    var playEvent = ().parent_(this);
+    playEvent.use {
+      ~clock = clock; 
+      if (~src.isNil, { ~src = storeCtx.src });
+      this[\play].value()
+    }
+  }
 }
 
 

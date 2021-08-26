@@ -17,15 +17,15 @@ SequencerCanvas {
 
   var store;
 
-	*new { arg store;
-		^super.new.init(store);
+	*new { arg store, parent;
+		^super.new.init(store, parent);
 	}
 
   front {
     canvas.front;
   }
 
-	init { arg aStore;
+	init { arg aStore, aParent;
 		var parent, bounds;
 		var title = format("sequencer - %", aStore.id);
     store = aStore;
@@ -34,7 +34,7 @@ SequencerCanvas {
 			title = title ++ " (top level)"
 		};
 
-		parent = Window.new(title, Rect(740, 455, 700, 400)).front;
+		parent = aParent ?? Window.new(title, Rect(740, 455, 700, 400)).front;
 		bounds = parent.view.bounds;
 		canvas = UserView(parent, bounds);
 		canvas.resize = 5;
@@ -42,12 +42,21 @@ SequencerCanvas {
 
 		props = Props((
 			quantX: 100,
+      quantSubdivisions: 2,
 			origin: 0@0,
 			timingOffset: 0,
+      bps: Store.global.timingContext.bpm / 60,
 			zoom: 1@1,
 			redraw: { canvas.refresh },
 			canvasBounds: canvas.parent.bounds,
 		));
+
+    Dispatcher.addListener(Topics.objectUpdated, this, { arg payload;
+			if (payload.bpm.notNil) {
+        props.bps = payload.bpm / 60;
+        canvas.refresh();
+			}
+		});
 
 		canvas.onResize = { arg c;
 			props.canvasBounds = c.parent.bounds;
@@ -74,6 +83,11 @@ SequencerCanvas {
       var viewClass = this.getItemEmbedView(item);
 			var view = viewClass.new(item, props);
       views = views.add(view);
+      canvas.refresh();
+    });
+
+    this.listen(Topics.objectDeleted, { arg payload;
+      views = views.select({ arg view; view.id != payload.objectId });
       canvas.refresh();
     });
 
@@ -139,11 +153,27 @@ SequencerCanvas {
 	}
 
   getContextMenuActions { arg mouseAction, clipboard;
-    ^[MenuAction("paste", {
-      clipboard.do { arg view;
-        var newView = view.copyTo(mouseAction.initialCanvasPosition, store);
-      }
-    })]
+    var pasteActions = if (clipboard.size != 0, {
+      [
+          MenuAction.separator,
+          MenuAction("paste", {
+            clipboard.do { arg view;
+              view.copyTo(mouseAction.initialCanvasPosition, store);
+            }
+          }),
+          MenuAction("paste linked", {
+            clipboard.do { arg view;
+              // view.copyTo(mouseAction.initialCanvasPosition, store, link: true);
+            }
+          })
+      ]
+    }, {[]});
+    ^[
+      Menu(
+        MenuAction("sub"),
+        MenuAction("menu"),
+      ).title_("add item")
+    ] ++ pasteActions;
   }
 
 	connectKeyActions {
@@ -169,6 +199,10 @@ SequencerCanvas {
             MenuAction(
               "copy",
               { clipboard = selected }
+            ),
+            MenuAction(
+              "delete",
+              { selected.do { arg selected; selected.deleteFromStore(store) } }
             ),
             *selected.last.getContextMenuActions()
           );
@@ -243,7 +277,15 @@ SequencerCanvas {
 		canvas.refresh;
 	}
 
+  incrementQuantSubdivision { arg increment;
+    props.quantSubdivisions = max(1, props.quantSubdivisions + increment);
+    canvas.refresh;
+  }
+
   play {
     store.play;
+  }
+  close {
+    canvas.parent.close;
   }
 }
