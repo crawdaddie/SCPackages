@@ -125,11 +125,11 @@ RxEvent : Event {
   }
 
   play { arg storeCtx, clock;
-    var playEvent = ().parent_(this);
+    var playEvent = this.copy;
     playEvent.use {
       ~clock = clock; 
       if (~src.isNil, { ~src = storeCtx.src });
-      this[\play].value()
+      parent[\play].value()
     }
   }
 }

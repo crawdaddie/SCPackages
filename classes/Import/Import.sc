@@ -2,7 +2,7 @@ Import {
 	classvar <> defaultModulePath;
   classvar <> projectModulePath;
 	*initClass {
-		defaultModulePath = Platform.userConfigDir +/+ "core-modules";
+		defaultModulePath = "/Users/adam/projects/sc/ecosystem/core-modules";
 	}
 	// this class is supposed to contain utilities for resolving a symbol into a path
 	// used for loading an instance of Mod (module)
@@ -144,7 +144,8 @@ Mod : Environment {
 		^this.loadFromPath
 	}
 
-	*reload_on_save { arg path;
+	*reloadOnSave { arg path;
+    path.postln;
 		all.at(path.asSymbol) !? { arg module;
 			"reloading on save: %".format(module).postln;
 			fork {

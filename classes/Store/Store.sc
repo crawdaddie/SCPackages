@@ -76,8 +76,14 @@ Store : RxEvent {
   }
 
 	getRxEvent { arg object, id;
-		object['id'] = id;
-		^RxEvent(object);
+    if (object.class == Store, {
+      object['id'] = id;
+      ^RxEvent(object)
+    }, {
+      var copy = object.copy;
+		  copy['id'] = id;
+		  ^RxEvent(copy);
+    });
 	}
   getOffset {
     ^this.beats ?? 0
