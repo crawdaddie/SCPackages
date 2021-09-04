@@ -85,9 +85,17 @@ SequenceableCanvasObject : CanvasObject {
     ^itemParams;
   }
 
+  injectParams { arg item;
+    item.row  = item.row ?? 0;
+    item.put('beats', item.beats ?? 0, false);
+    item.dur = item.dur ?? 1;
+    item.postln;
+  }
 
 	init { arg anRxEvent, aCanvasProps;
 		item = anRxEvent;
+    this.injectParams(item);
+    [item.beats, item.dur, item.row, item].postln;
     id = item.id;
 		props = Props((
       color: Color.rand,
@@ -124,6 +132,7 @@ SequenceableCanvasObject : CanvasObject {
 	bounds { arg item, origin, zoom;
 		var xFactor = Theme.horizontalUnit;
 		var yFactor = Theme.verticalUnit;	
+  
 
 		var bounds = Rect(
 			item.beats * xFactor,

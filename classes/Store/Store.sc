@@ -61,7 +61,6 @@ Store : RxEvent {
 			super.parent_(object.parent);
 		};
     timelineItems = TimelineItems(this.items);
-
     Dispatcher.addListener(Topics.objectUpdated, this, { arg payload;
       timelineItems = TimelineItems(this.items);
     });
@@ -80,9 +79,9 @@ Store : RxEvent {
       object['id'] = id;
       ^RxEvent(object)
     }, {
-      var copy = object.copy;
-		  copy['id'] = id;
-		  ^RxEvent(copy);
+      var rxEvent = RxEvent(object);
+		  rxEvent.put('id', id, false);
+		  ^rxEvent;
     });
 	}
   getOffset {
@@ -91,9 +90,7 @@ Store : RxEvent {
   
 	addObject { arg object;
 		var objectId = object.id ?? pathManager.getId();
-
 		var rxObject = this.getRxEvent(object, objectId);
-
 		this.put(objectId, rxObject, false);
 
 		this.dispatch(
@@ -165,9 +162,9 @@ Store : RxEvent {
     var thisclock = clock ?? TempoClock(global.timingContext.bpm / 60);
     player !? _.stop;
     
-    player = Prout(timelineItems.getRoutineFunc(0)).play(
-      clock: thisclock,
-      protoEvent: (storeCtx: this, clock: thisclock),
+    player = Prout(timelineItems.getRoutineFunc(0)).trace.play(
+      thisclock,
+      protoEvent: (/*storeCtx: this,*/ clock: thisclock),
     ); 
     // ^player;
   }

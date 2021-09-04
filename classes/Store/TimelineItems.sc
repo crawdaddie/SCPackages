@@ -28,6 +28,7 @@ TimelineItems {
     if (timestamps[0] != start, {
       timestamps = [start] ++ timestamps;
     });
+    timestamps.postln;
 
     if (loopPoints.notNil, {
       ^{ arg inval;

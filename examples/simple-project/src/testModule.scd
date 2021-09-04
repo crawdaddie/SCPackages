@@ -1,22 +1,16 @@
-var createEvent = { arg name, event;
-  currentEnvironment.postln;
-  event.parent_(currentEnvironment);
-  event.putAll(
-    (md: (path: ~path, memberKey: name))
-  );
-  currentEnvironment.put(name, event);
-};
-
-var hat = "/Users/adam/projects/sc/lib/Drum_Hits/ClosedHat_01.wav";
-// .asSoundfileMod;
-
-createEvent.('defaultEvent', (
-  row: 0,
-  beats: 0,
-  dur: 1,
-  soundfile: hat, 
-));
-
-~play = { arg ev ... params;
-  [ev, params].postln;
+// default event values - can and probably will be overriden
+// by concrete events
+~soundfile = "/Users/adam/projects/sc/lib/Drum_Hits/ClosedHat_01.wav".loadSoundfile;
+~beats = 1;
+~row = 2;
+~dur = 3;
+~play = #{
+  (
+    soundfile: ~soundfile,
+    rate: ~row * 2,
+    dur: ~dur,
+    type: 'soundfile'
+  ).play;
 }
+
+

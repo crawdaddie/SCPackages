@@ -131,17 +131,17 @@ SequencerCanvas {
   }
 
   getItemEmbedView { arg item;
-    if (item.type == 'sampleEvent') {
+    if (item.type == 'soundfile' || item.soundfile.notNil) {
       if (item.soundfile.notNil, { Mod(item.soundfile).setSFEvent(item) });
       ^SoundfileCanvasObject;
     };
     if (item.class == Store) {
       ^StoreCanvasObject;
     };
-    if (item.type == 'sequencerEvent') {
-      ^SequenceableCanvasObject;
-    };
-    ^CanvasObject;
+    // if (item.type == 'sequencerEvent') {
+    //   ^SequenceableCanvasObject;
+    // };
+    ^SequenceableCanvasObject;
   }
 
   listen { arg type, fn;

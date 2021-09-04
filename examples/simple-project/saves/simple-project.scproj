@@ -1,5 +1,28 @@
 var o,p,n=nil;
-o=[Store.prNew,Array.prNew(32),RxEvent.prNew,Array.prNew(32),TimelineItems.prNew,Event.prNew,Array.prNew(4),SortedList.prNew,Array.prNew,{ arg a, b; a < b }];
-p=[0,[array:o[1],size:3,proto:nil,parent:nil,know:true,metadata:nil,timelineItems:o[4],player:nil],1,[n,n,n,n,n,n,'timingContext',o[2],n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'id',1000,n,n,'randSeed',1000],2,[array:o[3],size:1,proto:nil,parent:nil,know:true,metadata:nil],3,[n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'bpm',147.81666002518,n,n,n,n,n,n,n,n,n,n],4,[timeline:o[5],sortedTimestamps:o[7]],5,[array:o[6],size:0,proto:nil,parent:nil,know:true],6,[n,n,n,n],7,[array:o[8],function:o[9]]
+o=[Store.prNew,Array.prNew(32),RxEvent.prNew,Array.prNew(32),Event.prNew,Array.prNew(32),Event.prNew,Array.prNew(16),Event.prNew,Array.prNew(16),"/Users/adam/projects/sc/lib/Beats/Beat01_Full(140BPM).wav",Event.prNew,Array.prNew(4),Event.prNew,Array.prNew(36),{
+			var soundfileMod = ~soundfile.value.asSoundfileMod;
+			(
+				instrument: ~instrument.value,
+				atk: ~atk.value,
+				decay: ~decay.value,
+				sustain: ~sustain.value,
+				startPos: ~startPos.value,
+				buf: soundfileMod.buffer,
+        dur: ~dur.value,
+        rate: ~rate.value,
+			).play;
+		},Event.prNew,Array.prNew(8),"/Users/adam/projects/sc/ecosystem/core-modules/baseEvents.scd",Event.prNew,Array.prNew(16),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(12),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(16),{ arg ev;
+      Import(ev.src, expose: false);
+		},{ arg ev, concreteParams;
+      var newEvent = ();
+      newEvent.parent_(ev);
+      newEvent.putAll(concreteParams);
+      newEvent;
+    },{
+			var ev = currentEnvironment;
+			var mod = ev.getModule;
+			mod.play(ev);
+		},RxEvent.prNew,Array.prNew(32),"/Users/adam/projects/sc/lib/Drum_Hits/ClosedHat_01.wav",RxEvent.prNew,Array.prNew(32),RxEvent.prNew,Array.prNew(32),TimelineItems.prNew,Event.prNew,Array.prNew(8),Array.prNew(1),Array.prNew(1),SortedList.prNew,Array.prNew(2),{ arg a, b; a < b },EventStreamPlayer.prNew,Event.prNew,Array.prNew(4),EventStreamCleanup.prNew,IdentitySet.prNew,Array.prNew(4)];
+p=[0,[array:o[1],size:6,proto:nil,parent:nil,know:true,metadata:nil,timelineItems:o[39],player:o[47]],1,[1005,o[2],n,n,1002,o[32],'timingContext',o[35],n,n,n,n,n,n,n,n,n,n,1004,o[37],n,n,n,n,n,n,'id',1000,n,n,'randSeed',1000],2,[array:o[3],size:5,proto:nil,parent:o[4],know:true,metadata:nil],3,['startPos',0,'beats',3.0,n,n,'dur',2.9953784603363,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'row',3.0,n,n,'id',1005,n,n,n,n],4,[array:o[5],size:5,proto:nil,parent:o[6],know:true],5,['startPos',0,'beats',3.0,n,n,'dur',2.9953784603363,'atk',0,n,n,n,n,n,n,n,n,n,n,n,n,'row',4.0,n,n,n,n,n,n,n,n],6,[array:o[7],size:4,proto:nil,parent:o[8],know:true],7,['startPos',0,'beats',1.5,n,n,'dur',0.79,'row',1.0,n,n,n,n,n,n],8,[array:o[9],size:3,proto:nil,parent:o[11],know:true],9,[n,n,'beats',1.0,n,n,'row',1.0,'soundfile',o[10],n,n,n,n,n,n],11,[array:o[12],size:1,proto:nil,parent:o[13],know:true],12,[n,n,'soundfile',o[10]],13,[array:o[14],size:9,proto:nil,parent:o[19],know:true],14,[n,n,'play',o[15],n,n,'decay',0.05,n,n,'type','sampleEvent',n,n,n,n,'atk',0.05,n,n,'amp',1,n,n,'rate',1,n,n,'instrument','stereo_player','md',o[16],'startPos',0,n,n],16,[array:o[17],size:2,proto:nil,parent:nil,know:true],17,[n,n,'path',o[18],n,n,'memberKey','sampleEvent'],19,[array:o[20],size:3,proto:nil,parent:o[23],know:true],20,[n,n,'md',o[21],n,n,'row',0,n,n,'type','sequencerEvent',n,n,n,n],21,[array:o[22],size:2,proto:nil,parent:nil,know:true],22,[n,n,'path',o[18],n,n,'memberKey','sequencerEvent'],23,[array:o[24],size:4,proto:nil,parent:o[27],know:true],24,['dur',1,'beats',0,n,n,'md',o[25],n,n,'type','timingEvent'],25,[array:o[26],size:2,proto:nil,parent:nil,know:true],26,[n,n,'path',o[18],n,n,'memberKey','timingEvent'],27,[array:o[28],size:4,proto:nil,parent:nil,know:true],28,[n,n,n,n,n,n,'getModule',o[29],'create',o[30],'type','codeEvent','play',o[31],n,n],32,[array:o[33],size:6,proto:nil,parent:nil,know:true,metadata:nil],33,['startPos',0,n,n,n,n,'soundfile',o[34],'dur',1,n,n,n,n,n,n,n,n,n,n,n,n,'row',0,n,n,'id',1002,'type','soundfile',n,n],35,[array:o[36],size:1,proto:nil,parent:nil,know:true,metadata:nil],36,[n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'bpm',140.0,n,n,n,n,n,n,n,n,n,n],37,[array:o[38],size:6,proto:nil,parent:o[6],know:true,metadata:nil],38,['startPos',0,'beats',0.0,n,n,'dur',2.9953784603363,'atk',0,n,n,n,n,n,n,n,n,n,n,n,n,'row',3.0,n,n,'id',1004,n,n,n,n],39,[timeline:o[40],sortedTimestamps:o[44]],40,[array:o[41],size:2,proto:nil,parent:nil,know:true],41,[n,n,n,n,0.0,o[42],3.0,o[43]],42,[o[37]],43,[o[2]],44,[array:o[45],function:o[46]],45,[0.0,3.0],47,[stream:nil,originalStream:Routine({ | inval | "open Function" }),clock:TempoClock.new,nextBeat:nil,streamHasEnded:true,isWaiting:false,era:0,event:o[48],muteCount:0,cleanup:o[50],routine:Routine({ | inTime | "open Function" })],48,[array:o[49],size:1,proto:nil,parent:nil,know:true],49,[n,n,'clock',TempoClock.new],50,[functions:o[51]],51,[array:o[52],size:0],52,[n,n,n,n]
 ];
 prUnarchive(o,p);

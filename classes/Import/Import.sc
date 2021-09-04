@@ -207,10 +207,18 @@ ModObject {
 O : ModObject {}
 
 + String {
+
+  loadSoundfile {
+    // ensures soundfile is loaded
+    // but returns string
+    this.asSoundfileMod;
+    ^this;
+  }
+
 	asSoundfileMod {
 		var mod = Mod.all.at(this.asSymbol);
     if (mod.isNil) {
-      mod = Import(this);
+      mod = Import(this, false);
     };
     ^mod;
 	}

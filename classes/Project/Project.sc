@@ -9,7 +9,6 @@ Project {
   classvar <timingContextGui;
 	classvar <player;
 	classvar <assetView;
-  classvar mainMenuUnregister;
 
 	*initClass {
 		recentProjectsFilePath = Project.filenameSymbol.asString.dirname +/+ "recentProjects";

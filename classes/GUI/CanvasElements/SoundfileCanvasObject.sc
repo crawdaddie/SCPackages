@@ -65,11 +65,12 @@ SoundfileCanvasObject : SequenceableCanvasObject {
 			var waveformSize = waveform.size;
 			var framesToRender = ((1 - startPos) * waveformSize).floor.asInteger;
 			var firstFrame = (startPos * waveformSize).floor.asInteger;
+      var amp = item.use { ~amp.value ?? 1 };
 
 			min(renderBounds.width, framesToRender).do { arg index;
 				var data = waveform[index + firstFrame];
-				var max = middlePoint + Point(0, data[0] * height * item.amp / 2);
-				var min = middlePoint + Point(0, data[1] * height * item.amp / 2);
+				var max = middlePoint + Point(0, data[0] * height * amp / 2);
+				var min = middlePoint + Point(0, data[1] * height * amp / 2);
 
 				Pen.line(max, min);
 				Pen.fillStroke;

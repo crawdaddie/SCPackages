@@ -18,66 +18,16 @@ RxEvent : Event {
 		if (event.isKindOf(RxEvent)) {
 			^event;
 		};
-		^super.new.init(event)
+    if (event.notNil, {
+      ^super.new(parent: event).init(event);
+    })
+		^super.new().init(event)
 	}
 
 	init { arg event;
-    
-		metadata = event.parent !? {
-			this.parent = event.parent;
-			event.parent['metadata'];
-		};
-		
+    // this.parent_(event.parent);
+    // proto = event.proto;
 		know = true;
-		event.keysValuesDo { arg key, val;
-			super.put(key, val);
-		};
-
-		this.listen(Topics.objectUpdated, { arg payload;
-			this.putAll(payload, false)
-		});
-
-		this.listen(Topics.moduleReload, { arg payload;
-			if (payload.path == metadata.path) {
-        this.reloadMetadata(metadata)
-			}
-		});
-	}
-
-	parent {
-		metadata !? {
-			parent = this.getParentFromMetadata(metadata);
-			^parent;
-		} ?? {
-			^super.parent;
-		}
-	}
-
-	parent_ { arg parentEvent;
-		if (parentEvent.isNil) {
-      parent = nil;
-			^this
-		};
-
-		parentEvent.metadata !? {
-			metadata = parentEvent.metadata;
-		};
-
-		parent = parentEvent;
-	}
-
-	getParentFromMetadata { arg md;
-		^Mod(md.path).at(md.memberKey);
-	}
-
-  reloadMetadata { arg metadata;
-    if (parent.notNil, {
-      parent = this.getParentFromMetadata(parent.md)
-    })
-  }
-
-  updateAfterLoadFromArchive {
-    this.reloadMetadata(metadata)
   }
 
 	put { arg key, value, dispatch = true;
@@ -124,12 +74,12 @@ RxEvent : Event {
     ^newEvent;
   }
 
-  play { arg storeCtx, clock;
+  play { arg storeCtx = (), clock;
     var playEvent = this.copy;
     playEvent.use {
       ~clock = clock; 
       if (~src.isNil, { ~src = storeCtx.src });
-      parent[\play].value()
+      currentEnvironment[\play].value();
     }
   }
 }
