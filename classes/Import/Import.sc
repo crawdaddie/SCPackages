@@ -41,6 +41,7 @@ Import {
 
 
 Mod : Environment {
+  // var <module, <moduleProxy;
 	classvar <>all;
 
 	*initClass {
@@ -223,3 +224,9 @@ O : ModObject {}
     ^mod;
 	}
 }
+
+// + Object {
+//   export {
+//     currentEnvironment.put(
+//   }
+// }

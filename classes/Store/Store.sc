@@ -1,11 +1,11 @@
 Store : RxEvent {
 	classvar global;
 	classvar <pathManager;
-	
 	classvar <defaultContexts;
 
   var <timelineItems;
 	var <player;
+  var <modulePath;
 
 	*global {
 		global = global ?? {
@@ -22,6 +22,7 @@ Store : RxEvent {
 	*global_ { arg obj;
     global = obj;
   }
+
 	*initClass {
 		defaultContexts = (
       randSeed: 1000 
@@ -40,8 +41,8 @@ Store : RxEvent {
     if (id == PathManager.initialId) {
       ^this.global;
     };
-		id ?? { ^global }; fullPath = pathManager.getPath(id);
-
+		id ?? { ^global };
+    fullPath = pathManager.getPath(id);
 		fullPath ?? { ^nil };
 		if (fullPath.size > 1) {
 			var parentId = fullPath[fullPath.size - 2];
@@ -51,11 +52,13 @@ Store : RxEvent {
 		}
 	}
 
-	*new { arg object;
-		^super.new.init(object)
+	*new { arg object, module;
+		^super.new.init(object, module)
 	}
 
-	init { arg object;
+	init { arg object, module;
+    modulePath = module !? _.path;
+    modulePath.postln;
 		object !? { 
 			this.putAll(object);
 			super.parent_(object.parent);

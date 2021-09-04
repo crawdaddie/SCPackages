@@ -1,9 +1,8 @@
 EventExtensions {
-  classvar soundfile;
+  classvar sample;
   classvar <sequencer;
 
   *add { arg eventType, func, parent;
-    // [eventType, func, parent].postln;
     Event.addEventType(eventType, func, parent);
     ^parent;
   }
@@ -14,8 +13,8 @@ EventExtensions {
       dur: 1,
       row: 0,
     );
-    soundfile = this.add(
-      \soundfile,
+    sample = this.add(
+      \sample,
       { arg server;
         var soundfileMod = ~soundfile.value.asSoundfileMod;
         ~buf = soundfileMod.buffer;
@@ -30,8 +29,8 @@ EventExtensions {
       );
     )
   }
-  *soundfile { arg event = ();
-    ^(type: 'soundfile').putAll(event).parent_(soundfile)
+  *sample { arg event = ();
+    ^(type: 'sample').putAll(event).parent_(sample)
   }
 }
 
