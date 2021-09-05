@@ -5,7 +5,7 @@ Project {
 	classvar <>defaultProjectsDir = "/home/adam/projects/supercollider/projects";
 
 	classvar <projectFile, <projectDir, <srcDir, <saveDir, <dataDir;
-	classvar <canvas;
+  classvar <>canvas;
   classvar <timingContextGui;
 	classvar <player;
 	classvar <assetView;

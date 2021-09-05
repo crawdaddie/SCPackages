@@ -19,15 +19,24 @@ RxEvent : Event {
 			^event;
 		};
     if (event.notNil, {
-      ^super.new(parent: event).init(event);
+      ^super.new().init(event);
     })
 		^super.new().init(event)
 	}
 
 	init { arg event;
-    // this.parent_(event.parent);
-    // proto = event.proto;
+    this.parent_(event.parent);
+    proto = event.proto;
+    this.putAll(event, false);
 		know = true;
+  }
+
+  reloadFromMetadata {
+    super.at('md') !? { arg md;
+      var parentMod = md.path.asSymbol.asModule;
+      var memberKey = md.memberKey;
+      parent = parentMod[memberKey];
+    }
   }
 
 	put { arg key, value, dispatch = true;
@@ -35,9 +44,9 @@ RxEvent : Event {
 
 		super.put(key, value);
 
-		if (dispatch && originalValue != value) {
-			this.dispatch(
-				type: Topics.objectUpdated,
+		if (dispatch && (originalValue != value)) {
+      this.dispatch(
+			  type: Topics.objectUpdated,
 				payload: (id: this.id).put(key, value),
 			)
 		};
@@ -56,7 +65,7 @@ RxEvent : Event {
 		};
 
 
-		if (updates.size > 0 && dispatch) {
+		if ((updates.size > 0) && dispatch) {
 			this.dispatch(
 				type: Topics.objectUpdated,
 				payload: updates.putAll((id: this.id))

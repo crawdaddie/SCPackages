@@ -1,6 +1,5 @@
 Import {
-	classvar <> defaultModulePath;
-  classvar <> projectModulePath;
+	classvar <> defaultModulePath; classvar <> projectModulePath;
 	*initClass {
 		defaultModulePath = "/Users/adam/projects/sc/ecosystem/core-modules";
 	}
@@ -41,7 +40,6 @@ Import {
 
 
 Mod : Environment {
-  // var <module, <moduleProxy;
 	classvar <>all;
 
 	*initClass {
@@ -50,6 +48,7 @@ Mod : Environment {
 
 	*new { arg path;
 		// check if module already exists and return that, or make a new one
+ 
 		var mod = all.at(path.asSymbol) !? { arg existingModule;
 			//format("module % already exists (passing previously loaded module)", path.split($/).last).postln;
 			existingModule;
@@ -151,12 +150,12 @@ Mod : Environment {
 			"reloading on save: %".format(module).postln;
 			fork {
 				module.reload;
-				Dispatcher((
+				Dispatcher(
 					type: Topics.moduleReload, 
 					payload: (
 						path: path
 					)
-				));
+				);
 			}	
 		}
 	}
@@ -225,8 +224,14 @@ O : ModObject {}
 	}
 }
 
-// + Object {
-//   export {
-//     currentEnvironment.put(
-//   }
-// }
++ Object {
+  export {
+    // var oldKeys, newKeys;
+    // oldKeys = currentEnvironment.keys;
+    // currentEnvironment.use { this.value };
+    // newKeys = currentEnvironment.keys.select({ arg k; oldKeys.includes(k).not });
+    currentEnvironment.exports !? {
+      currentEnvironment.exports
+    };
+  }
+}

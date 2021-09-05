@@ -3,6 +3,7 @@ Dispatcher {
 	classvar <listeners;
 	classvar matchAnyListeners;
 	classvar <dispatching;
+  classvar <>debug = false;
 	
 	*initClass {
 		listeners = Dictionary();
@@ -44,21 +45,28 @@ Dispatcher {
 			typeListeners.keysValuesDo { arg listeningObject, listener;
 				listener.value(payload, listeningObject, type);
 			};
-			// dispatching = false;
+      if (debug) {
+        "dispatched type %: % from % to %".format(
+          type,
+          payload,
+          eventSource,
+          typeListeners
+        ).postln;
+      }; 
 		}.fork(AppClock)
 	}
 
-	*debug { arg debugValue = true;
-		if (debugValue, {
-			this.addListener('*', this, { arg payload, listeningObject, type;
-				[ type, payload, listeningObject ].postln;
-			});
-
-		}, {
-			this.removeListenersForObject(this);
-		});
-
-	}
+// 	*debug { arg debugValue = true;
+// 		if (debugValue, {
+// 			this.addListener('*', this, { arg payload, listeningObject, type;
+// 				[ type, payload, listeningObject ].postln;
+// 			});
+// 
+// 		}, {
+// 			this.removeListenersForObject(this);
+// 		});
+// 
+// 	}
 
 	*connectObject { arg object ...methods;
 		methods.do { arg method;

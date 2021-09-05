@@ -64,9 +64,20 @@ Store : RxEvent {
 			super.parent_(object.parent);
 		};
     timelineItems = TimelineItems(this.items);
+
     Dispatcher.addListener(Topics.objectUpdated, this, { arg payload;
       timelineItems = TimelineItems(this.items);
     });
+  
+    Dispatcher.addListener(Topics.moduleReload, this, { arg payload;
+      if (payload.path == modulePath, {
+        this.keysValuesDo { arg key, item;
+          if (key.class == Integer, {
+            item.reloadFromMetadata;
+          });
+        };
+      })
+    })
 
     ^this
 	}
@@ -91,53 +102,78 @@ Store : RxEvent {
     ^this.beats ?? 0
   }
   
-	addObject { arg object;
+	addObject { arg object, beats;
 		var objectId = object.id ?? pathManager.getId();
-		var rxObject = this.getRxEvent(object, objectId);
-		this.put(objectId, rxObject, false);
+// 		var rxObject = this.getRxEvent(object, objectId);
+// 		this.put(objectId, rxObject, false);
+// 
+// 		this.dispatch(
+// 			Topics.objectAdded,
+// 			(
+// 				storeId: this.id,
+// 				object: rxObject
+// 			)
+// 		);
+// 
+// 		pathManager.setChildPath(objectId, this.id);
+// 
+// 		if (rxObject['row'].notNil) {
+// 			this.resolveOverlaps(rxObject);
+// 		};
+//     if (rxObject['beats'].notNil) {
+//       timelineItems.addItem(rxObject);
+//     };
+//     ^rxObject;
+    var objectCopy = (id: objectId, beats: beats).parent_(object);
+    var rxObject = RxEvent(objectCopy);
+    this.put(objectId, rxObject, false);
 
-		this.dispatch(
-			Topics.objectAdded,
-			(
-				storeId: this.id,
-				object: rxObject
-			)
-		);
-
-		pathManager.setChildPath(objectId, this.id);
-
-		if (rxObject['row'].notNil) {
-			this.resolveOverlaps(rxObject);
-		};
+    this.dispatch(
+      Topics.objectAdded,
+      (
+        storeId: this.id,
+        object: rxObject
+      )
+    );
     if (rxObject['beats'].notNil) {
       timelineItems.addItem(rxObject);
     };
+
+
+
+
+
+
+
     ^rxObject;
+    // super.put(objectId, objectCopy, false);
 	}
 
-	resolveOverlaps { arg object;
-		var rowItems = this.rowItems(object['row']);
-		rowItems.do { arg timestampWithItem;
-			var timestamp, items;
-			#timestamp, items = timestampWithItem;
-		}
-	}
+// 	resolveOverlaps { arg object;
+// 		var rowItems = this.rowItems(object['row']);
+// 		rowItems.do { arg timestampWithItem;
+// 			var timestamp, items;
+// 			#timestamp, items = timestampWithItem;
+// 		}
+// 	}
 
 	put { arg key, value, dispatch = true;
-		if (value == nil) {
-      var oldItem = this[key];
-			super.put(key, value, false);
-      if (oldItem['beats'].notNil) {
-        [key, value, oldItem].postln;
-      };
-			^this.dispatch(
-				Topics.objectDeleted,
-				(
-					storeId: this.id,
-					objectId: key
-				)
-			);
-		};
+    [key, value, dispatch].postln;
+
+		// if (value == nil) {
+		//       var oldItem = this[key];
+		// 	super.put(key, value, false);
+		//       if (oldItem['beats'].notNil) {
+		//         [key, value, oldItem].postln;
+		//       };
+		// 	^this.dispatch(
+		// 		Topics.objectDeleted,
+		// 		(
+		// 			storeId: this.id,
+		// 			objectId: key
+		// 		)
+		// 	);
+		// };
 
 		^super.put(key, value, dispatch);
 	}
