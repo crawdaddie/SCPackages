@@ -77,7 +77,7 @@ Store : RxEvent {
           });
         };
       })
-    })
+    });
 
     ^this
 	}
@@ -101,30 +101,19 @@ Store : RxEvent {
   getOffset {
     ^this.beats ?? 0
   }
+
+  copyItem { arg id, newParams;
+    var oldItem = this.at(id);
+    ^this.addItem(oldItem.copyAsEvent.putAll(newParams)); 
+  }
+
+  addSequenceableItem { arg object, beats = 0, row = 0, dur = 1;
+    ^this.addItem(object, (beats: object.beats ?? beats, row: object.row ?? row, dur: object.dur ?? dur));
+  }
   
-	addObject { arg object, beats;
+	addItem { arg object, inject = ();
 		var objectId = object.id ?? pathManager.getId();
-// 		var rxObject = this.getRxEvent(object, objectId);
-// 		this.put(objectId, rxObject, false);
-// 
-// 		this.dispatch(
-// 			Topics.objectAdded,
-// 			(
-// 				storeId: this.id,
-// 				object: rxObject
-// 			)
-// 		);
-// 
-// 		pathManager.setChildPath(objectId, this.id);
-// 
-// 		if (rxObject['row'].notNil) {
-// 			this.resolveOverlaps(rxObject);
-// 		};
-//     if (rxObject['beats'].notNil) {
-//       timelineItems.addItem(rxObject);
-//     };
-//     ^rxObject;
-    var objectCopy = (id: objectId, beats: beats).parent_(object);
+    var objectCopy = inject.putAll((id: objectId)).parent_(object);
     var rxObject = RxEvent(objectCopy);
     this.put(objectId, rxObject, false);
 
@@ -138,15 +127,7 @@ Store : RxEvent {
     if (rxObject['beats'].notNil) {
       timelineItems.addItem(rxObject);
     };
-
-
-
-
-
-
-
     ^rxObject;
-    // super.put(objectId, objectCopy, false);
 	}
 
 // 	resolveOverlaps { arg object;
@@ -157,24 +138,25 @@ Store : RxEvent {
 // 		}
 // 	}
 
+  deleteItem { arg id;
+    var oldItem = this[id];
+		super.put(id, nil, false);
+    if (oldItem['beats'].notNil) {
+      timelineItems = TimelineItems(this.items);
+		};
+		^this.dispatch(
+      Topics.objectDeleted,
+			(
+			  storeId: this.id,
+				objectId: id 
+			)
+		);
+  }
+
 	put { arg key, value, dispatch = true;
-    [key, value, dispatch].postln;
-
-		// if (value == nil) {
-		//       var oldItem = this[key];
-		// 	super.put(key, value, false);
-		//       if (oldItem['beats'].notNil) {
-		//         [key, value, oldItem].postln;
-		//       };
-		// 	^this.dispatch(
-		// 		Topics.objectDeleted,
-		// 		(
-		// 			storeId: this.id,
-		// 			objectId: key
-		// 		)
-		// 	);
-		// };
-
+		if (value == nil) {
+      ^this.deleteItem(key);
+    };
 		^super.put(key, value, dispatch);
 	}
 
@@ -203,7 +185,7 @@ Store : RxEvent {
     
     player = Prout(timelineItems.getRoutineFunc(0)).trace.play(
       thisclock,
-      protoEvent: (/*storeCtx: this,*/ clock: thisclock),
+      protoEvent: (storeCtx: this, clock: thisclock),
     ); 
     // ^player;
   }
@@ -212,7 +194,7 @@ Store : RxEvent {
     var newStore = Store(());
     this.pairsDo { arg key, value;
 			if (key.class == Integer, {
-        newStore.addObject(value.copyAsEvent);
+        newStore.addItem(value.copyAsEvent);
       }, {
         newStore.put(key, value);
       });

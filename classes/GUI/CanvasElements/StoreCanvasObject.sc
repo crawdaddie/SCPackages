@@ -4,7 +4,6 @@ StoreCanvasObject : SequenceableCanvasObject {
     var newProps = props.copy;
     var bounds = newProps.renderBounds;
     var newStore = item.copyAsEvent.put('id', nil);
-    props.postln;
 
     newProps.putAll(
       (
@@ -20,7 +19,7 @@ StoreCanvasObject : SequenceableCanvasObject {
     );
 
     newStore.putAll(this.getItemParams(newProps));
-    parentStore.addObject(Store.new(newStore));
+    parentStore.addItem(Store.new(newStore));
   }
   getItemEditView {
     SequencerCanvas(item);

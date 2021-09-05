@@ -85,17 +85,8 @@ SequenceableCanvasObject : CanvasObject {
     ^itemParams;
   }
 
-  injectParams { arg item;
-    item.row  = item.row ?? 0;
-    item.put('beats', item.beats ?? 0, false);
-    item.dur = item.dur ?? 1;
-    item.postln;
-  }
-
 	init { arg anRxEvent, aCanvasProps;
 		item = anRxEvent;
-    this.injectParams(item);
-    [item.beats, item.dur, item.row, item].postln;
     id = item.id;
 		props = Props((
       color: Color.rand,
@@ -288,7 +279,6 @@ SequenceableCanvasObject : CanvasObject {
   copyTo { arg position, store, link = false;
     var newProps = props.copy;
     var bounds = newProps.renderBounds;
-    var newItem = if (link.not, { item.copyAsEvent }, {()});
     var rxObject;
     var itemParams;
 
@@ -305,14 +295,7 @@ SequenceableCanvasObject : CanvasObject {
       )
     );
     itemParams = this.getItemParams(newProps);
-    if (link.not, { newItem.putAll(itemParams); store.addObject(newItem) }, {
-      newItem.putAll((
-        beats: itemParams.beats,
-        dur: itemParams.dur,
-        row: itemParams.row,
-      ));
-      store.addObject(newItem.proto_(item));
-    });
+    store.copyItem(item.id, itemParams); 
   }
 
 	onDragEnd { arg aMouseAction;
@@ -329,7 +312,7 @@ SequenceableCanvasObject : CanvasObject {
   }
 
   deleteFromStore { arg store;
-    store.put(id, nil);
+    store.delte(id);
   }
 
   getContextMenuActions {

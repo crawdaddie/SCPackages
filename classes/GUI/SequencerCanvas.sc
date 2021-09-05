@@ -96,7 +96,7 @@ SequencerCanvas {
       var params = this.getNewItemParams(x, y);
       var item = View.currentDrag;
       var newItem = this.getDragItemEvent(View.currentDrag, params);
-      store.addObject(newItem);
+      store.addSequenceableItem(newItem);
     });
 	}
   

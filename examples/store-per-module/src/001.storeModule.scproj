@@ -1,0 +1,17 @@
+var o,p,n=nil;
+o=[Store.prNew,Array.prNew(32),RxEvent.prNew,Array.prNew(32),Event.prNew,Array.prNew(8),Event.prNew,Array.prNew(8),"/Users/adam/projects/sc/ecosystem/examples/store-per-module/src/storeModule.scd","/Users/adam/projects/sc/lib/Drum_Hits/Kick_01.wav",Event.prNew,Array.prNew(24),{
+    var soundfileMod = ~soundfile.value.asSoundfileMod;
+    (
+      instrument: ~instrument.value,
+      atk: ~atk.value,
+      decay: ~decay.value,
+      sustain: ~sustain.value,
+      startPos: ~startPos.value,
+      buf: soundfileMod.buffer,
+      dur: ~dur.value,
+      rate: ~rate.value,
+    ).play;
+  },"",TimelineItems.prNew,Event.prNew,Array.prNew(4),Array.prNew(1),SortedList.prNew,Array.prNew(1),{ arg a, b; a < b },EventStreamPlayer.prNew,Event.prNew,Array.prNew(8),EventStreamCleanup.prNew,IdentitySet.prNew,Array.prNew(4)];
+p=[0,[array:o[1],size:1,proto:nil,parent:nil,know:true,metadata:nil,timelineItems:o[14],player:o[21],modulePath:o[8]],1,[n,n,n,n,n,n,1001,o[2],n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n],2,[array:o[3],size:5,proto:nil,parent:o[4],know:true,metadata:nil],3,['startPos',0,'beats',0.0,n,n,'dur',1.0,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'row',0.0,n,n,'id',1001,n,n,n,n],4,[array:o[5],size:2,proto:nil,parent:o[10],know:true],5,[n,n,'md',o[6],n,n,'soundfile',o[9]],6,[array:o[7],size:2,proto:nil,parent:nil,know:true],7,[n,n,'path',o[8],n,n,'memberKey','kick'],10,[array:o[11],size:6,proto:nil,parent:nil,know:true],11,[n,n,'play',o[12],n,n,'soundfile',o[13],'startPos',0,'type','sample','db',0,n,n,'instrument','stereo_player',n,n,n,n,n,n],14,[timeline:o[15],sortedTimestamps:o[18]],15,[array:o[16],size:1,proto:nil,parent:nil,know:true],16,[n,n,0,o[17]],17,[o[2]],18,[array:o[19],function:o[20]],19,[0],21,[stream:nil,originalStream:Routine({ | inval | "open Function" }),clock:TempoClock.new,nextBeat:nil,streamHasEnded:true,isWaiting:false,era:0,event:o[22],muteCount:0,cleanup:o[24],routine:Routine({ | inTime | "open Function" })],22,[array:o[23],size:2,proto:nil,parent:nil,know:true],23,['clock',TempoClock.new,n,n,n,n,'storeCtx',o[0]],24,[functions:o[25]],25,[array:o[26],size:0],26,[n,n,n,n]
+];
+prUnarchive(o,p);

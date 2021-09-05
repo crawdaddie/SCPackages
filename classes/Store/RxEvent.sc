@@ -85,9 +85,10 @@ RxEvent : Event {
 
   play { arg storeCtx = (), clock;
     var playEvent = this.copy;
+    var mod = storeCtx.modulePath !? { arg p; Mod(p) };
     playEvent.use {
+      ~modCtx = mod;
       ~clock = clock; 
-      if (~src.isNil, { ~src = storeCtx.src });
       currentEnvironment[\play].value();
     }
   }

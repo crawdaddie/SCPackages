@@ -1,5 +1,5 @@
 var o,p,n=nil;
 o=[Store.prNew,Array.prNew(32),RxEvent.prNew,Array.prNew(32),Event.prNew,Array.prNew(4),TimelineItems.prNew,Event.prNew,Array.prNew(4),SortedList.prNew,Array.prNew,{ arg a, b; a < b }];
-p=[0,[array:o[1],size:3,proto:nil,parent:nil,know:true,metadata:nil,timelineItems:o[6],player:nil],1,[n,n,n,n,n,n,'timingContext',o[2],n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'id',1000,n,n,'randSeed',1000],2,[array:o[3],size:0,proto:nil,parent:o[4],know:true,metadata:nil],3,[n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n],4,[array:o[5],size:1,proto:nil,parent:nil,know:true],5,['bpm',60,n,n],6,[timeline:o[7],sortedTimestamps:o[9]],7,[array:o[8],size:0,proto:nil,parent:nil,know:true],8,[n,n,n,n],9,[array:o[10],function:o[11]]
+p=[0,[array:o[1],size:3,proto:nil,parent:nil,know:true,metadata:nil,timelineItems:o[6],player:nil,modulePath:nil],1,[n,n,n,n,n,n,'timingContext',o[2],n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,'id',1000,n,n,'randSeed',1000],2,[array:o[3],size:0,proto:nil,parent:o[4],know:true,metadata:nil],3,[n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n],4,[array:o[5],size:1,proto:nil,parent:nil,know:true],5,['bpm',60,n,n],6,[timeline:o[7],sortedTimestamps:o[9]],7,[array:o[8],size:0,proto:nil,parent:nil,know:true],8,[n,n,n,n],9,[array:o[10],function:o[11]]
 ];
 prUnarchive(o,p);
