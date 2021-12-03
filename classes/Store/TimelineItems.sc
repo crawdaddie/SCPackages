@@ -1,5 +1,5 @@
 TimelineItems {
-  var timeline, sortedTimestamps;
+  var <timeline, <sortedTimestamps;
 
   *new { arg items;
     ^super.new.init(items)
@@ -28,7 +28,6 @@ TimelineItems {
     if (timestamps[0] != start, {
       timestamps = [start] ++ timestamps;
     });
-    timestamps.postln;
 
     if (loopPoints.notNil, {
       ^{ arg inval;
@@ -43,15 +42,17 @@ TimelineItems {
         var delta = nextTimestamp !? { nextTimestamp - timestamp } ?? { nil };
         var events = timeline[timestamp] ?? [];
 
-        inval.putAll((
+        delta.postln;
+        (
           events: events,
-          delta: delta,
+          dur: delta,
+          sustain: delta,
           play: {
             ~events.do { arg ev;
               ev.play(storeCtx: ~storeCtx, clock: ~clock);
             }
           }
-        )).yield
+        ).embedInStream(inval);
       }
     } 
   }

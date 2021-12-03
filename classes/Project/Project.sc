@@ -4,7 +4,7 @@ Project {
 	classvar emptyProjectDir;
 	classvar <>defaultProjectsDir = "/home/adam/projects/supercollider/projects";
 
-	classvar <projectFile, <projectDir, <srcDir, <saveDir, <dataDir;
+	classvar <projectFile, <projectDir, <srcDir, <synthsFile, <saveDir, <dataDir;
   classvar <>canvas;
   classvar <timingContextGui;
 	classvar <player;
@@ -55,10 +55,14 @@ Project {
     timingContextGui !? _.close;
     canvas !? _.close;
     this.setPaths(path);
-		(srcDir +/+ "synths.scd").load;
+
+    "loading synths (%)...".format(synthsFile).postln;
+		synthsFile.load;
+
 		path !? {
 			Store.readFromArchive(path);
 		};
+
 		canvas = SequencerCanvas(Store.global);
 		// assetView = AssetView();
     timingContextGui = EnvirGui(Store.global.timingContext);
@@ -87,6 +91,7 @@ Project {
 		saveDir = projectFile.dirname;
 		projectDir = saveDir.dirname;
 		srcDir = projectDir +/+ "src";
+    synthsFile = srcDir +/+ "synths.scd";
 		dataDir = projectDir +/+ "data";
 	}
 

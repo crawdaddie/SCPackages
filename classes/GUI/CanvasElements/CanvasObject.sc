@@ -1,7 +1,6 @@
 CanvasObject {
 	var props;
-
-	onClose {
+  onClose {
 		Dispatcher.removeListenersForObject(this)
 	}
   
@@ -24,8 +23,7 @@ CanvasObject {
 	}
 
 	select {
-		props.selected = true
-	}
+		props.selected = true }
 
 	unselect {
 		props.selected = false
@@ -80,7 +78,7 @@ SequenceableCanvasObject : CanvasObject {
 		var itemParams = (
 			beats: bounds.left / xFactor,
 			row: bounds.top / yFactor,
-			dur: bounds.width / xFactor
+			sustain: bounds.width / xFactor
 		);
     ^itemParams;
   }
@@ -128,7 +126,7 @@ SequenceableCanvasObject : CanvasObject {
 		var bounds = Rect(
 			item.beats * xFactor,
 			item.row * yFactor,
-			item.dur * xFactor,
+			item.sustain * xFactor,
 			yFactor
 		);
 
@@ -305,6 +303,7 @@ SequenceableCanvasObject : CanvasObject {
   getItemEditView {
     var view = EnvirGui(item)
       .putSpec(\row, ControlSpec(0, 128, \lin, 1, 0));
+    item.postln;
 
 		view.viewForParam('id').visible_(false);
 		view.parent.name = item.id;
@@ -312,7 +311,7 @@ SequenceableCanvasObject : CanvasObject {
   }
 
   deleteFromStore { arg store;
-    store.delte(id);
+    store.deleteItem(id);
   }
 
   getContextMenuActions {

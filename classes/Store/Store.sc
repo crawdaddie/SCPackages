@@ -1,69 +1,72 @@
 Store : RxEvent {
 	classvar global;
-	classvar <pathManager;
+	// classvar <pathManager;
 	classvar <defaultContexts;
 
   var <timelineItems;
 	var <player;
   var <modulePath;
 
-	*global {
-		global = global ?? {
-			pathManager = PathManager();
-			super.new.init(
-        defaultContexts.putAll(('id': PathManager.initialId, 'timingContext': RxEvent((bpm: 60))))
-      );
-		};
-    thisThread.randSeed = global.randSeed;
+  var <pathManager;
 
-		^global;
+// 	*global {
+// 		global = global ?? {
+// 			pathManager = PathManager();
+// 			super.new.init(
+//         defaultContexts.putAll(('id': PathManager.initialId, 'timingContext': RxEvent((bpm: 60))))
+//       );
+// 		};
+//     thisThread.randSeed = global.randSeed;
+// 
+// 		^global;
+// 	}
+
+	// *global_ { arg obj;
+	//     global = obj;
+	//   }
+
+	// *initClass {
+	// 	defaultContexts = (
+	//       randSeed: 1000 
+	// 	);
+	//     pathManager = PathManager();
+	// }
+
+  // *readFromArchive { arg path;
+  //   var archivedObject = path.load;
+  // 		global = this.new(archivedObject);
+  // 		pathManager.resetPaths(global);
+  // } 
+
+	//   *at { arg id;
+	// 	var fullPath;
+	//     if (id == PathManager.initialId) {
+	//       ^this.global;
+	//     };
+	// 	id ?? { ^global };
+	//     fullPath = pathManager.getPath(id);
+	// 	fullPath ?? { ^nil };
+	// 	if (fullPath.size > 1) {
+	// 		var parentId = fullPath[fullPath.size - 2];
+	// 		^Store.at(parentId).at(id);
+	// 	} { 
+	// 		^global.at(id);
+	// 	}
+	// }
+
+	*new { arg object, items, module;
+		^super.new.init(object, items, module)
 	}
 
-	*global_ { arg obj;
-    global = obj;
-  }
-
-	*initClass {
-		defaultContexts = (
-      randSeed: 1000 
-		);
+	init { arg object, items = [], module;
     pathManager = PathManager();
-	}
-
-  *readFromArchive { arg path;
-    var archivedObject = path.load;
-		global = this.new(archivedObject);
-		pathManager.resetPaths(global);
-  } 
-
-  *at { arg id;
-		var fullPath;
-    if (id == PathManager.initialId) {
-      ^this.global;
-    };
-		id ?? { ^global };
-    fullPath = pathManager.getPath(id);
-		fullPath ?? { ^nil };
-		if (fullPath.size > 1) {
-			var parentId = fullPath[fullPath.size - 2];
-			^Store.at(parentId).at(id);
-		} { 
-			^global.at(id);
-		}
-	}
-
-	*new { arg object, module;
-		^super.new.init(object, module)
-	}
-
-	init { arg object, module;
     modulePath = module !? _.path;
-    modulePath.postln;
 		object !? { 
 			this.putAll(object);
 			super.parent_(object.parent);
 		};
     timelineItems = TimelineItems(this.items);
+    items.do { |item| this.addItem(item) };
 
     Dispatcher.addListener(Topics.objectUpdated, this, { arg payload;
       timelineItems = TimelineItems(this.items);
@@ -107,8 +110,8 @@ Store : RxEvent {
     ^this.addItem(oldItem.copyAsEvent.putAll(newParams)); 
   }
 
-  addSequenceableItem { arg object, beats = 0, row = 0, dur = 1;
-    ^this.addItem(object, (beats: object.beats ?? beats, row: object.row ?? row, dur: object.dur ?? dur));
+  addSequenceableItem { arg object, beats = 0, row = 0, sustain = 1;
+    ^this.addItem(object, (beats: object.beats ?? beats, row: object.row ?? row, sustain: object.sustain ?? sustain));
   }
   
 	addItem { arg object, inject = ();
@@ -187,8 +190,14 @@ Store : RxEvent {
       thisclock,
       protoEvent: (storeCtx: this, clock: thisclock),
     ); 
+    ^player
     // ^player;
   }
+
+  timelinePlayer {
+    ^Prout(timelineItems.getRoutineFunc(0));
+  }
+  
 
   copy {
     var newStore = Store(());

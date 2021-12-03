@@ -1,5 +1,4 @@
-SoundfileEditor {
-  *new { arg soundfile, start, end;
+SoundfileEditor { *new { arg soundfile, start, end;
     ^super.new.init(soundfile, start, end);
   }
   init { arg soundfile, start, end;

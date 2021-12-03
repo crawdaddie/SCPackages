@@ -78,7 +78,8 @@ RxEvent : Event {
 	}
   
   copyAsEvent {
-    var newEvent = ().putAll(this).put('id', nil); 
+    var newEvent = ().putAll(this);
+    newEvent.id = nil; 
     newEvent.parent_(this.parent);
     ^newEvent;
   }
@@ -95,4 +96,3 @@ RxEvent : Event {
 }
 
 
-V : RxEvent {}

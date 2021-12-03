@@ -7,12 +7,16 @@ SoundfileCanvasObject : SequenceableCanvasObject {
     var baseProps = super.getProps(item, canvasProps);
     ^baseProps.putAll((
       waveformObjects: if (item.soundfile.notNil, {
-        Mod(item.soundfile).getWaveform(canvasProps.zoom.x * canvasProps.bps, canvasProps['redraw'])
+        Mod(item.soundfile).getWaveform(
+          canvasProps.zoom.x * canvasProps.bps,
+          canvasProps['redraw']
+        )
       }, {
         (
           selectedWaveformObject: (waveform: [], complete: true),
           previousWaveformObject: (waveform: [], complete: true)
-        )}),
+        )
+      }),
       startPos: item.startPos,
     ))
   }

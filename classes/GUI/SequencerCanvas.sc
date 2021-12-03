@@ -17,15 +17,16 @@ SequencerCanvas {
 
   var store;
 
-	*new { arg store, parent;
-		^super.new.init(store, parent);
+	*new { arg store, timingContext, parent;
+		^super.new.init(store, timingContext, parent);
+
 	}
 
   front {
     canvas.front;
   }
 
-	init { arg aStore, aParent;
+	init { arg aStore, timingContext, aParent;
 		var parent, bounds;
 		var title = format("sequencer - %", aStore.id);
     store = aStore;
@@ -45,7 +46,7 @@ SequencerCanvas {
       quantSubdivisions: 2,
 			origin: 0@0,
 			timingOffset: 0,
-      bps: Store.global.timingContext.bpm / 60,
+      bps: timingContext.bpm / 60,
 			zoom: 1@1,
 			redraw: { canvas.refresh },
 			canvasBounds: canvas.parent.bounds,
@@ -110,7 +111,13 @@ SequencerCanvas {
       )})
     };
 
-    if (currentDrag.soundfile.notNil, { ^Mod(currentDrag.soundfile).getSFEvent.create(params.putAll((soundfile: currentDrag.soundfile))) }, { ^currentDrag });
+    if (currentDrag.soundfile.notNil, {
+      ^Mod(currentDrag.soundfile)
+        .getSFEvent
+        .create(
+          params.putAll((soundfile: currentDrag.soundfile))
+        )
+    }, { ^currentDrag });
   }
 
   getNewItemParams { arg x, y;
@@ -125,7 +132,7 @@ SequencerCanvas {
 		itemParams = (
 			beats: (point.x / xFactor).round(1),
 			row: (point.y / yFactor).round(1),
-			//dur: bounds.width / xFactor
+			//sustain: bounds.width / xFactor
 		);
     ^itemParams;
   }

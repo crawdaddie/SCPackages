@@ -5,11 +5,11 @@ Import {
 	}
 	// this class is supposed to contain utilities for resolving a symbol into a path
 	// used for loading an instance of Mod (module)
-	*new { arg module, expose = true;
+ 	*new { arg module, expose = true, loader;
 		var mod;
 		var modPath = this.resolvePath(module);
 
-		mod = Mod.new(modPath);
+		mod = Mod.new(modPath, loader);
 
 		if (expose, { currentEnvironment.put(this.getModuleVarname(module), mod) });
 
@@ -31,8 +31,10 @@ Import {
     };
 
 		if (pathMatch.isEmpty && Project.srcDir.notNil) { pathMatch = (Project.srcDir +/+ moduleString ++ "*").pathMatch };
+    if (pathMatch.isEmpty && Project.dataDir.notNil) { pathMatch = (Project.dataDir +/+ moduleString ++ "*").pathMatch };
 
 		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ moduleString ++ "*").pathMatch };
+    pathMatch.postln;
 
 		^pathMatch[0]
 	}
@@ -45,15 +47,24 @@ Mod : Environment {
 	*initClass {
 		all = IdentityDictionary.new();
 	}
+  *switchToMod { arg path;
+    var mod = all.at(path.asSymbol);
+    if (mod.notNil, {
+      format("switching to environment %", mod).postln;
+      mod.push;
+    }, {
+      currentEnvironment = topEnvironment
+    });
+  }
 
-	*new { arg path;
+	*new { arg path, loader;
 		// check if module already exists and return that, or make a new one
  
 		var mod = all.at(path.asSymbol) !? { arg existingModule;
 			//format("module % already exists (passing previously loaded module)", path.split($/).last).postln;
 			existingModule;
 			} ?? {
-				super.new.init(path);
+				super.new.init(path, loader);
 			};
 
 		^mod;
@@ -74,7 +85,7 @@ Mod : Environment {
 	}
 
 
-	init { arg path;
+	init { arg path, loader;
 
 		this.proto_((
 			path: path,
@@ -84,6 +95,10 @@ Mod : Environment {
 		know = true;
 
 		this.registerModule;
+    if (loader.notNil, {
+      this.withLoader(loader);
+      ^this;
+    });
 
 		if (PathName.new(path).isFolder) {
 			this.loadFromFolder(path)
@@ -124,6 +139,13 @@ Mod : Environment {
 			modpath.load;
 		};
 	}
+
+  withLoader { arg loader;
+    var loaderPath = Import.resolvePath(loader);
+    this.make {
+      loaderPath.load;
+    }
+  }
 
 	loadVirtual { arg extra;
 		^this.make { extra.value() };
@@ -205,6 +227,14 @@ ModObject {
 }
 
 O : ModObject {}
+
+ModValue {
+  *new { arg key, value;
+    currentEnvironment.put(key, value);
+  }
+}
+
+V :  ModValue {}
 
 + String {
 

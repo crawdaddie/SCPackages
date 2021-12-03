@@ -1,16 +1,26 @@
 Waveform {
 	var <waveformData;
 	var <task;
+  var rawArray;
+  var cache;
 
-	*new { arg chunks;
-		^super.new.init(chunks)
+	*new { arg soundfile;
+		^super.new.init(soundfile)
 	}
 
-	init { arg chunks;
-		waveformData = Array.fill(chunks, [0, 0])
+	init { arg soundfile;
+    rawArray = FloatArray.newClear(soundfile.numFrames * soundfile.numrows);
+		Routine({
+			soundfile.readData(rawArray);
+		  // this.createWaveform(zoom);
+			// this.computeWaveforms(rawArray);
+		}).play(AppClock);
+
+		// waveformData = FloatArray.fill(chunks, [0, 0])
+    // rawArray = aRawArray;
 	}
 
-	computeWaveform { arg rawArray;
+	computeWaveform {
 		var chunks = waveformData.size;
 		var chunkSize = (rawArray.size / chunks).asInt;
 
@@ -30,9 +40,7 @@ Waveform {
 				waveformData[index] = [maxVal, minVal];
 			};
 		};
-
 		task.play(AppClock);
-
 	}
 
 	pauseTask {
@@ -45,35 +53,31 @@ Waveform {
 }
 
 WaveformCache {
-  classvar <waveforms;
 	var <cache;
 	var <rawArray;
 	var <soundfile;
-  *initClass {
-    waveforms = ();
-  }
+
 	*new { arg soundfile, zoom = 1;
-		^waveforms[soundfile] ?? super.new.init(soundfile, zoom);
+		^super.new.init(soundfile, zoom);
 	}
 
 	init { arg argSoundfile, zoom;
-		soundfile = SoundFile.openRead(argSoundfile);
+		soundfile = argSoundfile;
 		cache = Dictionary();
-		this.createWaveform(zoom);
 
 		rawArray = FloatArray.newClear(soundfile.numFrames * soundfile.numrows);
 		Routine({
 			soundfile.readData(rawArray);
-			this.computeWaveforms(rawArray);
+		  this.createWaveform(zoom);
+			// this.computeWaveforms(rawArray);
 		}).play(AppClock);
-    waveforms.put(argSoundfile, this);
 	}
 
-	createWaveform { arg zoom;
+	createWaveform { arg rawArray, zoom;
 		var duration = soundfile.duration;
 		var chunks = (duration * Theme.horizontalUnit * zoom).asInt;
-		var waveform = Waveform(chunks);
-		waveform.computeWaveform();
+		var waveform = Waveform(rawArray, chunks);
+		waveform.computeWaveform(rawArray);
 		cache.put(zoom, waveform);
 		^waveform
 	}
@@ -101,8 +105,8 @@ WaveformCache {
 	}
 
 	computeWaveforms { arg rawArray;
-		cache.keysValuesDo { |key, val|
-			val.computeWaveform(rawArray);
+		cache.keysValuesDo { |key, wf|
+			wf.computeWaveform(rawArray);
 		}
 	}
 }

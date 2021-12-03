@@ -1,6 +1,11 @@
 var selectedWaveform;
 var lastUsedSFEvent = 'sampleEvent'.importFrom('baseEvents').create((soundfile: ~path));
 ~soundfile = SoundFile.openRead(~path);
+~bufRateScale = ~soundfile.sampleRate / Server.default.sampleRate;
+~getIndex = { arg ev, zoom;
+  ev.bufRateScale * zoom;
+};
+"bufRateScale for sample % is %".format(~path, ~bufRateScale).postln;
 
 ~rawArray = nil;
 ~afterRawArray = Set();
@@ -28,12 +33,14 @@ Routine({
 
 
 ~waveformCache = Dictionary();
+// ~waveformCache = WaveformCache(~soundfile);
 
 ~createWaveform = { arg ev, zoom = 1, completionCallback;
 	var duration = ev.soundfile.duration;
-	var chunks = (duration * Theme.horizontalUnit * zoom).asInt;
+  var index = ev.getIndex(zoom);
+	var chunks = (duration * Theme.horizontalUnit * index).asInt;
 	var waveformObject = (waveform: Array.fill(chunks, [0, 0]));
-	ev.waveformCache.put(zoom, waveformObject);
+	ev.waveformCache.put(index, waveformObject);
 	ev.withRawArray { |rawArray|
 		ev.computeWaveform(rawArray, waveformObject, completionCallback);
 	};
@@ -70,8 +77,9 @@ Routine({
 
 ~getWaveform = { arg ev, zoom = 1, completionCallback;
 	var prevWaveform = selectedWaveform;
+  var index = ev.getIndex(zoom);
 
-	selectedWaveform = ev.waveformCache.at(zoom) !? { arg object;
+	selectedWaveform = ev.waveformCache.at(index) !? { arg object;
 		object.task.resume;
 		object;
 		} ?? { ev.createWaveform(zoom, completionCallback) };
