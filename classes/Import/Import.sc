@@ -20,12 +20,18 @@ Import {
 
 	*getModuleVarname { arg module;
 		var modString = module.asString;
-		^modString.split($/).last.asSymbol
+    var components = modString.split($/);
+    var name = components.last.asSymbol;
+    if (name == 'index.scd', {
+      name = components[components.size -2].asSymbol;
+    });
+    ^name;
 	}
 
 	*resolvePath { arg module;
     var moduleString = module.asString;
     var pathMatch = (moduleString ++ "*" ).pathMatch;
+    var path;
     if (pathMatch.isEmpty) {
       var cwd = thisProcess.nowExecutingPath !? (_.dirname) ?? "./";
       // matches paths relative to the current file 
@@ -35,12 +41,18 @@ Import {
 		if (pathMatch.isEmpty && Project.srcDir.notNil) { pathMatch = (Project.srcDir +/+ moduleString ++ "*").pathMatch };
     if (pathMatch.isEmpty && Project.dataDir.notNil) { pathMatch = (Project.dataDir +/+ moduleString ++ "*").pathMatch };
 		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ moduleString ++ "*").pathMatch };
-
 		if (pathMatch.isEmpty) { pathMatch = (defaultSoundfileLibPath +/+ moduleString ++ "*").pathMatch };
 
     format("module: %", pathMatch[0]).postln;
+    path = pathMatch[0];
+    if (path.endsWith("/"), {
+      path = path +/+ "index.scd";
+      if (path.pathMatch.isEmpty, {
+        Error("could not resolve module: % - does not contain an index.scd file".format(module)).throw
+      })
+    })
 
-		^pathMatch[0]
+		^path;
 	}
 }
 
@@ -196,10 +208,21 @@ Mod : Environment {
 		});
 	}
 
-	asString {
-		^format("Module %", this.at(\path).basename);
-	}
-
+// 	asString {
+// 		^format("Module %", this.at(\path).basename);
+// 	}
+// 
+//   asString { 
+//     var path = this.at(\path);
+//     var components = path.split($/);
+//     var name = components.last.asSymbol;
+//     if (name == 'index.scd', {
+//       name = components[components.size -2].asSymbol;
+//     });
+//     ^name;
+// 	}
+// 
+// 
 	asModule {
 		^this
 	}
