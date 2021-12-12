@@ -18,9 +18,6 @@ RxEvent : Event {
 		if (event.isKindOf(RxEvent)) {
 			^event;
 		};
-    if (event.notNil, {
-      ^super.new().init(event);
-    })
 		^super.new().init(event)
 	}
 

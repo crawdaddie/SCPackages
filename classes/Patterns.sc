@@ -1,3 +1,4 @@
+R : Rest {}
 Pval { 
   *new { arg nextFunc, resetFunc;
     ^Pfunc({ arg inval;
@@ -16,3 +17,4 @@ Pval {
     ^Pseq(this, repeats);
   }
 }
+

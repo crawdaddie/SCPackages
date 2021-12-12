@@ -1,6 +1,7 @@
 Data : Environment {
   var <>savePath;
   var <>defaults;
+  var <>presets;
   *new { arg defaults;
     var cwd = thisProcess.nowExecutingPath;
     var savePath = cwd.dirname +/+ "." ++ cwd.basename.replace(".scd", ".data.scd");
@@ -10,7 +11,7 @@ Data : Environment {
       savedData.proto = defaults;
       ^savedData;
     } { |error|
-			"module % not found".format(savePath).postln;
+			// "module % not found".format(savePath).postln;
       ^super.new().init(defaults, savePath)
     };
   }
@@ -18,9 +19,34 @@ Data : Environment {
   init { arg argDefaults, argSavePath;
     defaults = argDefaults; 
     savePath = argSavePath;
+    presets = ();
     this.know_(true);
     this.putAll(defaults);
   }
+
+  savePreset { arg name, input;
+    var copy = ().putAll(this).putAll(input);
+    presets.put(name, copy);
+    this.save;
+  }
+
+  loadPreset { arg name;
+    var preset = presets[name];
+    this.putAll(preset);
+    this.save;
+    ^preset;
+  }
+
+  atAllPairs { arg ...keys;
+    ^keys.collect({ arg key;
+      var value = this[key];
+      if (value.class == Env, {
+        value = [value.asArray];
+      });
+      [key, value]
+    }).flatten(1)
+  }
+
   save {
     this.writeMinifiedTextArchive(savePath);
   }

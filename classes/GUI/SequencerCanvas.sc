@@ -63,7 +63,7 @@ SequencerCanvas {
 			props.canvasBounds = c.parent.bounds;
 		};
 		
-		this.addChildViews(store.itemsFlat);
+		this.addChildViews(store.items);
 
 		this.connectKeyActions;
 		this.connectMouseActions;
@@ -268,6 +268,7 @@ SequencerCanvas {
 		grid = SequencerGrid();
 		views = items.collect({ arg item;
 			var class = this.getItemEmbedView(item);
+      item.postln;
 			class.new(item, props);
 		});
 	}

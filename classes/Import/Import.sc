@@ -1,7 +1,9 @@
 Import {
 	classvar <> defaultModulePath; classvar <> projectModulePath;
+  classvar <> defaultSoundfileLibPath;
 	*initClass {
 		defaultModulePath = "/Users/adam/projects/sc/ecosystem/core-modules";
+    defaultSoundfileLibPath = "/Users/adam/projects/sc/lib";
 	}
 	// this class is supposed to contain utilities for resolving a symbol into a path
 	// used for loading an instance of Mod (module)
@@ -32,9 +34,11 @@ Import {
 
 		if (pathMatch.isEmpty && Project.srcDir.notNil) { pathMatch = (Project.srcDir +/+ moduleString ++ "*").pathMatch };
     if (pathMatch.isEmpty && Project.dataDir.notNil) { pathMatch = (Project.dataDir +/+ moduleString ++ "*").pathMatch };
-
 		if (pathMatch.isEmpty) { pathMatch = (defaultModulePath +/+ moduleString ++ "*").pathMatch };
-    pathMatch.postln;
+
+		if (pathMatch.isEmpty) { pathMatch = (defaultSoundfileLibPath +/+ moduleString ++ "*").pathMatch };
+
+    format("module: %", pathMatch[0]).postln;
 
 		^pathMatch[0]
 	}
@@ -234,7 +238,7 @@ ModValue {
   }
 }
 
-V :  ModValue {}
+V : ModValue {}
 
 + String {
 

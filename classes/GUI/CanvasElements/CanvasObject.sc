@@ -303,8 +303,6 @@ SequenceableCanvasObject : CanvasObject {
   getItemEditView {
     var view = EnvirGui(item)
       .putSpec(\row, ControlSpec(0, 128, \lin, 1, 0));
-    item.postln;
-
 		view.viewForParam('id').visible_(false);
 		view.parent.name = item.id;
 		^view;

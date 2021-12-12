@@ -9,51 +9,6 @@ Store : RxEvent {
 
   var <pathManager;
 
-// 	*global {
-// 		global = global ?? {
-// 			pathManager = PathManager();
-// 			super.new.init(
-//         defaultContexts.putAll(('id': PathManager.initialId, 'timingContext': RxEvent((bpm: 60))))
-//       );
-// 		};
-//     thisThread.randSeed = global.randSeed;
-// 
-// 		^global;
-// 	}
-
-	// *global_ { arg obj;
-	//     global = obj;
-	//   }
-
-	// *initClass {
-	// 	defaultContexts = (
-	//       randSeed: 1000 
-	// 	);
-	//     pathManager = PathManager();
-	// }
-
-  // *readFromArchive { arg path;
-  //   var archivedObject = path.load;
-  // 		global = this.new(archivedObject);
-  // 		pathManager.resetPaths(global);
-  // } 
-
-	//   *at { arg id;
-	// 	var fullPath;
-	//     if (id == PathManager.initialId) {
-	//       ^this.global;
-	//     };
-	// 	id ?? { ^global };
-	//     fullPath = pathManager.getPath(id);
-	// 	fullPath ?? { ^nil };
-	// 	if (fullPath.size > 1) {
-	// 		var parentId = fullPath[fullPath.size - 2];
-	// 		^Store.at(parentId).at(id);
-	// 	} { 
-	// 		^global.at(id);
-	// 	}
-	// }
-
 	*new { arg object, items, module;
 		^super.new.init(object, items, module)
 	}
@@ -61,10 +16,12 @@ Store : RxEvent {
 	init { arg object, items = [], module;
     pathManager = PathManager();
     modulePath = module !? _.path;
+
 		object !? { 
 			this.putAll(object);
 			super.parent_(object.parent);
 		};
+
     timelineItems = TimelineItems(this.items);
     items.do { |item| this.addItem(item) };
 
@@ -116,7 +73,7 @@ Store : RxEvent {
   
 	addItem { arg object, inject = ();
 		var objectId = object.id ?? pathManager.getId();
-    var objectCopy = inject.putAll((id: objectId)).parent_(object);
+    var objectCopy = inject.putAll((id: objectId), object);
     var rxObject = RxEvent(objectCopy);
     this.put(objectId, rxObject, false);
 
@@ -132,14 +89,6 @@ Store : RxEvent {
     };
     ^rxObject;
 	}
-
-// 	resolveOverlaps { arg object;
-// 		var rowItems = this.rowItems(object['row']);
-// 		rowItems.do { arg timestampWithItem;
-// 			var timestamp, items;
-// 			#timestamp, items = timestampWithItem;
-// 		}
-// 	}
 
   deleteItem { arg id;
     var oldItem = this[id];
