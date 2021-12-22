@@ -3,9 +3,9 @@
   EnvGen.kr(envctl, gate, doneAction: Done.freeSelf, timeScale: timeScale);
 };
 
-~namedEnv = { arg ev, name, gate, defaultEnv, doneAction = 0, timeScale = 1;
+~namedEnv = { arg ev, name, gate, defaultEnv, doneAction = 0, timeScale = 1, levelBias = 0, levelScale = 1;
   var envctl = name.asSymbol.kr(defaultEnv !? defaultEnv.asArray ?? ~data !? ~data[name] ?? Env.newClear(8).asArray);
-  EnvGen.kr(envctl, gate, doneAction: doneAction, timeScale: timeScale);
+  EnvGen.kr(envctl, gate, doneAction: doneAction, levelScale: levelScale, levelBias: levelBias, timeScale: timeScale);
 };
 
 
