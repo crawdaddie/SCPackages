@@ -52,12 +52,16 @@ SequencerCanvas {
 			canvasBounds: canvas.parent.bounds,
 		));
 
-    Dispatcher.addListener(Topics.objectUpdated, this, { arg payload;
-			if (payload.bpm.notNil) {
-        props.bps = payload.bpm / 60;
-        canvas.refresh();
-			}
-		});
+    Dispatcher.addListener(
+      Topics.objectUpdated,
+      this,
+      { arg payload;
+        if (payload.bpm.notNil) {
+          props.bps = payload.bpm / 60;
+          canvas.refresh();
+        }
+		  }
+    );
 
 		canvas.onResize = { arg c;
 			props.canvasBounds = c.parent.bounds;

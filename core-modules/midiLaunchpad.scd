@@ -1,4 +1,3 @@
-var module = currentEnvironment;
 var constants = Dictionary.with(*[
   'PAGE_UP' ->    [0, -8], 
   'PAGE_DOWN' ->  [0,  8], 
@@ -33,18 +32,18 @@ MIDIIn.connectAll;
 ~midiOut.control(0, 0, 0x28);
 
 ~grid = Array.newClear(128)!128;
-~makeGrid = { arg module, gridItems, callingEnvironment = currentEnvironment;
+~makeGrid = { arg mod, gridItems, callingEnvironment = currentEnvironment;
   // ~midiOut.control(0, 0, colors['NULL']); // clear display
   gridItems.do { arg item;
     var x, y, object, callingEnv;
     #x, y, object, callingEnv = item;
-    module.addToGrid(object, x, y, callingEnv ? callingEnvironment);
+    mod.addToGrid(object, x, y, callingEnv ? callingEnvironment);
   };
 };
 
 ~setGrid = M { arg grid;
   ~grid = grid;
-  module.renderGrid(~offset);
+  mod.renderGrid(~offset);
 };
 
 ~offset = [0, 0];
@@ -84,7 +83,7 @@ MIDIIn.connectAll;
 };
 
 ~renderGrid = M { arg offset;
-  var gridSubset = module.gridSubset(~grid, offset); 
+  var gridSubset = mod.gridSubset(~grid, offset); 
   ~midiOut.control(0, 0, colors['NULL']); // clear display
 
   gridSubset.do { arg row, y;
@@ -105,7 +104,7 @@ MIDIIn.connectAll;
   var newOffset = (~offset + delta).clip(0, 120);
   if (newOffset != ~offset, {
     ~offset = newOffset;
-    ~renderGrid.value(module, ~offset);
+    ~renderGrid.value(mod, ~offset);
   })
 };
 
@@ -126,10 +125,10 @@ MIDIIn.connectAll;
 MIDIdef.cc('launchpadPosition', { |vel, num|
   if (vel == 127, {
     switch (num,
-      104, {module.updateOffset(constants['PAGE_UP'])},
-      105, {module.updateOffset(constants['PAGE_DOWN'])},
-      106, {module.updateOffset(constants['PAGE_LEFT'])},
-      107, {module.updateOffset(constants['PAGE_RIGHT'])},
+      104, {mod.updateOffset(constants['PAGE_UP'])},
+      105, {mod.updateOffset(constants['PAGE_DOWN'])},
+      106, {mod.updateOffset(constants['PAGE_LEFT'])},
+      107, {mod.updateOffset(constants['PAGE_RIGHT'])},
     ) 
   });
 }, chan: 0, srcID: ~midiSrc.uid);
@@ -137,12 +136,12 @@ MIDIdef.cc('launchpadPosition', { |vel, num|
 
 MIDIdef.noteOn('launchpad', { |vel, num|
   var gridItems;
-  // var grid = module.gridSubset(module.grid, module.offset);
-  var grid = module.grid;
+  // var grid = mod.gridSubset(module.grid, module.offset);
+  var grid = mod.grid;
   var x = num % 16;
   var y = ((num - x) / 16).asInteger;
-  var gridColumn = module.offset[0] + x;
-  var gridRow = module.offset[1] + y;
+  var gridColumn = mod.offset[0] + x;
+  var gridRow = mod.offset[1] + y;
 
   gridItems = if (x == 8, grid[gridRow], [grid[gridRow][gridColumn]]);
 
@@ -150,7 +149,7 @@ MIDIdef.noteOn('launchpad', { |vel, num|
     if (item.notNil, {
       var env = item['env'];
       var output = env.use { item['object'].value };
-      var flasher = module.flashPad(x, y, colors['GREEN_FULL']);
+      var flasher = mod.flashPad(x, y, colors['GREEN_FULL']);
 
       var clock = env['clock'] ?? TempoClock.default;
 
@@ -158,24 +157,24 @@ MIDIdef.noteOn('launchpad', { |vel, num|
 
       {
         flasher.stop;
-        module.setPad(x, y, colors['GREEN_FULL']);
-        module.gridColumn(gridColumn).do { arg columnItem, columnY;
+        mod.setPad(x, y, colors['GREEN_FULL']);
+        mod.gridColumn(gridColumn).do { arg columnItem, columnY;
           if ((columnItem.notNil && (columnY != gridRow)), {
             columnItem.put('output', nil);
-            module.setPad(x, columnY, colors['AMBER_FULL']);
+            mod.setPad(x, columnY, colors['AMBER_FULL']);
           })
         };
         item.put('output', output);
       }.fork(clock, quant: output.quant);
     }, {
       
-      module.gridColumn(gridColumn).do { arg columnItem, row;
+      mod.gridColumn(gridColumn).do { arg columnItem, row;
         var output = columnItem !? _['output'];
         if (output.notNil, {
           var env = columnItem['env'];
           var clock = env['clock'] ?? TempoClock.default;
 
-          var flasher = module.flashPad(x, row, colors['AMBER_FULL'], colors['GREEN_FULL']);
+          var flasher = mod.flashPad(x, row, colors['AMBER_FULL'], colors['GREEN_FULL']);
 
           { flasher.play(clock, quant: 1) }.fork(clock, quant: 1);
 
@@ -183,7 +182,7 @@ MIDIdef.noteOn('launchpad', { |vel, num|
             flasher.stop;
             columnItem.put('output', nil);
             output.source = nil;
-            module.setPad(x, row, colors['AMBER_FULL'])
+            mod.setPad(x, row, colors['AMBER_FULL'])
           }.fork(clock, quant: output.quant)
         })
       };

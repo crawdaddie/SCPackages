@@ -8,3 +8,7 @@
   ~path,
 );
 
+~defaultEvent = M { arg ev = ();
+  (instrument: 'bufplayer2', buf: ~buffer, startPos: 0).putAll(ev);
+};
+
